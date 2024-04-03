@@ -1,88 +1,69 @@
-import { useCallback, useState } from 'react';
+import { useState } from 'react';
 import toast from 'react-hot-toast';
 import * as Yup from 'yup';
 import { useFormik } from 'formik';
-import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
-import FormControlLabel from '@mui/material/FormControlLabel';
-import FormHelperText from '@mui/material/FormHelperText';
 import Grid from '@mui/material/Unstable_Grid2';
-import MenuItem from '@mui/material/MenuItem';
 import Stack from '@mui/material/Stack';
-import Switch from '@mui/material/Switch';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
-import { FileDropzone } from 'src/components/file-dropzone';
-import { QuillEditor } from 'src/components/quill-editor';
 import { useRouter } from 'src/hooks/use-router';
 import { paths } from 'src/paths';
+import { useMockedUser } from 'src/hooks/use-mocked-user';
+import { IconButton, InputAdornment } from '@mui/material';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 
-const categoryOptions = [
-  {
-    label: 'Healthcare',
-    value: 'healthcare',
-  },
-  {
-    label: 'Makeup',
-    value: 'makeup',
-  },
-  {
-    label: 'Dress',
-    value: 'dress',
-  },
-  {
-    label: 'Skincare',
-    value: 'skincare',
-  },
-  {
-    label: 'Jewelry',
-    value: 'jewelry',
-  },
-  {
-    label: 'Blouse',
-    value: 'blouse',
-  },
-];
+import { solKeyAccountsApi } from 'src/api/products/index';
 
 const initialValues = {
-  barcode: '925487986526',
-  category: '',
-  description: '',
-  images: [],
-  name: '',
-  newPrice: 0,
-  oldPrice: 0,
-  sku: 'IYV-8745',
-  submit: null,
+  userId: '',
+  ruc: '',
+  username: '',
+  password: '',
+  passwordConfirm: '',
 };
 
 const validationSchema = Yup.object({
-  barcode: Yup.string().max(255),
-  category: Yup.string().max(255),
-  description: Yup.string().max(5000),
-  images: Yup.array(),
-  name: Yup.string().max(255).required(),
-  newPrice: Yup.number().min(0).required(),
-  oldPrice: Yup.number().min(0),
-  sku: Yup.string().max(255),
+  userId: Yup.string().max(255),
+  ruc: Yup.string()
+    .matches(/^[0-9]+$/, 'Solo se permiten números')
+    .min(11, 'Debe tener exactamente 11 dígitos')
+    .max(11, 'Debe tener exactamente 11 dígitos')
+    .test('dosPrimerosDigitos', 'Los dos primeros dígitos deben ser 10 o 20', (value) => {
+      const primerosDosDigitos = value ? value.substring(0, 2) : '';
+      return primerosDosDigitos === '10' || primerosDosDigitos === '20';
+    })
+    .required('Se requiere RUC'),
+  username: Yup.string().max(50).required('Se requiere nombre de usuario'),
+  password: Yup.string().max(20).required('Se requiere contraseña'),
+  passwordConfirm: Yup.string()
+    .oneOf([Yup.ref('password')], 'Las contraseñas deben coincidir')
+    .required('Se requiere confirmar contraseña'),
 });
 
 export const ProductCreateForm = (props) => {
+  const [inputRucValue, setInputRucValue] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showPasswordConfirm, setShowPasswordConfirm] = useState(false);
+  const user = useMockedUser();
   const router = useRouter();
-  const [files, setFiles] = useState([]);
+  initialValues.userId = user.id;
+
   const formik = useFormik({
     initialValues,
     validationSchema,
     onSubmit: async (values, helpers) => {
       try {
         // NOTE: Make API request
-        toast.success('Product created');
+        const response = await solKeyAccountsApi.createSolKeyAccount(values);
+        toast.success('Cuenta Clave SOL creada');
         router.push(paths.dashboard.products.index);
       } catch (err) {
         console.error(err);
-        toast.error('Something went wrong!');
+        toast.error('Algo salió mal!');
         helpers.setStatus({ success: false });
         helpers.setErrors({ submit: err.message });
         helpers.setSubmitting(false);
@@ -90,21 +71,18 @@ export const ProductCreateForm = (props) => {
     },
   });
 
-  const handleFilesDrop = useCallback((newFiles) => {
-    setFiles((prevFiles) => {
-      return [...prevFiles, ...newFiles];
-    });
-  }, []);
+  const handleTogglePassowrdVisibility = (opt) => {
+    if (opt == 'show-pass') setShowPassword(!showPassword);
+    if (opt == 'show-pass-confirm') setShowPasswordConfirm(!showPasswordConfirm);
+  };
 
-  const handleFileRemove = useCallback((file) => {
-    setFiles((prevFiles) => {
-      return prevFiles.filter((_file) => _file.path !== file.path);
-    });
-  }, []);
-
-  const handleFilesRemoveAll = useCallback(() => {
-    setFiles([]);
-  }, []);
+  const handleInputRucChange = (e) => {
+    const { value } = e.target;
+    if (/^[0-9]*$/.test(value) && String(value).length <= 11) {
+      setInputRucValue(value);
+      formik.setFieldValue('ruc', value);
+    }
+  };
 
   return (
     <form
@@ -122,189 +100,92 @@ export const ProductCreateForm = (props) => {
                 xs={12}
                 md={4}
               >
-                <Typography variant="h6">Basic details</Typography>
+                <Typography variant="h6">Detalles básicos</Typography>
               </Grid>
               <Grid
                 xs={12}
                 md={8}
               >
                 <Stack spacing={3}>
-                  <TextField
-                    error={!!(formik.touched.name && formik.errors.name)}
-                    fullWidth
-                    helperText={formik.touched.name && formik.errors.name}
-                    label="Product Name"
-                    name="name"
-                    onBlur={formik.handleBlur}
-                    onChange={formik.handleChange}
-                    value={formik.values.name}
-                  />
-                  <div>
-                    <Typography
-                      color="text.secondary"
-                      sx={{ mb: 2 }}
-                      variant="subtitle2"
-                    >
-                      Description
-                    </Typography>
-                    <QuillEditor
-                      onChange={(value) => {
-                        formik.setFieldValue('description', value);
-                      }}
-                      placeholder="Write something"
-                      sx={{ height: 400 }}
-                      value={formik.values.description}
-                    />
-                    {!!(formik.touched.description && formik.errors.description) && (
-                      <Box sx={{ mt: 2 }}>
-                        <FormHelperText error>{formik.errors.description}</FormHelperText>
-                      </Box>
-                    )}
-                  </div>
-                </Stack>
-              </Grid>
-            </Grid>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent>
-            <Grid
-              container
-              spacing={3}
-            >
-              <Grid
-                xs={12}
-                md={4}
-              >
-                <Stack spacing={1}>
-                  <Typography variant="h6">Images</Typography>
-                  <Typography
-                    color="text.secondary"
-                    variant="body2"
-                  >
-                    Images will appear in the store front of your website.
-                  </Typography>
-                </Stack>
-              </Grid>
-              <Grid
-                xs={12}
-                md={8}
-              >
-                <FileDropzone
-                  accept={{ 'image/*': [] }}
-                  caption="(SVG, JPG, PNG, or gif maximum 900x400)"
-                  files={files}
-                  onDrop={handleFilesDrop}
-                  onRemove={handleFileRemove}
-                  onRemoveAll={handleFilesRemoveAll}
-                />
-              </Grid>
-            </Grid>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent>
-            <Grid
-              container
-              spacing={3}
-            >
-              <Grid
-                xs={12}
-                md={4}
-              >
-                <Typography variant="h6">Pricing</Typography>
-              </Grid>
-              <Grid
-                xs={12}
-                md={8}
-              >
-                <Stack spacing={3}>
-                  <TextField
-                    error={!!(formik.touched.oldPrice && formik.errors.oldPrice)}
-                    fullWidth
-                    label="Old price"
-                    name="oldPrice"
-                    onBlur={formik.handleBlur}
-                    onChange={formik.handleChange}
-                    type="number"
-                    value={formik.values.oldPrice}
-                  />
-                  <TextField
-                    error={!!(formik.touched.newPrice && formik.errors.newPrice)}
-                    fullWidth
-                    label="New Price"
-                    name="newPrice"
-                    onBlur={formik.handleBlur}
-                    onChange={formik.handleChange}
-                    type="number"
-                    value={formik.values.newPrice}
-                  />
-                  <div>
-                    <FormControlLabel
-                      control={<Switch defaultChecked />}
-                      label="Keep selling when stock is empty"
-                    />
-                  </div>
-                </Stack>
-              </Grid>
-            </Grid>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent>
-            <Grid
-              container
-              spacing={3}
-            >
-              <Grid
-                xs={12}
-                md={4}
-              >
-                <Typography variant="h6">Category</Typography>
-              </Grid>
-              <Grid
-                xs={12}
-                md={8}
-              >
-                <Stack spacing={3}>
-                  <TextField
-                    error={!!(formik.touched.category && formik.errors.category)}
-                    fullWidth
-                    label="Category"
-                    name="category"
-                    onBlur={formik.handleBlur}
-                    onChange={formik.handleChange}
-                    select
-                    value={formik.values.category}
-                  >
-                    {categoryOptions.map((option) => (
-                      <MenuItem
-                        key={option.value}
-                        value={option.value}
-                      >
-                        {option.label}
-                      </MenuItem>
-                    ))}
-                  </TextField>
                   <TextField
                     disabled
-                    error={!!(formik.touched.barcode && formik.errors.barcode)}
+                    error={!!(formik.touched.userId && formik.errors.userId)}
                     fullWidth
-                    label="Barcode"
-                    name="barcode"
+                    helperText={formik.touched.userId && formik.errors.userId}
+                    label="ID Usuario"
+                    name="userId"
                     onBlur={formik.handleBlur}
                     onChange={formik.handleChange}
-                    value={formik.values.barcode}
+                    value={formik.values.userId || user?.id}
                   />
                   <TextField
-                    disabled
-                    error={!!(formik.touched.sku && formik.errors.sku)}
+                    autoFocus
+                    error={!!(formik.touched.ruc && formik.errors.ruc)}
                     fullWidth
-                    label="SKU"
-                    name="sku"
+                    helperText={formik.touched.ruc && formik.errors.ruc}
+                    label="Ruc"
+                    name="ruc"
+                    onBlur={formik.handleBlur}
+                    onChange={handleInputRucChange}
+                    value={inputRucValue}
+                  />
+                  <TextField
+                    error={!!(formik.touched.username && formik.errors.username)}
+                    fullWidth
+                    helperText={formik.touched.username && formik.errors.username}
+                    label="Nombre de usuario"
+                    name="username"
                     onBlur={formik.handleBlur}
                     onChange={formik.handleChange}
-                    value={formik.values.sku}
+                    value={formik.values.username}
+                  />
+                  <TextField
+                    error={!!(formik.touched.password && formik.errors.password)}
+                    fullWidth
+                    helperText={formik.touched.password && formik.errors.password}
+                    label="Contraseña"
+                    name="password"
+                    onBlur={formik.handleBlur}
+                    onChange={formik.handleChange}
+                    type={showPassword ? 'text' : 'password'}
+                    value={formik.values.password}
+                    InputProps={{
+                      endAdornment: (
+                        <InputAdornment position="end">
+                          <IconButton
+                            arial-label="Alternar visibilidad de contraseña"
+                            onClick={() => handleTogglePassowrdVisibility('show-pass')}
+                            edge="end"
+                          >
+                            {showPassword ? <VisibilityIcon /> : <VisibilityOffIcon />}
+                          </IconButton>
+                        </InputAdornment>
+                      ),
+                    }}
+                  />
+                  <TextField
+                    error={!!(formik.touched.passwordConfirm && formik.errors.passwordConfirm)}
+                    fullWidth
+                    helperText={formik.touched.passwordConfirm && formik.errors.passwordConfirm}
+                    label="Contraseña (Confirmar)"
+                    name="passwordConfirm"
+                    onBlur={formik.handleBlur}
+                    onChange={formik.handleChange}
+                    type={showPasswordConfirm ? 'text' : 'password'}
+                    value={formik.values.passwordConfirm}
+                    InputProps={{
+                      endAdornment: (
+                        <InputAdornment position="end">
+                          <IconButton
+                            arial-label="Alternar visibilidad de contraseña"
+                            onClick={() => handleTogglePassowrdVisibility('show-pass-confirm')}
+                            edge="end"
+                          >
+                            {showPasswordConfirm ? <VisibilityIcon /> : <VisibilityOffIcon />}
+                          </IconButton>
+                        </InputAdornment>
+                      ),
+                    }}
                   />
                 </Stack>
               </Grid>
@@ -317,12 +198,13 @@ export const ProductCreateForm = (props) => {
           justifyContent="flex-end"
           spacing={1}
         >
-          <Button color="inherit">Cancel</Button>
+          <Button color="inherit">Cancelar</Button>
           <Button
+            disabled={formik.isSubmitting}
             type="submit"
             variant="contained"
           >
-            Create
+            Crear
           </Button>
         </Stack>
       </Stack>

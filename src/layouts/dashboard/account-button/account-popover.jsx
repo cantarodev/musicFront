@@ -1,9 +1,8 @@
 import { useCallback } from 'react';
 import PropTypes from 'prop-types';
 import toast from 'react-hot-toast';
-import CreditCard01Icon from '@untitled-ui/icons-react/build/esm/CreditCard01';
 import Settings04Icon from '@untitled-ui/icons-react/build/esm/Settings04';
-import User03Icon from '@untitled-ui/icons-react/build/esm/User03';
+import LogOut03 from '@untitled-ui/icons-react/build/esm/LogOut03';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Divider from '@mui/material/Divider';
@@ -32,21 +31,6 @@ export const AccountPopover = (props) => {
       onClose?.();
 
       switch (auth.issuer) {
-        case Issuer.Amplify: {
-          await auth.signOut();
-          break;
-        }
-
-        case Issuer.Auth0: {
-          await auth.logout();
-          break;
-        }
-
-        case Issuer.Firebase: {
-          await auth.signOut();
-          break;
-        }
-
         case Issuer.JWT: {
           await auth.signOut();
           break;
@@ -60,7 +44,7 @@ export const AccountPopover = (props) => {
       router.push(paths.index);
     } catch (err) {
       console.error(err);
-      toast.error('Something went wrong!');
+      toast.error('Algo salió mal!');
     }
   }, [auth, router, onClose]);
 
@@ -78,33 +62,16 @@ export const AccountPopover = (props) => {
       {...other}
     >
       <Box sx={{ p: 2 }}>
-        <Typography variant="body1">{user.name}</Typography>
+        <Typography variant="body1">{user?.name}</Typography>
         <Typography
           color="text.secondary"
           variant="body2"
         >
-          demo@devias.io
+          {user?.email}
         </Typography>
       </Box>
       <Divider />
       <Box sx={{ p: 1 }}>
-        <ListItemButton
-          component={RouterLink}
-          href={paths.dashboard.social.profile}
-          onClick={onClose}
-          sx={{
-            borderRadius: 1,
-            px: 1,
-            py: 0.5,
-          }}
-        >
-          <ListItemIcon>
-            <SvgIcon fontSize="small">
-              <User03Icon />
-            </SvgIcon>
-          </ListItemIcon>
-          <ListItemText primary={<Typography variant="body1">Profile</Typography>} />
-        </ListItemButton>
         <ListItemButton
           component={RouterLink}
           href={paths.dashboard.account}
@@ -120,24 +87,7 @@ export const AccountPopover = (props) => {
               <Settings04Icon />
             </SvgIcon>
           </ListItemIcon>
-          <ListItemText primary={<Typography variant="body1">Settings</Typography>} />
-        </ListItemButton>
-        <ListItemButton
-          component={RouterLink}
-          href={paths.dashboard.index}
-          onClick={onClose}
-          sx={{
-            borderRadius: 1,
-            px: 1,
-            py: 0.5,
-          }}
-        >
-          <ListItemIcon>
-            <SvgIcon fontSize="small">
-              <CreditCard01Icon />
-            </SvgIcon>
-          </ListItemIcon>
-          <ListItemText primary={<Typography variant="body1">Billing</Typography>} />
+          <ListItemText primary={<Typography variant="body1">Ajustes</Typography>} />
         </ListItemButton>
       </Box>
       <Divider sx={{ my: '0 !important' }} />
@@ -153,7 +103,12 @@ export const AccountPopover = (props) => {
           onClick={handleLogout}
           size="small"
         >
-          Logout
+          <ListItemIcon>
+            <SvgIcon fontSize="small">
+              <LogOut03 />
+            </SvgIcon>
+          </ListItemIcon>
+          Cerrar sesión
         </Button>
       </Box>
     </Popover>

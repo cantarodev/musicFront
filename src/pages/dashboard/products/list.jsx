@@ -10,7 +10,7 @@ import Stack from '@mui/material/Stack';
 import SvgIcon from '@mui/material/SvgIcon';
 import Typography from '@mui/material/Typography';
 
-import { productsApi } from 'src/api/products';
+import { solKeyAccountsApi } from 'src/api/products';
 import { BreadcrumbsSeparator } from 'src/components/breadcrumbs-separator';
 import { RouterLink } from 'src/components/router-link';
 import { Seo } from 'src/components/seo';
@@ -19,8 +19,10 @@ import { usePageView } from 'src/hooks/use-page-view';
 import { paths } from 'src/paths';
 import { ProductListSearch } from 'src/sections/dashboard/product/product-list-search';
 import { ProductListTable } from 'src/sections/dashboard/product/product-list-table';
+import { useMockedUser } from 'src/hooks/use-mocked-user';
 
 const useProductsSearch = () => {
+  const user = useMockedUser();
   const [state, setState] = useState({
     filters: {
       name: undefined,
@@ -30,6 +32,7 @@ const useProductsSearch = () => {
     },
     page: 0,
     rowsPerPage: 5,
+    userId: user.id,
   });
 
   const handleFiltersChange = useCallback((filters) => {
@@ -70,8 +73,8 @@ const useProductsStore = (searchState) => {
 
   const handleProductsGet = useCallback(async () => {
     try {
-      const response = await productsApi.getProducts(searchState);
-
+      const response = await solKeyAccountsApi.getProducts(searchState);
+      console.log(response);
       if (isMounted()) {
         setState({
           products: response.data,
@@ -120,7 +123,7 @@ const Page = () => {
               spacing={4}
             >
               <Stack spacing={1}>
-                <Typography variant="h4">Products</Typography>
+                <Typography variant="h4">Cuentas Clave SOL</Typography>
                 <Breadcrumbs separator={<BreadcrumbsSeparator />}>
                   <Link
                     color="text.primary"
@@ -136,13 +139,13 @@ const Page = () => {
                     href={paths.dashboard.products.index}
                     variant="subtitle2"
                   >
-                    Products
+                    Cuentas Clave SOL
                   </Link>
                   <Typography
                     color="text.secondary"
                     variant="subtitle2"
                   >
-                    List
+                    Lista
                   </Typography>
                 </Breadcrumbs>
               </Stack>
@@ -161,7 +164,7 @@ const Page = () => {
                   }
                   variant="contained"
                 >
-                  Add
+                  Agregar
                 </Button>
               </Stack>
             </Stack>

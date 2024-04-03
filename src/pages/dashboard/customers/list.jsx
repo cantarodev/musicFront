@@ -10,13 +10,13 @@ import Stack from '@mui/material/Stack';
 import SvgIcon from '@mui/material/SvgIcon';
 import Typography from '@mui/material/Typography';
 
-import { customersApi } from 'src/api/customers';
+import { solKeyAccountsApi } from 'src/api/customers';
 import { Seo } from 'src/components/seo';
 import { useMounted } from 'src/hooks/use-mounted';
 import { usePageView } from 'src/hooks/use-page-view';
 import { useSelection } from 'src/hooks/use-selection';
-import { CustomerListSearch } from 'src/sections/dashboard/customer/customer-list-search';
-import { CustomerListTable } from 'src/sections/dashboard/customer/customer-list-table';
+import { CustomerListSearch } from 'src/sections/dashboard/customers/customer-list-search';
+import { CustomerListTable } from 'src/sections/dashboard/customers/customer-list-table';
 
 const useCustomersSearch = () => {
   const [state, setState] = useState({
@@ -79,7 +79,7 @@ const useCustomersStore = (searchState) => {
 
   const handleCustomersGet = useCallback(async () => {
     try {
-      const response = await customersApi.getCustomers(searchState);
+      const response = await solKeyAccountsApi.getSolKeyAccounts(searchState);
 
       if (isMounted()) {
         setState({
@@ -121,7 +121,7 @@ const Page = () => {
 
   return (
     <>
-      <Seo title="Dashboard: Customer List" />
+      <Seo title="Dashboard: Lista Clave-Sol" />
       <Box
         component="main"
         sx={{

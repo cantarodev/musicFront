@@ -9,25 +9,27 @@ import Stack from '@mui/material/Stack';
 import SvgIcon from '@mui/material/SvgIcon';
 import Typography from '@mui/material/Typography';
 
-import { customersApi } from 'src/api/customers';
+import { solKeyAccountsApi } from 'src/api/customers';
 import { RouterLink } from 'src/components/router-link';
 import { Seo } from 'src/components/seo';
 import { useMounted } from 'src/hooks/use-mounted';
 import { usePageView } from 'src/hooks/use-page-view';
 import { paths } from 'src/paths';
-import { CustomerEditForm } from 'src/sections/dashboard/customer/customer-edit-form';
+import { SolKeyAccountEditForm } from 'src/sections/dashboard/customers/customer-edit-form';
 import { getInitials } from 'src/utils/get-initials';
+import { useMockedUser } from 'src/hooks/use-mocked-user';
+import { solKeyAccount } from 'src/api/customers/data';
 
 const useCustomer = () => {
   const isMounted = useMounted();
-  const [customer, setCustomer] = useState(null);
+  const [account, setAccount] = useState(null);
 
-  const handleCustomerGet = useCallback(async () => {
+  const handleAccountGet = useCallback(async () => {
     try {
-      const response = await customersApi.getCustomer();
+      const response = await solKeyAccountsApi.getSolKeyAccount();
 
       if (isMounted()) {
-        setCustomer(response);
+        setAccount(response);
       }
     } catch (err) {
       console.error(err);
@@ -36,16 +38,17 @@ const useCustomer = () => {
 
   useEffect(
     () => {
-      handleCustomerGet();
+      handleAccountGet();
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   );
 
-  return customer;
+  return account;
 };
 
 const Page = () => {
+  const user = useMockedUser();
   const customer = useCustomer();
 
   usePageView();
@@ -56,7 +59,7 @@ const Page = () => {
 
   return (
     <>
-      <Seo title="Dashboard: Customer Edit" />
+      <Seo title="Dashboard: Clave-Sol" />
       <Box
         component="main"
         sx={{
@@ -71,7 +74,7 @@ const Page = () => {
                 <Link
                   color="text.primary"
                   component={RouterLink}
-                  href={paths.dashboard.customers.index}
+                  href={paths.dashboard.solKeyAccounts.index}
                   sx={{
                     alignItems: 'center',
                     display: 'inline-flex',
@@ -81,7 +84,7 @@ const Page = () => {
                   <SvgIcon sx={{ mr: 1 }}>
                     <ArrowLeftIcon />
                   </SvgIcon>
-                  <Typography variant="subtitle2">Customers</Typography>
+                  <Typography variant="subtitle2">Clave Sol</Typography>
                 </Link>
               </div>
               <Stack
@@ -99,24 +102,24 @@ const Page = () => {
                   spacing={2}
                 >
                   <Avatar
-                    src={customer.avatar}
+                    src={user?.avatar}
                     sx={{
                       height: 64,
                       width: 64,
                     }}
                   >
-                    {getInitials(customer.name)}
+                    {getInitials(user?.name)}
                   </Avatar>
                   <Stack spacing={1}>
-                    <Typography variant="h4">{customer.email}</Typography>
+                    <Typography variant="h4">{user?.email}</Typography>
                     <Stack
                       alignItems="center"
                       direction="row"
                       spacing={1}
                     >
-                      <Typography variant="subtitle2">user_id:</Typography>
+                      <Typography variant="subtitle2">ID Usuario:</Typography>
                       <Chip
-                        label={customer.id}
+                        label={user?.id}
                         size="small"
                       />
                     </Stack>
@@ -124,7 +127,7 @@ const Page = () => {
                 </Stack>
               </Stack>
             </Stack>
-            <CustomerEditForm customer={customer} />
+            <SolKeyAccountEditForm solKeyAccount={solKeyAccount} />
           </Stack>
         </Container>
       </Box>

@@ -1,11 +1,9 @@
 import { Fragment, useCallback, useState } from 'react';
-import numeral from 'numeral';
 import PropTypes from 'prop-types';
 import { toast } from 'react-hot-toast';
 import ChevronDownIcon from '@untitled-ui/icons-react/build/esm/ChevronDown';
 import ChevronRightIcon from '@untitled-ui/icons-react/build/esm/ChevronRight';
 import DotsHorizontalIcon from '@untitled-ui/icons-react/build/esm/DotsHorizontal';
-import Image01Icon from '@untitled-ui/icons-react/build/esm/Image01';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import CardContent from '@mui/material/CardContent';
@@ -13,11 +11,8 @@ import Divider from '@mui/material/Divider';
 import Grid from '@mui/material/Grid';
 import IconButton from '@mui/material/IconButton';
 import InputAdornment from '@mui/material/InputAdornment';
-import LinearProgress from '@mui/material/LinearProgress';
-import MenuItem from '@mui/material/MenuItem';
 import Stack from '@mui/material/Stack';
 import SvgIcon from '@mui/material/SvgIcon';
-import Switch from '@mui/material/Switch';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
@@ -26,36 +21,17 @@ import TablePagination from '@mui/material/TablePagination';
 import TableRow from '@mui/material/TableRow';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 
 import { Scrollbar } from 'src/components/scrollbar';
 import { SeverityPill } from 'src/components/severity-pill';
 
-const categoryOptions = [
-  {
-    label: 'Healthcare',
-    value: 'healthcare',
-  },
-  {
-    label: 'Makeup',
-    value: 'makeup',
-  },
-  {
-    label: 'Dress',
-    value: 'dress',
-  },
-  {
-    label: 'Skincare',
-    value: 'skincare',
-  },
-  {
-    label: 'Jewelry',
-    value: 'jewelry',
-  },
-  {
-    label: 'Blouse',
-    value: 'blouse',
-  },
-];
+import { solKeyAccountsApi } from 'src/api/products/index';
+import { useFormik } from 'formik';
+import * as Yup from 'yup';
+
+const initialValues = {};
 
 export const ProductListTable = (props) => {
   const {
@@ -67,6 +43,52 @@ export const ProductListTable = (props) => {
     rowsPerPage = 0,
   } = props;
   const [currentProduct, setCurrentProduct] = useState(null);
+  const [showPassword, setShowPassword] = useState(false);
+  const [inputRucValue, setInputRucValue] = useState('');
+
+  items.forEach((product) => {
+    initialValues[product.id] = {
+      id: product.id || '',
+      ruc: product.ruc || '',
+      username: product.username || '',
+      password: product.password || '',
+    };
+  });
+
+  const validationSchema = Yup.object({
+    id: Yup.string().max(255),
+    ruc: Yup.string()
+      .matches(/^[0-9]+$/, 'Solo se permiten números')
+      .min(11, 'Debe tener exactamente 11 dígitos')
+      .max(11, 'Debe tener exactamente 11 dígitos')
+      .test('dosPrimerosDigitos', 'Los dos primeros dígitos deben ser 10 o 20', (value) => {
+        const primerosDosDigitos = value ? value.substring(0, 2) : '';
+        return primerosDosDigitos === '10' || primerosDosDigitos === '20';
+      })
+      .required('Se requiere RUC'),
+    username: Yup.string().max(50).required('Se requiere nombre de usuario'),
+    password: Yup.string().max(20).required('Se requiere contraseña'),
+  });
+
+  const formik = useFormik({
+    initialValues,
+    validationSchema,
+    onSubmit: async (values, helpers) => {
+      try {
+        console.log(values);
+        // NOTE: Make API request
+        // const response = await solKeyAccountsApi.updateSolKeyAccount(values);
+        // console.log(response);
+        toast.success('Cuenta Clave SOL creada');
+      } catch (err) {
+        console.error(err);
+        toast.error('Algo salió mal!');
+        helpers.setStatus({ success: false });
+        helpers.setErrors({ submit: err.message });
+        helpers.setSubmitting(false);
+      }
+    },
+  });
 
   const handleProductToggle = useCallback((productId) => {
     setCurrentProduct((prevProductId) => {
@@ -82,14 +104,38 @@ export const ProductListTable = (props) => {
     setCurrentProduct(null);
   }, []);
 
-  const handleProductUpdate = useCallback(() => {
-    setCurrentProduct(null);
-    toast.success('Product updated');
+  const handleProductUpdate = useCallback(async (id) => {
+    try {
+      console.log(id);
+      // const response = await solKeyAccountsApi.updateSolKeyAccount({});
+      setCurrentProduct(null);
+      toast.success('Product updated');
+    } catch (err) {
+      console.error(err);
+      toast.error('Algo salió mal!');
+    }
   }, []);
 
   const handleProductDelete = useCallback(() => {
     toast.error('Product cannot be deleted');
   }, []);
+
+  const handleTogglePassowrdVisibility = (opt) => {
+    if (opt == 'show-pass') setShowPassword(!showPassword);
+  };
+
+  const handleInputRucChange = (e) => {
+    const { value, name } = e.target;
+    console.log(value, name);
+    if (/^[0-9]*$/.test(value) && String(value).length <= 11) {
+      setInputRucValue(value);
+      formik.setFieldValue(name, value);
+    }
+  };
+
+  const handleIdChange = (id) => {
+    formik.values.id = id;
+  };
 
   return (
     <div>
@@ -97,22 +143,30 @@ export const ProductListTable = (props) => {
         <Table sx={{ minWidth: 1200 }}>
           <TableHead>
             <TableRow>
-              <TableCell />
-              <TableCell width="25%">Name</TableCell>
-              <TableCell width="25%">Stock</TableCell>
-              <TableCell>Price</TableCell>
-              <TableCell>sku</TableCell>
-              <TableCell>Status</TableCell>
-              <TableCell align="right">Actions</TableCell>
+              <TableCell width="5%" />
+              <TableCell width="30%">ID Clave SOL</TableCell>
+              <TableCell width="30%">ID Usuario</TableCell>
+              <TableCell width="15%">Ruc</TableCell>
+              <TableCell width="15%">Nombre de Usuario</TableCell>
+              <TableCell width="15%">Estado</TableCell>
+              <TableCell align="right">Acciones</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {items.map((product) => {
               const isCurrent = product.id === currentProduct;
-              const price = numeral(product.price).format(`${product.currency}0,0.00`);
-              const quantityColor = product.quantity >= 10 ? 'success' : 'error';
-              const statusColor = product.status === 'published' ? 'success' : 'info';
-              const hasManyVariants = product.variants > 1;
+              const statusColor =
+                product.status === 'active'
+                  ? 'success'
+                  : product.status === 'inactive'
+                  ? 'error'
+                  : 'warning';
+              const status =
+                product.status === 'active'
+                  ? 'activo'
+                  : product.status === 'inactive'
+                  ? 'inactivo'
+                  : 'pendiente';
 
               return (
                 <Fragment key={product.id}>
@@ -136,90 +190,36 @@ export const ProductListTable = (props) => {
                           },
                         }),
                       }}
-                      width="25%"
+                      width="5%"
                     >
                       <IconButton onClick={() => handleProductToggle(product.id)}>
                         <SvgIcon>{isCurrent ? <ChevronDownIcon /> : <ChevronRightIcon />}</SvgIcon>
                       </IconButton>
                     </TableCell>
-                    <TableCell width="25%">
+                    <TableCell width="30%">
                       <Box
                         sx={{
-                          alignItems: 'center',
-                          display: 'flex',
+                          cursor: 'pointer',
                         }}
                       >
-                        {product.image ? (
-                          <Box
-                            sx={{
-                              alignItems: 'center',
-                              backgroundColor: 'neutral.50',
-                              backgroundImage: `url(${product.image})`,
-                              backgroundPosition: 'center',
-                              backgroundSize: 'cover',
-                              borderRadius: 1,
-                              display: 'flex',
-                              height: 80,
-                              justifyContent: 'center',
-                              overflow: 'hidden',
-                              width: 80,
-                            }}
-                          />
-                        ) : (
-                          <Box
-                            sx={{
-                              alignItems: 'center',
-                              backgroundColor: 'neutral.50',
-                              borderRadius: 1,
-                              display: 'flex',
-                              height: 80,
-                              justifyContent: 'center',
-                              width: 80,
-                            }}
-                          >
-                            <SvgIcon>
-                              <Image01Icon />
-                            </SvgIcon>
-                          </Box>
-                        )}
-                        <Box
-                          sx={{
-                            cursor: 'pointer',
-                            ml: 2,
-                          }}
-                        >
-                          <Typography variant="subtitle2">{product.name}</Typography>
-                          <Typography
-                            color="text.secondary"
-                            variant="body2"
-                          >
-                            in {product.category}
-                          </Typography>
-                        </Box>
+                        <Typography variant="subtitle2">{product.id}</Typography>
                       </Box>
                     </TableCell>
-                    <TableCell width="25%">
-                      <LinearProgress
-                        value={product.quantity}
-                        variant="determinate"
-                        color={quantityColor}
+                    <TableCell width="30%">
+                      <Box
                         sx={{
-                          height: 8,
-                          width: 36,
+                          cursor: 'pointer',
                         }}
-                      />
-                      <Typography
-                        color="text.secondary"
-                        variant="body2"
                       >
-                        {product.quantity} in stock
-                        {hasManyVariants && ` in ${product.variants} variants`}
-                      </Typography>
+                        <Typography variant="subtitle2">{product.userId}</Typography>
+                      </Box>
                     </TableCell>
-                    <TableCell>{price}</TableCell>
-                    <TableCell>{product.sku}</TableCell>
-                    <TableCell>
-                      <SeverityPill color={statusColor}>{product.status}</SeverityPill>
+                    <TableCell width="15%">
+                      <Typography variant="subtitle2">{product.ruc}</Typography>
+                    </TableCell>
+                    <TableCell width="15%">{product.username}</TableCell>
+                    <TableCell width="15%">
+                      <SeverityPill color={statusColor}>{status}</SeverityPill>
                     </TableCell>
                     <TableCell align="right">
                       <IconButton>
@@ -247,185 +247,157 @@ export const ProductListTable = (props) => {
                           },
                         }}
                       >
-                        <CardContent>
-                          <Grid
-                            container
-                            spacing={3}
-                          >
+                        <form onSubmit={formik.handleSubmit}>
+                          <CardContent>
                             <Grid
-                              item
-                              md={6}
-                              xs={12}
+                              container
+                              spacing={3}
                             >
-                              <Typography variant="h6">Basic details</Typography>
-                              <Divider sx={{ my: 2 }} />
                               <Grid
-                                container
-                                spacing={3}
+                                item
+                                md={12}
+                                xs={12}
                               >
+                                <Typography variant="h6">Detalles</Typography>
+                                <Divider sx={{ my: 2 }} />
                                 <Grid
-                                  item
-                                  md={6}
-                                  xs={12}
+                                  container
+                                  spacing={3}
                                 >
-                                  <TextField
-                                    defaultValue={product.name}
-                                    fullWidth
-                                    label="Product name"
-                                    name="name"
-                                  />
-                                </Grid>
-                                <Grid
-                                  item
-                                  md={6}
-                                  xs={12}
-                                >
-                                  <TextField
-                                    defaultValue={product.sku}
-                                    disabled
-                                    fullWidth
-                                    label="SKU"
-                                    name="sku"
-                                  />
-                                </Grid>
-                                <Grid
-                                  item
-                                  md={6}
-                                  xs={12}
-                                >
-                                  <TextField
-                                    defaultValue={product.category}
-                                    fullWidth
-                                    label="Category"
-                                    select
+                                  <Grid
+                                    item
+                                    md={3}
+                                    xs={12}
                                   >
-                                    {categoryOptions.map((option) => (
-                                      <MenuItem
-                                        key={option.value}
-                                        value={option.value}
-                                      >
-                                        {option.label}
-                                      </MenuItem>
-                                    ))}
-                                  </TextField>
-                                </Grid>
-                                <Grid
-                                  item
-                                  md={6}
-                                  xs={12}
-                                >
-                                  <TextField
-                                    defaultValue={product.id}
-                                    disabled
-                                    fullWidth
-                                    label="Barcode"
-                                    name="barcode"
-                                  />
+                                    <TextField
+                                      disabled
+                                      fullWidth
+                                      label="ID Clave SOL"
+                                      name={`${product.id}.id`}
+                                      value={formik.values[product.id]?.id}
+                                    />
+                                  </Grid>
+                                  <Grid
+                                    item
+                                    md={3}
+                                    xs={12}
+                                  >
+                                    <TextField
+                                      error={
+                                        !!(
+                                          formik.touched[product.id]?.username &&
+                                          formik.errors[product.id]?.username
+                                        )
+                                      }
+                                      fullWidth
+                                      helperText={
+                                        formik.touched[product.id]?.username &&
+                                        formik.errors[product.id]?.username
+                                      }
+                                      label="Nombre de Usuario"
+                                      name={`${product.id}.username`}
+                                      value={formik.values[product.id]?.username}
+                                      onChange={formik.handleChange}
+                                    />
+                                  </Grid>
+                                  <Grid
+                                    item
+                                    md={3}
+                                    xs={12}
+                                  >
+                                    <TextField
+                                      // error={
+                                      //   !!(
+                                      //     formik.touched[product.id]?.ruc &&
+                                      //     formik.errors[product.id]?.ruc
+                                      //   )
+                                      // }
+                                      fullWidth
+                                      // helperText={
+                                      //   formik.touched[product.id]?.ruc &&
+                                      //   formik.errors[product.id]?.ruc
+                                      // }
+                                      label="Ruc"
+                                      name={`${product.id}.ruc`}
+                                      value={formik.values[product.id]?.ruc}
+                                      onChange={handleInputRucChange}
+                                    />
+                                  </Grid>
+                                  <Grid
+                                    item
+                                    md={3}
+                                    xs={12}
+                                  >
+                                    <TextField
+                                      // error={!!(formik.touched.password && formik.errors.password)}
+                                      fullWidth
+                                      // helperText={formik.touched.password && formik.errors.password}
+                                      label="Contraseña"
+                                      name={`${product.id}.password`}
+                                      type={showPassword ? 'text' : 'password'}
+                                      onChange={formik.handleChange}
+                                      value={formik.values[product.id]?.password}
+                                      InputProps={{
+                                        endAdornment: (
+                                          <InputAdornment position="end">
+                                            <IconButton
+                                              arial-label="Alternar visibilidad de contraseña"
+                                              onClick={() =>
+                                                handleTogglePassowrdVisibility('show-pass')
+                                              }
+                                              edge="end"
+                                            >
+                                              {showPassword ? (
+                                                <VisibilityIcon />
+                                              ) : (
+                                                <VisibilityOffIcon />
+                                              )}
+                                            </IconButton>
+                                          </InputAdornment>
+                                        ),
+                                      }}
+                                    />
+                                  </Grid>
                                 </Grid>
                               </Grid>
                             </Grid>
-                            <Grid
-                              item
-                              md={6}
-                              xs={12}
-                            >
-                              <Typography variant="h6">Pricing and stocks</Typography>
-                              <Divider sx={{ my: 2 }} />
-                              <Grid
-                                container
-                                spacing={3}
-                              >
-                                <Grid
-                                  item
-                                  md={6}
-                                  xs={12}
-                                >
-                                  <TextField
-                                    defaultValue={product.price}
-                                    fullWidth
-                                    label="Old price"
-                                    name="old-price"
-                                    InputProps={{
-                                      startAdornment: (
-                                        <InputAdornment position="start">
-                                          {product.currency}
-                                        </InputAdornment>
-                                      ),
-                                    }}
-                                    type="number"
-                                  />
-                                </Grid>
-                                <Grid
-                                  item
-                                  md={6}
-                                  xs={12}
-                                >
-                                  <TextField
-                                    defaultValue={product.price}
-                                    fullWidth
-                                    label="New price"
-                                    name="new-price"
-                                    InputProps={{
-                                      startAdornment: (
-                                        <InputAdornment position="start">$</InputAdornment>
-                                      ),
-                                    }}
-                                    type="number"
-                                  />
-                                </Grid>
-                                <Grid
-                                  item
-                                  md={6}
-                                  xs={12}
-                                  sx={{
-                                    alignItems: 'center',
-                                    display: 'flex',
-                                  }}
-                                >
-                                  <Switch />
-                                  <Typography variant="subtitle2">
-                                    Keep selling when stock is empty
-                                  </Typography>
-                                </Grid>
-                              </Grid>
-                            </Grid>
-                          </Grid>
-                        </CardContent>
-                        <Divider />
-                        <Stack
-                          alignItems="center"
-                          direction="row"
-                          justifyContent="space-between"
-                          sx={{ p: 2 }}
-                        >
+                          </CardContent>
+                          <Divider />
                           <Stack
                             alignItems="center"
                             direction="row"
-                            spacing={2}
+                            justifyContent="space-between"
+                            sx={{ p: 2 }}
                           >
-                            <Button
-                              onClick={handleProductUpdate}
-                              type="submit"
-                              variant="contained"
+                            <Stack
+                              alignItems="center"
+                              direction="row"
+                              spacing={2}
                             >
-                              Update
-                            </Button>
-                            <Button
-                              color="inherit"
-                              onClick={handleProductClose}
-                            >
-                              Cancel
-                            </Button>
+                              <Button
+                                disabled={formik.isSubmitting}
+                                type="submit"
+                                variant="contained"
+                              >
+                                Modificar
+                              </Button>
+                              <Button
+                                color="inherit"
+                                onClick={handleProductClose}
+                              >
+                                Cancelar
+                              </Button>
+                            </Stack>
+                            <div>
+                              <Button
+                                onClick={handleProductDelete}
+                                color="error"
+                              >
+                                Eliminar Clave SOL
+                              </Button>
+                            </div>
                           </Stack>
-                          <div>
-                            <Button
-                              onClick={handleProductDelete}
-                              color="error"
-                            >
-                              Delete product
-                            </Button>
-                          </div>
-                        </Stack>
+                        </form>
                       </TableCell>
                     </TableRow>
                   )}
@@ -443,6 +415,8 @@ export const ProductListTable = (props) => {
         page={page}
         rowsPerPage={rowsPerPage}
         rowsPerPageOptions={[5, 10, 25]}
+        labelRowsPerPage="Filas por página:"
+        labelDisplayedRows={({ from, to, count }) => `${from}-${to} de ${count}`}
       />
     </div>
   );

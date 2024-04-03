@@ -71,7 +71,6 @@ const reduceChildRoutes = ({ acc, depth, item, pathname }) => {
 
 export const SideNavSection = (props) => {
   const { items = [], pathname, subheader = '', ...other } = props;
-
   return (
     <Stack
       component="ul"

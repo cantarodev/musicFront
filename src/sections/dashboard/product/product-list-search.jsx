@@ -12,56 +12,18 @@ import Typography from '@mui/material/Typography';
 import { MultiSelect } from 'src/components/multi-select';
 import { useUpdateEffect } from 'src/hooks/use-update-effect';
 
-const categoryOptions = [
-  {
-    label: 'Healthcare',
-    value: 'healthcare',
-  },
-  {
-    label: 'Makeup',
-    value: 'makeup',
-  },
-  {
-    label: 'Dress',
-    value: 'dress',
-  },
-  {
-    label: 'Skincare',
-    value: 'skincare',
-  },
-  {
-    label: 'Jewelry',
-    value: 'jewelry',
-  },
-  {
-    label: 'Blouse',
-    value: 'blouse',
-  },
-];
-
 const statusOptions = [
   {
-    label: 'Published',
-    value: 'published',
+    label: 'Pendiente',
+    value: 'pending',
   },
   {
-    label: 'Draft',
-    value: 'draft',
-  },
-];
-
-const stockOptions = [
-  {
-    label: 'All',
-    value: 'all',
+    label: 'Activo',
+    value: 'active',
   },
   {
-    label: 'Available',
-    value: 'available',
-  },
-  {
-    label: 'Out of Stock',
-    value: 'outOfStock',
+    label: 'Inactivo',
+    value: 'inactive',
   },
 ];
 
@@ -72,28 +34,24 @@ export const ProductListSearch = (props) => {
 
   const handleChipsUpdate = useCallback(() => {
     const filters = {
-      name: undefined,
-      category: [],
+      username: undefined,
+      ruc: undefined,
       status: [],
-      inStock: undefined,
     };
 
     chips.forEach((chip) => {
       switch (chip.field) {
-        case 'name':
+        case 'username':
           // There will (or should) be only one chips with field "name"
           // so we can set up it directly
-          filters.name = chip.value;
-          break;
-        case 'category':
-          filters.category.push(chip.value);
+          filters.username = chip.value;
           break;
         case 'status':
           filters.status.push(chip.value);
           break;
-        case 'inStock':
+        case 'ruc':
           // The value can be "available" or "outOfStock" and we transform it to a boolean
-          filters.inStock = chip.value === 'available';
+          filters.ruc = chip.value;
           break;
         default:
           break;
@@ -124,11 +82,11 @@ export const ProductListSearch = (props) => {
     const value = queryRef.current?.value || '';
 
     setChips((prevChips) => {
-      const found = prevChips.find((chip) => chip.field === 'name');
+      const found = prevChips.find((chip) => chip.field === 'username');
 
       if (found && value) {
         return prevChips.map((chip) => {
-          if (chip.field === 'name') {
+          if (chip.field === 'username') {
             return {
               ...chip,
               value: queryRef.current?.value || '',
@@ -140,13 +98,13 @@ export const ProductListSearch = (props) => {
       }
 
       if (found && !value) {
-        return prevChips.filter((chip) => chip.field !== 'name');
+        return prevChips.filter((chip) => chip.field !== 'username');
       }
 
       if (!found && value) {
         const chip = {
-          label: 'Name',
-          field: 'name',
+          label: 'Nombre de Usuario',
+          field: 'username',
           value,
         };
 
@@ -159,47 +117,6 @@ export const ProductListSearch = (props) => {
     if (queryRef.current) {
       queryRef.current.value = '';
     }
-  }, []);
-
-  const handleCategoryChange = useCallback((values) => {
-    setChips((prevChips) => {
-      const valuesFound = [];
-
-      // First cleanup the previous chips
-      const newChips = prevChips.filter((chip) => {
-        if (chip.field !== 'category') {
-          return true;
-        }
-
-        const found = values.includes(chip.value);
-
-        if (found) {
-          valuesFound.push(chip.value);
-        }
-
-        return found;
-      });
-
-      // Nothing changed
-      if (values.length === valuesFound.length) {
-        return newChips;
-      }
-
-      values.forEach((value) => {
-        if (!valuesFound.includes(value)) {
-          const option = categoryOptions.find((option) => option.value === value);
-
-          newChips.push({
-            label: 'Category',
-            field: 'category',
-            value,
-            displayValue: option.label,
-          });
-        }
-      });
-
-      return newChips;
-    });
   }, []);
 
   const handleStatusChange = useCallback((values) => {
@@ -231,7 +148,7 @@ export const ProductListSearch = (props) => {
           const option = statusOptions.find((option) => option.value === value);
 
           newChips.push({
-            label: 'Status',
+            label: 'Estado',
             field: 'status',
             value,
             displayValue: option.label,
@@ -243,63 +160,10 @@ export const ProductListSearch = (props) => {
     });
   }, []);
 
-  const handleStockChange = useCallback((values) => {
-    // Stock can only have one value, even if displayed as multi-select, so we select the first one.
-    // This example allows you to select one value or "All", which is not included in the
-    // rest of multi-selects.
-
-    setChips((prevChips) => {
-      // First cleanup the previous chips
-      const newChips = prevChips.filter((chip) => chip.field !== 'inStock');
-      const latestValue = values[values.length - 1];
-
-      switch (latestValue) {
-        case 'available':
-          newChips.push({
-            label: 'Stock',
-            field: 'inStock',
-            value: 'available',
-            displayValue: 'Available',
-          });
-          break;
-        case 'outOfStock':
-          newChips.push({
-            label: 'Stock',
-            field: 'inStock',
-            value: 'outOfStock',
-            displayValue: 'Out of Stock',
-          });
-          break;
-        default:
-          // Should be "all", so we do not add this filter
-          break;
-      }
-
-      return newChips;
-    });
-  }, []);
-
-  // We memoize this part to prevent re-render issues
-  const categoryValues = useMemo(
-    () => chips.filter((chip) => chip.field === 'category').map((chip) => chip.value),
-    [chips]
-  );
-
   const statusValues = useMemo(
     () => chips.filter((chip) => chip.field === 'status').map((chip) => chip.value),
     [chips]
   );
-
-  const stockValues = useMemo(() => {
-    const values = chips.filter((chip) => chip.field === 'inStock').map((chip) => chip.value);
-
-    // Since we do not display the "all" as chip, we add it to the multi-select as a selected value
-    if (values.length === 0) {
-      values.unshift('all');
-    }
-
-    return values;
-  }, [chips]);
 
   const showChips = chips.length > 0;
 
@@ -321,7 +185,7 @@ export const ProductListSearch = (props) => {
           disableUnderline
           fullWidth
           inputProps={{ ref: queryRef }}
-          placeholder="Search by product name"
+          placeholder="Buscar por nombre de usuario"
           sx={{ flexGrow: 1 }}
         />
       </Stack>
@@ -363,7 +227,7 @@ export const ProductListSearch = (props) => {
             color="text.secondary"
             variant="subtitle2"
           >
-            No filters applied
+            No se aplicaron filtros
           </Typography>
         </Box>
       )}
@@ -376,22 +240,10 @@ export const ProductListSearch = (props) => {
         sx={{ p: 1 }}
       >
         <MultiSelect
-          label="Category"
-          onChange={handleCategoryChange}
-          options={categoryOptions}
-          value={categoryValues}
-        />
-        <MultiSelect
-          label="Status"
+          label="Estados"
           onChange={handleStatusChange}
           options={statusOptions}
           value={statusValues}
-        />
-        <MultiSelect
-          label="Stock"
-          onChange={handleStockChange}
-          options={stockOptions}
-          value={stockValues}
         />
       </Stack>
     </div>

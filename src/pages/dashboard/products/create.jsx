@@ -28,7 +28,7 @@ const Page = () => {
         <Container maxWidth="xl">
           <Stack spacing={3}>
             <Stack spacing={1}>
-              <Typography variant="h4">Create a new product</Typography>
+              <Typography variant="h4">Crear Clave SOL</Typography>
               <Breadcrumbs separator={<BreadcrumbsSeparator />}>
                 <Link
                   color="text.primary"
@@ -44,13 +44,13 @@ const Page = () => {
                   href={paths.dashboard.products.index}
                   variant="subtitle2"
                 >
-                  Products
+                  Cuentas Clave SOL
                 </Link>
                 <Typography
                   color="text.secondary"
                   variant="subtitle2"
                 >
-                  Create
+                  Crear
                 </Typography>
               </Breadcrumbs>
             </Stack>

@@ -4,25 +4,12 @@ export const paths = {
   contact: '/contact',
   pricing: '/pricing',
   auth: {
-    auth0: {
-      callback: '/auth/auth0/callback',
-      login: '/auth/auth0/login',
-    },
-    jwt: {
-      login: '/auth/jwt/login',
-      register: '/auth/jwt/register',
-    },
-    firebase: {
-      login: '/auth/firebase/login',
-      register: '/auth/firebase/register',
-    },
-    amplify: {
-      confirmRegister: '/auth/amplify/confirm-register',
-      forgotPassword: '/auth/amplify/forgot-password',
-      login: '/auth/amplify/login',
-      register: '/auth/amplify/register',
-      resetPassword: '/auth/amplify/reset-password',
-    },
+    login: '/auth/login',
+    register: '/auth/register',
+    emailSent: '/auth/email-sent',
+    verify: '/auth/verify',
+    forgotPassword: '/auth/forgot-password',
+    resetPassword: '/auth/reset-password',
   },
   authDemo: {
     forgotPassword: {
@@ -61,6 +48,8 @@ export const paths = {
       postCreate: '/dashboard/blog/create',
     },
     calendar: '/dashboard/calendar',
+    sunKey: '/dashboard/sun-key',
+    bots: '/dashboard/bots',
     chat: '/dashboard/chat',
     crypto: '/dashboard/crypto',
     customers: {

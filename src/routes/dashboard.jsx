@@ -14,10 +14,10 @@ const BlogPostListPage = lazy(() => import('src/pages/dashboard/blog/list'));
 const BlogPostDetailPage = lazy(() => import('src/pages/dashboard/blog/detail'));
 const BlogPostCreatePage = lazy(() => import('src/pages/dashboard/blog/create'));
 
-// Customer
-const CustomerListPage = lazy(() => import('src/pages/dashboard/customers/list'));
-const CustomerDetailPage = lazy(() => import('src/pages/dashboard/customers/detail'));
-const CustomerEditPage = lazy(() => import('src/pages/dashboard/customers/edit'));
+// SolKeyAccount
+const SolKeyAccountListPage = lazy(() => import('src/pages/dashboard/customers/list'));
+const SolKeyAccountDetailPage = lazy(() => import('src/pages/dashboard/customers/detail'));
+const SolKeyAccountEditPage = lazy(() => import('src/pages/dashboard/customers/edit'));
 
 // Invoice
 const InvoiceListPage = lazy(() => import('src/pages/dashboard/invoices/list'));
@@ -49,6 +49,8 @@ const AccountPage = lazy(() => import('src/pages/dashboard/account'));
 const AnalyticsPage = lazy(() => import('src/pages/dashboard/analytics'));
 const BlankPage = lazy(() => import('src/pages/dashboard/blank'));
 const CalendarPage = lazy(() => import('src/pages/dashboard/calendar'));
+const SunKeyPage = lazy(() => import('src/pages/dashboard/sun-key'));
+const BotsPage = lazy(() => import('src/pages/dashboard/bots'));
 const ChatPage = lazy(() => import('src/pages/dashboard/chat'));
 const CryptoPage = lazy(() => import('src/pages/dashboard/crypto'));
 const EcommercePage = lazy(() => import('src/pages/dashboard/ecommerce'));
@@ -111,15 +113,15 @@ export const dashboardRoutes = [
         children: [
           {
             index: true,
-            element: <CustomerListPage />,
+            element: <SolKeyAccountListPage />,
           },
           {
             path: ':customerId',
-            element: <CustomerDetailPage />,
+            element: <SolKeyAccountDetailPage />,
           },
           {
             path: ':customerId/edit',
-            element: <CustomerEditPage />,
+            element: <SolKeyAccountEditPage />,
           },
         ],
       },
@@ -225,6 +227,14 @@ export const dashboardRoutes = [
       {
         path: 'calendar',
         element: <CalendarPage />,
+      },
+      {
+        path: 'sun-key',
+        element: <SunKeyPage />,
+      },
+      {
+        path: 'bots',
+        element: <BotsPage />,
       },
       {
         path: 'chat',

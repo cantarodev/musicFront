@@ -9,6 +9,8 @@ export const es = {
   [tokens.nav.blog]: 'Blog',
   [tokens.nav.browse]: 'Buscar',
   [tokens.nav.calendar]: 'Calendario',
+  [tokens.nav.sunKey]: 'Clave Sol',
+  [tokens.nav.bots]: 'Bots',
   [tokens.nav.chat]: 'Chat',
   [tokens.nav.checkout]: 'Pago',
   [tokens.nav.concepts]: 'Conceptos',

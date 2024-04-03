@@ -10,6 +10,8 @@ export const tokens = {
     blog: 'nav.blog',
     browse: 'nav.browse',
     calendar: 'nav.calendar',
+    sunKey: 'nav.sunKey',
+    bots: 'nav.bots',
     chat: 'nav.chat',
     checkout: 'nav.checkout',
     concepts: 'nav.concepts',

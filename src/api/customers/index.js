@@ -2,23 +2,23 @@ import { applyPagination } from 'src/utils/apply-pagination';
 import { applySort } from 'src/utils/apply-sort';
 import { deepCopy } from 'src/utils/deep-copy';
 
-import { customer, customers, emails, invoices, logs } from './data';
+import { solKeyAccount, solKeyAccounts, emails, invoices, logs } from './data';
 
-class CustomersApi {
-  getCustomers(request = {}) {
+class SolKeyAccountsApi {
+  getSolKeyAccounts(request = {}) {
     const { filters, page, rowsPerPage, sortBy, sortDir } = request;
 
-    let data = deepCopy(customers);
+    let data = deepCopy(solKeyAccounts);
     let count = data.length;
 
     if (typeof filters !== 'undefined') {
-      data = data.filter((customer) => {
+      data = data.filter((solKeyAccount) => {
         if (typeof filters.query !== 'undefined' && filters.query !== '') {
           let queryMatched = false;
           const properties = ['email', 'name'];
 
           properties.forEach((property) => {
-            if (customer[property].toLowerCase().includes(filters.query.toLowerCase())) {
+            if (solKeyAccount[property].toLowerCase().includes(filters.query.toLowerCase())) {
               queryMatched = true;
             }
           });
@@ -29,19 +29,19 @@ class CustomersApi {
         }
 
         if (typeof filters.hasAcceptedMarketing !== 'undefined') {
-          if (customer.hasAcceptedMarketing !== filters.hasAcceptedMarketing) {
+          if (solKeyAccount.hasAcceptedMarketing !== filters.hasAcceptedMarketing) {
             return false;
           }
         }
 
         if (typeof filters.isProspect !== 'undefined') {
-          if (customer.isProspect !== filters.isProspect) {
+          if (solKeyAccount.isProspect !== filters.isProspect) {
             return false;
           }
         }
 
         if (typeof filters.isReturning !== 'undefined') {
-          if (customer.isReturning !== filters.isReturning) {
+          if (solKeyAccount.isReturning !== filters.isReturning) {
             return false;
           }
         }
@@ -65,8 +65,8 @@ class CustomersApi {
     });
   }
 
-  getCustomer(request) {
-    return Promise.resolve(deepCopy(customer));
+  getSolKeyAccount(request) {
+    return Promise.resolve(deepCopy(solKeyAccount));
   }
 
   getEmails(request) {
@@ -82,4 +82,4 @@ class CustomersApi {
   }
 }
 
-export const customersApi = new CustomersApi();
+export const solKeyAccountsApi = new SolKeyAccountsApi();

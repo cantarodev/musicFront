@@ -25,7 +25,7 @@ export const EcommerceProducts = (props) => {
     <Card>
       <CardHeader
         action={<MoreMenu />}
-        title="Top Selling Products"
+        title="Top Selling Producttts"
       />
       <Scrollbar>
         <Table sx={{ minWidth: 300 }}>

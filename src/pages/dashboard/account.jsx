@@ -21,10 +21,9 @@ const now = new Date();
 
 const tabs = [
   { label: 'General', value: 'general' },
-  { label: 'Billing', value: 'billing' },
-  { label: 'Team', value: 'team' },
-  { label: 'Notifications', value: 'notifications' },
-  { label: 'Security', value: 'security' },
+  { label: 'Facturación', value: 'facturacion' },
+  { label: 'Notificaciones', value: 'notificaciones' },
+  { label: 'Seguridad', value: 'seguridad' },
 ];
 
 const Page = () => {
@@ -39,7 +38,7 @@ const Page = () => {
 
   return (
     <>
-      <Seo title="Dashboard: Account" />
+      <Seo title="Dashboard: Cuenta" />
       <Box
         component="main"
         sx={{
@@ -52,7 +51,7 @@ const Page = () => {
             spacing={3}
             sx={{ mb: 3 }}
           >
-            <Typography variant="h4">Account</Typography>
+            <Typography variant="h4">Cuenta</Typography>
             <div>
               <Tabs
                 indicatorColor="primary"
@@ -75,12 +74,12 @@ const Page = () => {
           </Stack>
           {currentTab === 'general' && (
             <AccountGeneralSettings
-              avatar={user.avatar || ''}
-              email={user.email || ''}
-              name={user.name || ''}
+              avatar={user?.avatar || ''}
+              email={user?.email || ''}
+              name={user?.name || ''}
             />
           )}
-          {currentTab === 'billing' && (
+          {currentTab === 'facturacion' && (
             <AccountBillingSettings
               plan="standard"
               invoices={[
@@ -102,26 +101,8 @@ const Page = () => {
               ]}
             />
           )}
-          {currentTab === 'team' && (
-            <AccountTeamSettings
-              members={[
-                {
-                  avatar: '/assets/avatars/avatar-cao-yu.png',
-                  email: 'cao.yu@devias.io',
-                  name: 'Cao Yu',
-                  role: 'Owner',
-                },
-                {
-                  avatar: '/assets/avatars/avatar-siegbert-gottfried.png',
-                  email: 'siegbert.gottfried@devias.io',
-                  name: 'Siegbert Gottfried',
-                  role: 'Standard',
-                },
-              ]}
-            />
-          )}
-          {currentTab === 'notifications' && <AccountNotificationsSettings />}
-          {currentTab === 'security' && (
+          {currentTab === 'notificaciones' && <AccountNotificationsSettings />}
+          {currentTab === 'seguridad' && (
             <AccountSecuritySettings
               loginEvents={[
                 {

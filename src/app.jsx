@@ -23,12 +23,30 @@ import { useAnalytics } from 'src/hooks/use-analytics';
 import { routes } from 'src/routes';
 import { store } from 'src/store';
 import { createTheme } from 'src/theme';
+import { useMockedUser } from 'src/hooks/use-mocked-user';
+import { useEffect, useState } from 'react';
 
 export const App = () => {
   useAnalytics(gtmConfig);
   useNprogress();
+  const [user, setUser] = useState(null);
 
-  const element = useRoutes(routes);
+  const filteredRoutes = user?.isAdmin
+    ? routes
+    : routes
+        .map((route) => {
+          if (route.children) {
+            return {
+              ...route,
+              children: route.children.filter((child) => child.path !== 'bots'),
+            };
+          } else {
+            return route;
+          }
+        })
+        .filter((route) => route.path !== 'bots');
+
+  const element = useRoutes(filteredRoutes);
 
   return (
     <ReduxProvider store={store}>
@@ -74,7 +92,11 @@ export const App = () => {
                           ) : (
                             <>
                               {element}
-                              <SettingsButton onClick={settings.handleDrawerOpen} />
+                              <SettingsButton
+                                onClick={settings.handleDrawerOpen}
+                                routes={routes}
+                                setUser={setUser}
+                              />
                               <SettingsDrawer
                                 canReset={settings.isCustom}
                                 onClose={settings.handleDrawerClose}
@@ -94,7 +116,10 @@ export const App = () => {
                               />
                             </>
                           )}
-                          <Toaster />
+                          <Toaster
+                            position="top-right"
+                            reverseOrder={false}
+                          />
                         </RTL>
                       </ThemeProvider>
                     );

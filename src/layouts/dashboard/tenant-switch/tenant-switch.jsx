@@ -28,13 +28,13 @@ export const TenantSwitch = (props) => {
             color="inherit"
             variant="h6"
           >
-            Devias
+            Impuestos
           </Typography>
           <Typography
             color="neutral.400"
             variant="body2"
           >
-            Production
+            Prueba
           </Typography>
         </Box>
         <IconButton

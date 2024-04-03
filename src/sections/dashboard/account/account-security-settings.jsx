@@ -17,16 +17,24 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 
 import { Scrollbar } from 'src/components/scrollbar';
+import { IconButton, InputAdornment } from '@mui/material';
 
 export const AccountSecuritySettings = (props) => {
   const { loginEvents } = props;
+  const [showPassword, setShowPassword] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
 
   const handleEdit = useCallback(() => {
     setIsEditing((prevState) => !prevState);
   }, []);
+
+  const handleTogglePassowrdVisibility = () => {
+    setShowPassword(!showPassword);
+  };
 
   return (
     <Stack spacing={4}>
@@ -55,7 +63,7 @@ export const AccountSecuritySettings = (props) => {
                 <TextField
                   disabled={!isEditing}
                   label="Password"
-                  type="password"
+                  type={showPassword ? 'text' : 'password'}
                   defaultValue="Thebestpasswordever123#"
                   sx={{
                     flexGrow: 1,
@@ -64,6 +72,19 @@ export const AccountSecuritySettings = (props) => {
                         borderStyle: 'dotted',
                       },
                     }),
+                  }}
+                  InputProps={{
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <IconButton
+                          arial-label="Alternar visibilidad de contraseña"
+                          onClick={handleTogglePassowrdVisibility}
+                          edge="end"
+                        >
+                          {showPassword ? <VisibilityIcon /> : <VisibilityOffIcon />}
+                        </IconButton>
+                      </InputAdornment>
+                    ),
                   }}
                 />
                 <Button onClick={handleEdit}>{isEditing ? 'Save' : 'Edit'}</Button>

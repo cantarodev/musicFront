@@ -4,7 +4,9 @@ import PropTypes from 'prop-types';
 export const Seo = (props) => {
   const { title } = props;
 
-  const fullTitle = title ? title + ' | Devias Kit PRO' : 'Devias Kit PRO';
+  const fullTitle = title
+    ? title + ' | Corridas Impuestos Analytia'
+    : 'Corridas Impuestos Analytia';
 
   return (
     <Helmet>

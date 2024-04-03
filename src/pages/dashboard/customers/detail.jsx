@@ -22,12 +22,12 @@ import { Seo } from 'src/components/seo';
 import { useMounted } from 'src/hooks/use-mounted';
 import { usePageView } from 'src/hooks/use-page-view';
 import { paths } from 'src/paths';
-import { CustomerBasicDetails } from 'src/sections/dashboard/customer/customer-basic-details';
-import { CustomerDataManagement } from 'src/sections/dashboard/customer/customer-data-management';
-import { CustomerEmailsSummary } from 'src/sections/dashboard/customer/customer-emails-summary';
-import { CustomerInvoices } from 'src/sections/dashboard/customer/customer-invoices';
-import { CustomerPayment } from 'src/sections/dashboard/customer/customer-payment';
-import { CustomerLogs } from 'src/sections/dashboard/customer/customer-logs';
+import { CustomerBasicDetails } from 'src/sections/dashboard/customers/customer-basic-details';
+import { CustomerDataManagement } from 'src/sections/dashboard/customers/customer-data-management';
+import { CustomerEmailsSummary } from 'src/sections/dashboard/customers/customer-emails-summary';
+import { CustomerInvoices } from 'src/sections/dashboard/customers/customer-invoices';
+import { CustomerPayment } from 'src/sections/dashboard/customers/customer-payment';
+import { CustomerLogs } from 'src/sections/dashboard/customers/customer-logs';
 import { getInitials } from 'src/utils/get-initials';
 
 const tabs = [
@@ -135,7 +135,7 @@ const Page = () => {
 
   return (
     <>
-      <Seo title="Dashboard: Customer Details" />
+      <Seo title="Dashboard: Detalle Clave-Sol" />
       <Box
         component="main"
         sx={{

@@ -105,9 +105,7 @@ export const AuthProvider = (props) => {
     async (email, password) => {
       const { accessToken } = await authApi.signIn({ email, password });
       const user = await authApi.me({ accessToken });
-
       sessionStorage.setItem(STORAGE_KEY, accessToken);
-
       dispatch({
         type: ActionType.SIGN_IN,
         payload: {
@@ -120,15 +118,12 @@ export const AuthProvider = (props) => {
 
   const signUp = useCallback(
     async (email, name, password) => {
-      const { accessToken } = await authApi.signUp({ email, name, password });
-      const user = await authApi.me({ accessToken });
-
-      sessionStorage.setItem(STORAGE_KEY, accessToken);
+      await authApi.signUp({ email, name, password });
 
       dispatch({
         type: ActionType.SIGN_UP,
         payload: {
-          user,
+          user: null,
         },
       });
     },
@@ -145,6 +140,7 @@ export const AuthProvider = (props) => {
       value={{
         ...state,
         issuer: Issuer.JWT,
+        initialize,
         signIn,
         signUp,
         signOut,

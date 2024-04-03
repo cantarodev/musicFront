@@ -27,15 +27,18 @@ import ShoppingCart01Icon from 'src/icons/untitled-ui/duocolor/shopping-cart-01'
 import Truck01Icon from 'src/icons/untitled-ui/duocolor/truck-01';
 import Upload04Icon from 'src/icons/untitled-ui/duocolor/upload-04';
 import Users03Icon from 'src/icons/untitled-ui/duocolor/users-03';
+import { FaRobot } from 'react-icons/fa';
 import XSquareIcon from 'src/icons/untitled-ui/duocolor/x-square';
 import { tokens } from 'src/locales/tokens';
 import { paths } from 'src/paths';
+import { useMockedUser } from 'src/hooks/use-mocked-user';
 
 export const useSections = () => {
   const { t } = useTranslation();
+  const user = useMockedUser();
 
   return useMemo(() => {
-    return [
+    const sections = [
       {
         items: [
           {
@@ -95,6 +98,15 @@ export const useSections = () => {
       {
         subheader: t(tokens.nav.concepts),
         items: [
+          {
+            title: t(tokens.nav.sunKey),
+            path: paths.dashboard.sunKey,
+            icon: (
+              <SvgIcon fontSize="small">
+                <Lock01Icon />
+              </SvgIcon>
+            ),
+          },
           {
             title: t(tokens.nav.customers),
             path: paths.dashboard.customers.index,
@@ -536,5 +548,19 @@ export const useSections = () => {
         ],
       },
     ];
-  }, [t]);
+
+    if (user?.isAdmin) {
+      sections[1].items.splice(1, 0, {
+        title: t(tokens.nav.bots),
+        path: paths.dashboard.bots,
+        icon: (
+          <SvgIcon fontSize="small">
+            <FaRobot />
+          </SvgIcon>
+        ),
+      });
+    }
+
+    return sections;
+  }, [t, user.isAdmin]);
 };

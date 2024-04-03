@@ -1,6 +1,6 @@
 /* eslint-disable no-bitwise */
-export const JWT_SECRET = 'devias-top-secret-key';
-export const JWT_EXPIRES_IN = 3600 * 24 * 2; // 2 days
+export const JWT_SECRET = 'Tax_';
+export const JWT_EXPIRES_IN = 3600 * 0.5; // 2 days
 
 // Since we are unable to sign a JWT in a browser
 // because "jsonwebtoken" library is available on server side only, NodeJS environment

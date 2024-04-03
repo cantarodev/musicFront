@@ -1,6 +1,5 @@
 import PropTypes from 'prop-types';
 import Box from '@mui/material/Box';
-import Link from '@mui/material/Link';
 import Stack from '@mui/material/Stack';
 import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
@@ -8,10 +7,8 @@ import Typography from '@mui/material/Typography';
 import { paths } from 'src/paths';
 
 const issuers = {
-  Amplify: '/assets/logos/logo-amplify.svg',
-  Auth0: '/assets/logos/logo-auth0.svg',
-  Firebase: '/assets/logos/logo-firebase.svg',
-  JWT: '/assets/logos/logo-jwt.svg',
+  Sire: '/assets/logos/logo-sire.png',
+  Dua: '/assets/logos/logo-sire.png',
 };
 
 export const AuthIssuer = (props) => {
@@ -30,19 +27,7 @@ export const AuthIssuer = (props) => {
         p: 3,
       }}
     >
-      <Typography variant="body2">
-        Visit our{' '}
-        <Link
-          component="a"
-          href={paths.docs}
-          target="_blank"
-          underline="hover"
-          variant="subtitle2"
-        >
-          docs
-        </Link>{' '}
-        and find out how to switch between
-      </Typography>
+      <Typography variant="body2">Controla tus impuestos de una manera más oportuna</Typography>
       <Stack
         alignItems="center"
         direction="row"
@@ -77,6 +62,7 @@ export const AuthIssuer = (props) => {
     </Box>
   );
 };
+//PLEs
 
 AuthIssuer.propTypes = {
   issuer: PropTypes.string.isRequired,

@@ -1,64 +1,29 @@
 import { createResourceId } from 'src/utils/create-resource-id';
+import axios from 'axios';
 import { decode, JWT_EXPIRES_IN, JWT_SECRET, sign } from 'src/utils/jwt';
 import { wait } from 'src/utils/wait';
 
-import { users } from './data';
-
-const STORAGE_KEY = 'users';
-
-// NOTE: We use sessionStorage since memory storage is lost after page reload.
-//  This should be replaced with a server call that returns DB persisted data.
-
-const getPersistedUsers = () => {
-  try {
-    const data = sessionStorage.getItem(STORAGE_KEY);
-
-    if (!data) {
-      return [];
-    }
-
-    return JSON.parse(data);
-  } catch (err) {
-    console.error(err);
-    return [];
-  }
-};
-
-const persistUser = (user) => {
-  try {
-    const users = getPersistedUsers();
-    const data = JSON.stringify([...users, user]);
-    sessionStorage.setItem(STORAGE_KEY, data);
-  } catch (err) {
-    console.error(err);
-  }
-};
+import { getUser, createUser } from './data';
 
 class AuthApi {
   async signIn(request) {
     const { email, password } = request;
-
     await wait(500);
 
     return new Promise((resolve, reject) => {
       try {
-        // Merge static users (data file) with persisted users (browser storage)
-        const mergedUsers = [...users, ...getPersistedUsers()];
+        getUser(email, password).then((data) => {
+          if (!data?.user) {
+            reject(new Error(data.message));
+            return;
+          }
 
-        // Find the user
-        const user = mergedUsers.find((user) => user.email === email);
-
-        if (!user || user.password !== password) {
-          reject(new Error('Please check your email and password'));
-          return;
-        }
-
-        // Create the access token
-        const accessToken = sign({ userId: user.id }, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
-
-        resolve({ accessToken });
+          const accessToken = sign({ userId: data.user.id }, JWT_SECRET, {
+            expiresIn: JWT_EXPIRES_IN,
+          });
+          resolve({ accessToken });
+        });
       } catch (err) {
-        console.error('[Auth Api]: ', err);
         reject(new Error('Internal server error'));
       }
     });
@@ -71,31 +36,15 @@ class AuthApi {
 
     return new Promise((resolve, reject) => {
       try {
-        // Merge static users (data file) with persisted users (browser storage)
-        const mergedUsers = [...users, ...getPersistedUsers()];
-
         // Check if a user already exists
-        let user = mergedUsers.find((user) => user.email === email);
+        createUser(email, name, password).then((data) => {
+          if (!data?.user) {
+            reject(new Error(data.message));
+            return;
+          }
 
-        if (user) {
-          reject(new Error('User already exists'));
-          return;
-        }
-
-        user = {
-          id: createResourceId(),
-          avatar: undefined,
-          email,
-          name,
-          password,
-          plan: 'Standard',
-        };
-
-        persistUser(user);
-
-        const accessToken = sign({ userId: user.id }, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
-
-        resolve({ accessToken });
+          resolve(data.user);
+        });
       } catch (err) {
         console.error('[Auth Api]: ', err);
         reject(new Error('Internal server error'));
@@ -103,7 +52,7 @@ class AuthApi {
     });
   }
 
-  me(request) {
+  async me(request) {
     const { accessToken } = request;
 
     return new Promise((resolve, reject) => {
@@ -111,24 +60,21 @@ class AuthApi {
         // Decode access token
         const decodedToken = decode(accessToken);
 
-        // Merge static users (data file) with persisted users (browser storage)
-        const mergedUsers = [...users, ...getPersistedUsers()];
-
         // Find the user
         const { userId } = decodedToken;
-        const user = mergedUsers.find((user) => user.id === userId);
-
-        if (!user) {
-          reject(new Error('Invalid authorization token'));
-          return;
-        }
-
-        resolve({
-          id: user.id,
-          avatar: user.avatar,
-          email: user.email,
-          name: user.name,
-          plan: user.plan,
+        axios.get(`http://localhost:5000/api/v1/user/me/${userId}`).then(({ data }) => {
+          if (!data.user) {
+            reject(new Error('Invalid authorization token'));
+            return;
+          }
+          const user = JSON.parse(data.user);
+          resolve({
+            id: user.id,
+            avatar: user.avatar,
+            email: user.email,
+            name: user.businessName,
+            isAdmin: user.isAdmin,
+          });
         });
       } catch (err) {
         console.error('[Auth Api]: ', err);

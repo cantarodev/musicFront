@@ -73,7 +73,7 @@ export const Layout = (props) => {
                   },
                 }}
               >
-                Devias Kit <span>PRO</span>
+                Impuestos <span>SUNAT</span>
               </Box>
             </Stack>
           </Stack>
