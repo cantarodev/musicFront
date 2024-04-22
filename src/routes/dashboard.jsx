@@ -14,10 +14,15 @@ const BlogPostListPage = lazy(() => import('src/pages/dashboard/blog/list'));
 const BlogPostDetailPage = lazy(() => import('src/pages/dashboard/blog/detail'));
 const BlogPostCreatePage = lazy(() => import('src/pages/dashboard/blog/create'));
 
-// SolKeyAccount
-const SolKeyAccountListPage = lazy(() => import('src/pages/dashboard/customers/list'));
-const SolKeyAccountDetailPage = lazy(() => import('src/pages/dashboard/customers/detail'));
-const SolKeyAccountEditPage = lazy(() => import('src/pages/dashboard/customers/edit'));
+// Customer
+const CustomerListPage = lazy(() => import('src/pages/dashboard/customers/list'));
+const CustomerDetailPage = lazy(() => import('src/pages/dashboard/customers/detail'));
+const CustomerEditPage = lazy(() => import('src/pages/dashboard/customers/edit'));
+
+// User
+const UserListPage = lazy(() => import('src/pages/dashboard/users/list'));
+const UserDetailPage = lazy(() => import('src/pages/dashboard/users/detail'));
+const UserEditPage = lazy(() => import('src/pages/dashboard/users/edit'));
 
 // Invoice
 const InvoiceListPage = lazy(() => import('src/pages/dashboard/invoices/list'));
@@ -113,15 +118,32 @@ export const dashboardRoutes = [
         children: [
           {
             index: true,
-            element: <SolKeyAccountListPage />,
+            element: <CustomerListPage />,
           },
           {
             path: ':customerId',
-            element: <SolKeyAccountDetailPage />,
+            element: <CustomerDetailPage />,
           },
           {
             path: ':customerId/edit',
-            element: <SolKeyAccountEditPage />,
+            element: <CustomerEditPage />,
+          },
+        ],
+      },
+      {
+        path: 'users',
+        children: [
+          {
+            index: true,
+            element: <UserListPage />,
+          },
+          {
+            path: ':userId',
+            element: <UserDetailPage />,
+          },
+          {
+            path: ':userId/edit',
+            element: <UserEditPage />,
           },
         ],
       },

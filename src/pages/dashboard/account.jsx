@@ -14,7 +14,6 @@ import { usePageView } from 'src/hooks/use-page-view';
 import { AccountBillingSettings } from 'src/sections/dashboard/account/account-billing-settings';
 import { AccountGeneralSettings } from 'src/sections/dashboard/account/account-general-settings';
 import { AccountNotificationsSettings } from 'src/sections/dashboard/account/account-notifications-settings';
-import { AccountTeamSettings } from 'src/sections/dashboard/account/account-team-settings';
 import { AccountSecuritySettings } from 'src/sections/dashboard/account/account-security-settings';
 
 const now = new Date();

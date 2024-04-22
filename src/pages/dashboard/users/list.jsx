@@ -10,15 +10,15 @@ import Stack from '@mui/material/Stack';
 import SvgIcon from '@mui/material/SvgIcon';
 import Typography from '@mui/material/Typography';
 
-import { customersApi } from 'src/api/customers';
+import { usersApi } from 'src/api/users';
 import { Seo } from 'src/components/seo';
 import { useMounted } from 'src/hooks/use-mounted';
 import { usePageView } from 'src/hooks/use-page-view';
 import { useSelection } from 'src/hooks/use-selection';
-import { CustomerListSearch } from 'src/sections/dashboard/customers/customer-list-search';
-import { CustomerListTable } from 'src/sections/dashboard/customers/customer-list-table';
+import { UserListSearch } from 'src/sections/dashboard/users/user-list-search';
+import { UserListTable } from 'src/sections/dashboard/users/user-list-table';
 
-const useCustomersSearch = () => {
+const useUsersSearch = () => {
   const [state, setState] = useState({
     filters: {
       query: undefined,
@@ -70,21 +70,21 @@ const useCustomersSearch = () => {
   };
 };
 
-const useCustomersStore = (searchState) => {
+const useUsersStore = (searchState) => {
   const isMounted = useMounted();
   const [state, setState] = useState({
-    customers: [],
-    customersCount: 0,
+    users: [],
+    usersCount: 0,
   });
 
-  const handleCustomersGet = useCallback(async () => {
+  const handleUsersGet = useCallback(async () => {
     try {
-      const response = await customersApi.getCustomers(searchState);
+      const response = await usersApi.getUsers(searchState);
 
       if (isMounted()) {
         setState({
-          customers: response.data,
-          customersCount: response.count,
+          users: response.data,
+          usersCount: response.count,
         });
       }
     } catch (err) {
@@ -94,7 +94,7 @@ const useCustomersStore = (searchState) => {
 
   useEffect(
     () => {
-      handleCustomersGet();
+      handleUsersGet();
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [searchState]
@@ -105,17 +105,17 @@ const useCustomersStore = (searchState) => {
   };
 };
 
-const useCustomersIds = (customers = []) => {
+const useUsersIds = (users = []) => {
   return useMemo(() => {
-    return customers.map((customer) => customer.id);
-  }, [customers]);
+    return users.map((user) => user.id);
+  }, [users]);
 };
 
 const Page = () => {
-  const customersSearch = useCustomersSearch();
-  const customersStore = useCustomersStore(customersSearch.state);
-  const customersIds = useCustomersIds(customersStore.customers);
-  const customersSelection = useSelection(customersIds);
+  const usersSearch = useUsersSearch();
+  const usersStore = useUsersStore(usersSearch.state);
+  const usersIds = useUsersIds(usersStore.users);
+  const usersSelection = useSelection(usersIds);
 
   usePageView();
 
@@ -156,7 +156,7 @@ const Page = () => {
                   </Button>
                 </Stack>
               </Stack>
-              <Stack
+              {/* <Stack
                 alignItems="center"
                 direction="row"
                 spacing={3}
@@ -171,27 +171,27 @@ const Page = () => {
                 >
                   Agregar
                 </Button>
-              </Stack>
+              </Stack> */}
             </Stack>
             <Card>
-              <CustomerListSearch
-                onFiltersChange={customersSearch.handleFiltersChange}
-                onSortChange={customersSearch.handleSortChange}
-                sortBy={customersSearch.state.sortBy}
-                sortDir={customersSearch.state.sortDir}
+              <UserListSearch
+                onFiltersChange={usersSearch.handleFiltersChange}
+                onSortChange={usersSearch.handleSortChange}
+                sortBy={usersSearch.state.sortBy}
+                sortDir={usersSearch.state.sortDir}
               />
-              <CustomerListTable
-                count={customersStore.customersCount}
-                items={customersStore.customers}
-                onDeselectAll={customersSelection.handleDeselectAll}
-                onDeselectOne={customersSelection.handleDeselectOne}
-                onPageChange={customersSearch.handlePageChange}
-                onRowsPerPageChange={customersSearch.handleRowsPerPageChange}
-                onSelectAll={customersSelection.handleSelectAll}
-                onSelectOne={customersSelection.handleSelectOne}
-                page={customersSearch.state.page}
-                rowsPerPage={customersSearch.state.rowsPerPage}
-                selected={customersSelection.selected}
+              <UserListTable
+                count={usersStore.usersCount}
+                items={usersStore.users}
+                onDeselectAll={usersSelection.handleDeselectAll}
+                onDeselectOne={usersSelection.handleDeselectOne}
+                onPageChange={usersSearch.handlePageChange}
+                onRowsPerPageChange={usersSearch.handleRowsPerPageChange}
+                onSelectAll={usersSelection.handleSelectAll}
+                onSelectOne={usersSelection.handleSelectOne}
+                page={usersSearch.state.page}
+                rowsPerPage={usersSearch.state.rowsPerPage}
+                selected={usersSelection.selected}
               />
             </Card>
           </Stack>

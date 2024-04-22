@@ -95,6 +95,9 @@ export const BotsListTable = (props) => {
                       </Box>
                     </TableCell>
                     <TableCell width="15%">
+                      <Typography variant="subtitle2">{bot.tag}</Typography>
+                    </TableCell>
+                    <TableCell width="15%">
                       <Typography variant="subtitle2">{bot.name}</Typography>
                     </TableCell>
                     <TableCell width="15%">

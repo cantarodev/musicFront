@@ -223,13 +223,13 @@ export const SideNav = (props) => {
             ))}
           </Stack>
           <Box sx={{ p: 3 }}>
-            <Typography variant="subtitle1">Need help?</Typography>
+            <Typography variant="subtitle1">Necesitas ayuda?</Typography>
             <Typography
               color="neutral.400"
               sx={{ mb: 2 }}
               variant="body2"
             >
-              Please check our docs.
+              Por favor consulte nuestros documentos.
             </Typography>
             <Button
               component="a"
@@ -243,7 +243,7 @@ export const SideNav = (props) => {
               target="_blank"
               variant="contained"
             >
-              Documentation
+              Documentación
             </Button>
           </Box>
         </Stack>

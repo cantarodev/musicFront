@@ -37,7 +37,7 @@ class BotsApi {
   }
 
   async createBot(request) {
-    const { id, userId, name, description } = request;
+    const { id, tag, name, description } = request;
 
     await wait(1000);
 
@@ -54,7 +54,7 @@ class BotsApi {
             resolve(data);
           });
         } else {
-          createBot(userId, name, description).then((data) => {
+          createBot(tag, name, description).then((data) => {
             if (data.status !== 'SUCCESS') {
               reject(new Error(data.message));
               return;

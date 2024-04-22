@@ -51,6 +51,7 @@ const Page = () => {
   const location = useLocation();
   const returnTo = searchParams.get('returnTo');
   const { issuer, signIn } = useAuth();
+
   const formik = useFormik({
     initialValues,
     validationSchema,
@@ -82,6 +83,7 @@ const Page = () => {
       const errorValue = searchParams.get('error') === 'false' ? false : true;
       const respValue = searchParams.get('resp');
       const emailValue = searchParams.get('email');
+      formik.setFieldValue('email', emailValue);
       setSearchValue({ error: errorValue, resp: respValue, email: emailValue || '' });
       setColor(errorValue ? 'error' : 'success');
     }
@@ -145,9 +147,9 @@ const Page = () => {
                   label="Correo electrónico"
                   name="email"
                   onBlur={formik.handleBlur}
-                  onChange={formik.handleChange}
                   type="email"
-                  value={formik.values.email || searchValue?.email}
+                  value={formik.values.email}
+                  onChange={formik.handleChange}
                 />
                 <TextField
                   error={!!(formik.touched.password && formik.errors.password)}

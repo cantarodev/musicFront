@@ -2,8 +2,8 @@ import axios from 'axios';
 
 export const getSunKeyAccounts = async (userId) => {
   try {
-    const { data } = await axios.get(`http://localhost:5000/api/v1/solKeyAccount/${userId}`);
-    const sunKeyAccounts = JSON.parse(data.solKeyAccounts);
+    const { data } = await axios.get(`http://localhost:5000/api/v1/sunKeyAccount/${userId}`);
+    const sunKeyAccounts = JSON.parse(data.sunKeyAccounts);
     return sunKeyAccounts;
   } catch (error) {
     const { response } = error;
@@ -13,7 +13,7 @@ export const getSunKeyAccounts = async (userId) => {
 
 export const createSunKeyAccount = async (userId, ruc, username, password) => {
   try {
-    const { data } = await axios.post('http://localhost:5000/api/v1/solKeyAccount/', {
+    const { data } = await axios.post('http://localhost:5000/api/v1/sunKeyAccount/', {
       userId,
       ruc,
       username,
@@ -28,7 +28,7 @@ export const createSunKeyAccount = async (userId, ruc, username, password) => {
 
 export const deleteSunKeyAccount = async (sunKeyId) => {
   try {
-    const response = await axios.delete(`http://localhost:5000/api/v1/solKeyAccount/${sunKeyId}`);
+    const response = await axios.delete(`http://localhost:5000/api/v1/sunKeyAccount/${sunKeyId}`);
     const sunKey = response?.data;
     return sunKey;
   } catch (err) {
@@ -38,7 +38,7 @@ export const deleteSunKeyAccount = async (sunKeyId) => {
 
 export const updateSunKeyAccount = async (id, ruc, username, password) => {
   try {
-    const { data } = await axios.put('http://localhost:5000/api/v1/solKeyAccount/', {
+    const { data } = await axios.put('http://localhost:5000/api/v1/sunKeyAccount/', {
       id,
       ruc,
       username,

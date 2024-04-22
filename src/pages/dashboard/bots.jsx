@@ -149,7 +149,7 @@ const Page = () => {
                   </Typography>
                 </Breadcrumbs>
               </Stack>
-              {user.isAdmin && (
+              {user?.isAdmin && (
                 <Stack
                   alignItems="center"
                   direction="row"

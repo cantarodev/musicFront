@@ -49,15 +49,15 @@ const Page = () => {
             align="center"
             variant={mdUp ? 'h1' : 'h4'}
           >
-            404: The page you are looking for isn’t here
+            404: No encontramos esa página.
           </Typography>
           <Typography
             align="center"
             color="text.secondary"
             sx={{ mt: 0.5 }}
           >
-            You either tried some shady route or you came here by mistake. Whichever it is, try
-            using the navigation.
+            O intentaste alguna ruta turbia o viniste aquí por error. Sea lo que sea, no puede estar
+            aquí.
           </Typography>
           <Box
             sx={{
@@ -70,7 +70,7 @@ const Page = () => {
               component={RouterLink}
               href={paths.index}
             >
-              Back to Home
+              Regresar
             </Button>
           </Box>
         </Container>

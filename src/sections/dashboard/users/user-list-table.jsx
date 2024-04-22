@@ -22,8 +22,9 @@ import { RouterLink } from 'src/components/router-link';
 import { Scrollbar } from 'src/components/scrollbar';
 import { paths } from 'src/paths';
 import { getInitials } from 'src/utils/get-initials';
+import AWS from 'aws-sdk';
 
-export const CustomerListTable = (props) => {
+export const UserListTable = (props) => {
   const {
     count = 0,
     items = [],
@@ -77,13 +78,13 @@ export const CustomerListTable = (props) => {
             color="inherit"
             size="small"
           >
-            Delete
+            Eliminar
           </Button>
           <Button
             color="inherit"
             size="small"
           >
-            Edit
+            Editar
           </Button>
         </Stack>
       )}
@@ -104,23 +105,40 @@ export const CustomerListTable = (props) => {
                   }}
                 />
               </TableCell>
-              <TableCell>Name</TableCell>
-              <TableCell>Location</TableCell>
-              <TableCell>Orders</TableCell>
-              <TableCell>Spent</TableCell>
+              <TableCell>Nombre</TableCell>
+              <TableCell>Ubicación</TableCell>
+              <TableCell>Total Bots</TableCell>
               <TableCell align="right">Actions</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {items.map((customer) => {
-              const isSelected = selected.includes(customer.id);
-              const location = `${customer.city}, ${customer.state}, ${customer.country}`;
-              const totalSpent = numeral(customer.totalSpent).format(`${customer.currency}0,0.00`);
+            {items.map((user) => {
+              const isSelected = selected.includes(user.id);
+              const location = `${user.city || 'Tingo María'}, ${user.region || 'Huánuco'}, ${
+                user.country || 'Perú'
+              }`;
+              let photoURL = '';
+              const s3 = new AWS.S3({
+                region: 'us-east-2',
+                credentials: {
+                  accessKeyId: 'AKIA4MTWJ6ITS7PRWPFS',
+                  secretAccessKey: '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',
+                },
+                signatureVersion: 'v4',
+              });
+
+              if (user?.avatar) {
+                const params = {
+                  Bucket: 'user-photo-taxes',
+                  Key: user?.avatar,
+                };
+                photoURL = s3.getSignedUrl('getObject', params);
+              }
 
               return (
                 <TableRow
                   hover
-                  key={customer.id}
+                  key={user.id}
                   selected={isSelected}
                 >
                   <TableCell padding="checkbox">
@@ -128,9 +146,9 @@ export const CustomerListTable = (props) => {
                       checked={isSelected}
                       onChange={(event) => {
                         if (event.target.checked) {
-                          onSelectOne?.(customer.id);
+                          onSelectOne?.(user.id);
                         } else {
-                          onDeselectOne?.(customer.id);
+                          onDeselectOne?.(user.id);
                         }
                       }}
                       value={isSelected}
@@ -143,41 +161,38 @@ export const CustomerListTable = (props) => {
                       spacing={1}
                     >
                       <Avatar
-                        src={customer.avatar}
+                        src={photoURL}
                         sx={{
                           height: 42,
                           width: 42,
                         }}
                       >
-                        {getInitials(customer.name)}
+                        {getInitials(user.businessName)}
                       </Avatar>
                       <div>
                         <Link
                           color="inherit"
                           component={RouterLink}
-                          href={paths.dashboard.customers.details}
+                          href={paths.dashboard.users.details}
                           variant="subtitle2"
                         >
-                          {customer.name}
+                          {user.businessName}
                         </Link>
                         <Typography
                           color="text.secondary"
                           variant="body2"
                         >
-                          {customer.email}
+                          {user.email}
                         </Typography>
                       </div>
                     </Stack>
                   </TableCell>
                   <TableCell>{location}</TableCell>
-                  <TableCell>{customer.totalOrders}</TableCell>
-                  <TableCell>
-                    <Typography variant="subtitle2">{totalSpent}</Typography>
-                  </TableCell>
+                  <TableCell>{user.totalBots || 2}</TableCell>
                   <TableCell align="right">
                     <IconButton
                       component={RouterLink}
-                      href={paths.dashboard.customers.edit}
+                      href={paths.dashboard.users.edit}
                     >
                       <SvgIcon>
                         <Edit02Icon />
@@ -185,7 +200,7 @@ export const CustomerListTable = (props) => {
                     </IconButton>
                     <IconButton
                       component={RouterLink}
-                      href={paths.dashboard.customers.details}
+                      href={paths.dashboard.users.details}
                     >
                       <SvgIcon>
                         <ArrowRightIcon />
@@ -206,12 +221,14 @@ export const CustomerListTable = (props) => {
         page={page}
         rowsPerPage={rowsPerPage}
         rowsPerPageOptions={[5, 10, 25]}
+        labelRowsPerPage="Filas por página:"
+        labelDisplayedRows={({ from, to, count }) => `${from}-${to} de ${count}`}
       />
     </Box>
   );
 };
 
-CustomerListTable.propTypes = {
+UserListTable.propTypes = {
   count: PropTypes.number,
   items: PropTypes.array,
   onDeselectAll: PropTypes.func,

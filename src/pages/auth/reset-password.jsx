@@ -128,7 +128,7 @@ const Page = () => {
                       error={!!(formik.touched.password && formik.errors.password)}
                       fullWidth
                       helperText={formik.touched.password && formik.errors.password}
-                      label="Contraseña"
+                      label="Contraseña nueva"
                       name="password"
                       onBlur={formik.handleBlur}
                       onChange={formik.handleChange}
@@ -152,7 +152,7 @@ const Page = () => {
                       error={!!(formik.touched.passwordConfirm && formik.errors.passwordConfirm)}
                       fullWidth
                       helperText={formik.touched.passwordConfirm && formik.errors.passwordConfirm}
-                      label="Contraseña (Confirmar)"
+                      label="Contraseña nueva (Confirmar)"
                       name="passwordConfirm"
                       onBlur={formik.handleBlur}
                       onChange={formik.handleChange}

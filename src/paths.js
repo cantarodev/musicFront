@@ -57,6 +57,11 @@ export const paths = {
       details: '/dashboard/customers/:customerId',
       edit: '/dashboard/customers/:customerId/edit',
     },
+    users: {
+      index: '/dashboard/users',
+      details: '/dashboard/users/:userId',
+      edit: '/dashboard/users/:userId/edit',
+    },
     ecommerce: '/dashboard/ecommerce',
     fileManager: '/dashboard/file-manager',
     invoices: {

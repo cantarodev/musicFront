@@ -38,13 +38,15 @@ export const App = () => {
           if (route.children) {
             return {
               ...route,
-              children: route.children.filter((child) => child.path !== 'bots'),
+              children: route.children.filter(
+                (child) => child.path !== 'bots' && child.path !== 'users'
+              ),
             };
           } else {
             return route;
           }
         })
-        .filter((route) => route.path !== 'bots');
+        .filter((route) => route.path !== 'bots' && route.path !== 'users');
 
   const element = useRoutes(filteredRoutes);
 

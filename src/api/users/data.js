@@ -1,5 +1,16 @@
 import axios from 'axios';
 
+export const getUsers = async () => {
+  try {
+    const { data } = await axios.get(`http://localhost:5000/api/v1/user`);
+    const users = JSON.parse(data.users);
+    return users;
+  } catch (error) {
+    const { response } = error;
+    return response.data;
+  }
+};
+
 export const deleteUser = async (email) => {
   try {
     console.log(email);

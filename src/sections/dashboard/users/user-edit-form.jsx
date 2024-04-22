@@ -17,19 +17,19 @@ import { RouterLink } from 'src/components/router-link';
 import { paths } from 'src/paths';
 import { wait } from 'src/utils/wait';
 
-export const CustomerEditForm = (props) => {
-  const { customer, ...other } = props;
+export const UserEditForm = (props) => {
+  const { user, ...other } = props;
   const formik = useFormik({
     initialValues: {
-      address1: customer.address1 || '',
-      address2: customer.address2 || '',
-      country: customer.country || '',
-      email: customer.email || '',
-      hasDiscount: customer.hasDiscount || false,
-      isVerified: customer.isVerified || false,
-      name: customer.name || '',
-      phone: customer.phone || '',
-      state: customer.state || '',
+      address1: user.address1 || '',
+      address2: user.address2 || '',
+      country: user.country || '',
+      email: user.email || '',
+      hasDiscount: user.hasDiscount || false,
+      isVerified: user.isVerified || false,
+      name: user.name || '',
+      phone: user.phone || '',
+      state: user.state || '',
       submit: null,
     },
     validationSchema: Yup.object({
@@ -266,7 +266,7 @@ export const CustomerEditForm = (props) => {
             color="inherit"
             component={RouterLink}
             disabled={formik.isSubmitting}
-            href={paths.dashboard.customers.details}
+            href={paths.dashboard.users.details}
           >
             Cancel
           </Button>
@@ -276,6 +276,6 @@ export const CustomerEditForm = (props) => {
   );
 };
 
-CustomerEditForm.propTypes = {
-  customer: PropTypes.object.isRequired,
+UserEditForm.propTypes = {
+  user: PropTypes.object.isRequired,
 };

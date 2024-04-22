@@ -18,6 +18,7 @@ export const es = {
   [tokens.nav.course]: 'Curso',
   [tokens.nav.create]: 'Crear',
   [tokens.nav.crypto]: 'Crypto',
+  [tokens.nav.users]: 'Usuarios',
   [tokens.nav.customers]: 'Clientes',
   [tokens.nav.dashboard]: 'Dashboard',
   [tokens.nav.details]: 'Detalles',

@@ -11,9 +11,10 @@ export const getBots = async () => {
   }
 };
 
-export const createBot = async (name, description) => {
+export const createBot = async (tag, name, description) => {
   try {
     const { data } = await axios.post('http://localhost:5000/api/v1/bot/', {
+      tag,
       name,
       description,
     });

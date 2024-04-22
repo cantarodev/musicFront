@@ -2,7 +2,7 @@ import { subDays, subHours, subMinutes, subSeconds } from 'date-fns';
 
 const now = new Date();
 
-export const solKeyAccounts = [
+export const customers = [
   {
     id: '5e887ac47eed253091be10cb',
     avatar: '/assets/avatars/avatar-carson-darrin.png',
@@ -164,7 +164,7 @@ export const solKeyAccounts = [
   },
 ];
 
-export const solKeyAccount = {
+export const customer = {
   id: '5e86805e2bafd54f66cc95c3',
   address1: 'Street John Wick, no. 7',
   address2: 'House #25',

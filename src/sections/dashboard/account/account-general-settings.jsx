@@ -1,6 +1,5 @@
 import PropTypes from 'prop-types';
 import Camera01Icon from '@untitled-ui/icons-react/build/esm/Camera01';
-import User01Icon from '@untitled-ui/icons-react/build/esm/User01';
 import { alpha } from '@mui/system/colorManipulator';
 import Avatar from '@mui/material/Avatar';
 import Box from '@mui/material/Box';
@@ -19,7 +18,7 @@ import { paths } from 'src/paths';
 import { Issuer } from 'src/utils/auth';
 import { useCallback, useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
-import { userApi } from 'src/api/user';
+import { usersApi } from 'src/api/users';
 import 'src/toast.css';
 
 import AWS from 'aws-sdk';
@@ -155,7 +154,7 @@ export const AccountGeneralSettings = (props) => {
 
     try {
       await s3.upload(params).promise();
-      const resp = await userApi.updateUser({ ...newData, ['avatar']: selectedImage.name });
+      const resp = await usersApi.updateUser({ ...newData, ['avatar']: selectedImage.name });
       if (resp?.status == 'SUCCESS') {
         setNewData({ ...newData, ['avatar']: selectedImage.name });
         await auth.initialize();

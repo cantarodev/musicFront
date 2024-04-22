@@ -19,13 +19,13 @@ export const BotsCreateForm = (props) => {
 
   const initialValues = {
     id: bot?.id || '',
-    userId: bot?.userId || user.id,
+    tag: bot?.tag || '',
     name: bot?.name || '',
     description: bot?.description || '',
   };
 
   const validationSchema = Yup.object({
-    userId: Yup.string().max(255),
+    tag: Yup.string().max(50).required('Se requiere una etiqueta para el bot'),
     name: Yup.string().max(50).required('Se requiere un nombre para el bot'),
     description: Yup.string().max(255),
   });
@@ -66,14 +66,14 @@ export const BotsCreateForm = (props) => {
         sx={{ p: 3 }}
       >
         <TextField
-          disabled
-          error={!!(formik.touched.userId && formik.errors.userId)}
+          disabled={action === 'edit' ? true : false}
+          error={!!(formik.touched.tag && formik.errors.tag)}
           fullWidth
-          helperText={formik.touched.userId && formik.errors.userId}
-          label="ID Usuario"
-          name="userId"
+          helperText={formik.touched.tag && formik.errors.tag}
+          label="Etiqueta"
+          name="tag"
           onChange={formik.handleChange}
-          value={formik.values.userId}
+          value={formik.values.tag}
         />
         <TextField
           error={!!(formik.touched.name && formik.errors.name)}
