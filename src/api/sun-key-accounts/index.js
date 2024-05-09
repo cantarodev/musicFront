@@ -3,23 +3,24 @@ import { deepCopy } from 'src/utils/deep-copy';
 import { wait } from 'src/utils/wait';
 
 import {
-  getSunKeyAccounts,
-  createSunKeyAccount,
-  deleteSunKeyAccount,
-  updateSunKeyAccount,
+  getClaveSolAccounts,
+  createClaveSolAccount,
+  deleteClaveSolAccount,
+  updateClaveSolAccount,
+  validateClaveSolAccount,
 } from './data';
 
-class SunKeyAccountsApi {
-  async getSunKeyAccounts(request = {}) {
+class ClaveSolAccountsApi {
+  async getClaveSolAccounts(request = {}) {
     const { filters, page, rowsPerPage, userId } = request;
-    let sunKeyAccounts = deepCopy(await getSunKeyAccounts(userId));
-    let data = sunKeyAccounts;
+    let claveSolAccounts = deepCopy(await getClaveSolAccounts(userId));
+    let data = claveSolAccounts;
     let count = data.length;
-
+    console.log(filters);
     if (typeof filters !== 'undefined') {
-      data = data.filter((product) => {
+      data = data.filter((claveSol) => {
         if (typeof filters.username !== 'undefined' && filters.username !== '') {
-          const usernameMatched = product.username
+          const usernameMatched = claveSol.username
             .toLowerCase()
             .includes(filters.username.toLowerCase());
 
@@ -28,9 +29,17 @@ class SunKeyAccountsApi {
           }
         }
 
+        if (typeof filters.name !== 'undefined' && filters.name !== '') {
+          const nameMatched = claveSol.name.toLowerCase().includes(filters.name.toLowerCase());
+
+          if (!nameMatched) {
+            return false;
+          }
+        }
+
         // It is possible to select multiple status options
         if (typeof filters.status !== 'undefined' && filters.status.length > 0) {
-          const statusMatched = filters.status.includes(product.status);
+          const statusMatched = filters.status.includes(claveSol.status);
 
           if (!statusMatched) {
             return false;
@@ -52,16 +61,16 @@ class SunKeyAccountsApi {
     });
   }
 
-  async createSunKeyAccount(request) {
-    const { id, userId, ruc, username, password } = request;
+  async createClaveSolAccount(request) {
+    const { account_id, userId, name, ruc, username, password } = request;
 
     await wait(1000);
 
     return new Promise((resolve, reject) => {
       try {
         // Check if a user already exists
-        if (id) {
-          updateSunKeyAccount(id, ruc, username, password).then((data) => {
+        if (account_id) {
+          updateClaveSolAccount(account_id, name, ruc, username, password).then((data) => {
             if (data.status !== 'SUCCESS') {
               reject(new Error(data.message));
               return;
@@ -70,7 +79,7 @@ class SunKeyAccountsApi {
             resolve(data);
           });
         } else {
-          createSunKeyAccount(userId, ruc, username, password).then((data) => {
+          createClaveSolAccount(userId, name, ruc, username, password).then((data) => {
             if (data.status !== 'SUCCESS') {
               reject(new Error(data.message));
               return;
@@ -86,13 +95,36 @@ class SunKeyAccountsApi {
     });
   }
 
-  async deleteSunKeyAccount(request) {
-    const { sunKeyId } = request;
+  async validateClaveSolAccount(request) {
+    const { ruc, username, password } = request;
+
+    await wait(1000);
+
+    return new Promise((resolve, reject) => {
+      try {
+        // Check if a user already exists
+        validateClaveSolAccount(ruc, username, password).then((data) => {
+          if (data.status !== 'SUCCESS') {
+            reject(new Error(data.message));
+            return;
+          }
+
+          resolve(data);
+        });
+      } catch (err) {
+        console.error('[Auth Api]: ', err);
+        reject(new Error('Internal server error'));
+      }
+    });
+  }
+
+  async deleteClaveSolAccount(request) {
+    const { account_id } = request;
     await wait(500);
 
     return new Promise((resolve, reject) => {
       try {
-        deleteSunKeyAccount(sunKeyId).then((data) => {
+        deleteClaveSolAccount(account_id).then((data) => {
           if (!data?.status) {
             reject(new Error('Por favor, inténtalo más tarde.'));
             return;
@@ -106,15 +138,15 @@ class SunKeyAccountsApi {
     });
   }
 
-  async updateSunKeyAccount(request) {
-    const { id, ruc, username, password } = request;
+  async updateClaveSolAccount(request) {
+    const { account_id, name, ruc, username, password } = request;
 
     await wait(1000);
 
     return new Promise((resolve, reject) => {
       try {
         // Check if a user already exists
-        updateSunKeyAccount(id, ruc, username, password).then((data) => {
+        updateClaveSolAccount(account_id, name, ruc, username, password).then((data) => {
           if (data.status !== 'SUCCESS') {
             reject(new Error(data.message));
             return;
@@ -130,4 +162,4 @@ class SunKeyAccountsApi {
   }
 }
 
-export const sunKeyAccountsApi = new SunKeyAccountsApi();
+export const claveSolAccountsApi = new ClaveSolAccountsApi();

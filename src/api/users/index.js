@@ -3,16 +3,24 @@ import { applySort } from 'src/utils/apply-sort';
 import { deepCopy } from 'src/utils/deep-copy';
 import { wait } from 'src/utils/wait';
 
-import { getUsers, deleteUser, updateUser } from './data';
+import {
+  getUsers,
+  deleteUser,
+  deletAllUsers,
+  changeStatusUser,
+  downloadUsers,
+  updateUser,
+} from './data';
 
 class UsersApi {
   async getUsers(request = {}) {
     const { filters, page, rowsPerPage, sortBy, sortDir } = request;
-    console.log(await getUsers());
+
     let data = deepCopy(await getUsers());
     let count = data.length;
 
     if (typeof filters !== 'undefined') {
+      console.log('aqui');
       data = data.filter((user) => {
         if (typeof filters.query !== 'undefined' && filters.query !== '') {
           let queryMatched = false;
@@ -29,20 +37,20 @@ class UsersApi {
           }
         }
 
-        if (typeof filters.hasAcceptedMarketing !== 'undefined') {
-          if (user.hasAcceptedMarketing !== filters.hasAcceptedMarketing) {
+        if (typeof filters.active !== 'undefined') {
+          if (user.status !== filters.active) {
             return false;
           }
         }
 
-        if (typeof filters.isProspect !== 'undefined') {
-          if (user.isProspect !== filters.isProspect) {
+        if (typeof filters.inactive !== 'undefined') {
+          if (user.status !== filters.inactive) {
             return false;
           }
         }
 
-        if (typeof filters.isReturning !== 'undefined') {
-          if (user.isReturning !== filters.isReturning) {
+        if (typeof filters.pending !== 'undefined') {
+          if (user.status !== filters.pending) {
             return false;
           }
         }
@@ -66,7 +74,7 @@ class UsersApi {
     });
   }
 
-  async delete(request) {
+  async deleteUser(request) {
     const { email } = request;
     await wait(500);
 
@@ -78,7 +86,61 @@ class UsersApi {
             return;
           }
 
-          resolve(data.message);
+          resolve(data);
+        });
+      } catch (err) {
+        reject(new Error('Internal server error'));
+      }
+    });
+  }
+
+  async deletAllUsers(request) {
+    const { userIds } = request;
+    await wait(500);
+
+    return new Promise((resolve, reject) => {
+      try {
+        deletAllUsers(userIds).then((data) => {
+          if (!data?.message) {
+            reject(new Error('Por favor, inténtalo más tarde.'));
+            return;
+          }
+
+          resolve(data);
+        });
+      } catch (err) {
+        reject(new Error('Internal server error'));
+      }
+    });
+  }
+
+  async changeStatusUser(request) {
+    const { email, status } = request;
+    await wait(500);
+    console.log(status);
+    return new Promise((resolve, reject) => {
+      try {
+        changeStatusUser(email, status).then((data) => {
+          if (!data?.message) {
+            reject(new Error('Por favor, inténtalo más tarde.'));
+            return;
+          }
+
+          resolve(data);
+        });
+      } catch (err) {
+        reject(new Error('Internal server error'));
+      }
+    });
+  }
+
+  async downloadUsers() {
+    await wait(500);
+    return new Promise((resolve, reject) => {
+      try {
+        downloadUsers().then((resp) => {
+          console.log('a', resp);
+          resolve(resp);
         });
       } catch (err) {
         reject(new Error('Internal server error'));
@@ -87,12 +149,12 @@ class UsersApi {
   }
 
   async updateUser(request) {
-    const { avatar, email, businessName, password } = request;
+    const { avatar, email, name, lastname, password } = request;
     await wait(1000);
 
     return new Promise((resolve, reject) => {
       try {
-        updateUser(avatar, email, businessName, password).then((data) => {
+        updateUser(avatar, email, name, lastname, password).then((data) => {
           if (data.status !== 'SUCCESS') {
             reject(new Error(data.message));
             return;

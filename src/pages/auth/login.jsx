@@ -44,6 +44,7 @@ const Page = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [searchValue, setSearchValue] = useState({ error: false, resp: '', email: '' });
   const [color, setColor] = useState('');
+  const [showAlert, setShowAlert] = useState(false);
 
   const isMounted = useMounted();
   const router = useRouter();
@@ -98,6 +99,16 @@ const Page = () => {
     window.history.replaceState(null, '', newUrl);
   }, []);
 
+  useEffect(() => {
+    if (searchValue.resp) {
+      setShowAlert(true);
+      const timeoutId = setTimeout(() => {
+        setShowAlert(false);
+      }, 5000);
+      return () => clearTimeout(timeoutId);
+    }
+  }, [searchValue.resp]);
+
   usePageView();
   return (
     <>
@@ -125,7 +136,7 @@ const Page = () => {
             title="Inicio de sesión"
           />
           <CardContent>
-            {searchValue.resp && (
+            {showAlert && (
               <Alert
                 icon={<CheckCircleOutline fontSize="inherit" />}
                 variant="filled"

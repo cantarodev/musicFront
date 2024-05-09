@@ -28,7 +28,6 @@ const tabs = [
 const Page = () => {
   const user = useMockedUser();
   const [currentTab, setCurrentTab] = useState('general');
-
   usePageView();
 
   const handleTabsChange = useCallback((event, value) => {
@@ -76,6 +75,7 @@ const Page = () => {
               avatar={user?.avatar || ''}
               email={user?.email || ''}
               name={user?.name || ''}
+              lastname={user?.lastname || ''}
             />
           )}
           {currentTab === 'facturacion' && (

@@ -47,7 +47,7 @@ const Page = () => {
             <Link
               color="text.primary"
               component={RouterLink}
-              href={success ? paths.auth.login : paths.auth.register}
+              href={success ? paths.index : paths.auth.register}
               sx={{
                 alignItems: 'center',
                 display: 'inline-flex',

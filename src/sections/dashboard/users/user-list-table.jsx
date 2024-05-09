@@ -17,12 +17,19 @@ import TableHead from '@mui/material/TableHead';
 import TablePagination from '@mui/material/TablePagination';
 import TableRow from '@mui/material/TableRow';
 import Typography from '@mui/material/Typography';
+import { toast } from 'react-hot-toast';
 
 import { RouterLink } from 'src/components/router-link';
 import { Scrollbar } from 'src/components/scrollbar';
 import { paths } from 'src/paths';
 import { getInitials } from 'src/utils/get-initials';
 import AWS from 'aws-sdk';
+import { SeverityPill } from 'src/components/severity-pill';
+import { UsersChangeStatus } from 'src/components/users-change-status';
+import { UsersMoreMenu } from 'src/components/users-more-menu';
+import { useCallback, useState } from 'react';
+
+import { usersApi } from 'src/api/users/index';
 
 export const UserListTable = (props) => {
   const {
@@ -37,11 +44,58 @@ export const UserListTable = (props) => {
     page = 0,
     rowsPerPage = 0,
     selected = [],
+    handleOpen,
+    handleUsersGet,
+    onClose,
   } = props;
+  const [currentUser, setCurrentUser] = useState(null);
 
   const selectedSome = selected.length > 0 && selected.length < items.length;
   const selectedAll = items.length > 0 && selected.length === items.length;
   const enableBulkActions = selected.length > 0;
+
+  const handleUserSelected = useCallback((bot) => {
+    setCurrentUser((prevBot) => {
+      return bot;
+    });
+  }, []);
+
+  const deleteAllUsers = async (toastId) => {
+    try {
+      const response = await usersApi.deletAllUsers({ userIds: selected });
+      toast.dismiss(toastId);
+      handleUsersGet();
+      toast.success(response.message, { duration: 3000, position: 'top-center' });
+    } catch (err) {
+      console.error(err);
+      toast.error('Algo salió mal!', { duration: 3000, position: 'top-center' });
+    }
+  };
+
+  const confirmDeleteAll = () => {
+    toast(
+      (t) => (
+        <span>
+          ¿Eliminar todos los usuarios?
+          <Button
+            sx={{ ml: 1, mr: 1 }}
+            onClick={() => toast.dismiss(t.id)}
+          >
+            Cancelar
+          </Button>
+          <Button
+            onClick={() => deleteAllUsers(t.id)}
+            variant="contained"
+          >
+            Sí
+          </Button>
+        </span>
+      ),
+      {
+        duration: 5000,
+      }
+    );
+  };
 
   return (
     <Box sx={{ position: 'relative' }}>
@@ -77,14 +131,9 @@ export const UserListTable = (props) => {
           <Button
             color="inherit"
             size="small"
+            onClick={confirmDeleteAll}
           >
             Eliminar
-          </Button>
-          <Button
-            color="inherit"
-            size="small"
-          >
-            Editar
           </Button>
         </Stack>
       )}
@@ -106,17 +155,30 @@ export const UserListTable = (props) => {
                 />
               </TableCell>
               <TableCell>Nombre</TableCell>
-              <TableCell>Ubicación</TableCell>
-              <TableCell>Total Bots</TableCell>
-              <TableCell align="right">Actions</TableCell>
+              <TableCell>Doc. Idendtidad</TableCell>
+              <TableCell>Tel/Celular</TableCell>
+              <TableCell>Verificado</TableCell>
+              <TableCell>Estado</TableCell>
+              <TableCell align="right">Acciones</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {items.map((user) => {
-              const isSelected = selected.includes(user.id);
-              const location = `${user.city || 'Tingo María'}, ${user.region || 'Huánuco'}, ${
-                user.country || 'Perú'
-              }`;
+              const isSelected = selected.includes(user.user_id);
+              const verifiedColor = user.verified ? 'success' : 'error';
+              const statusColor =
+                user.status === 'active'
+                  ? 'success'
+                  : user.status == 'inactive'
+                  ? 'error'
+                  : 'warning';
+              const status =
+                user.status === 'active'
+                  ? 'Activo'
+                  : user.status == 'inactive'
+                  ? 'Inactivo'
+                  : 'Pendiente';
+              const verified = user.verified ? 'SI' : 'NO';
               let photoURL = '';
               const s3 = new AWS.S3({
                 region: 'us-east-2',
@@ -138,17 +200,18 @@ export const UserListTable = (props) => {
               return (
                 <TableRow
                   hover
-                  key={user.id}
+                  key={user.user_id}
                   selected={isSelected}
                 >
                   <TableCell padding="checkbox">
                     <Checkbox
                       checked={isSelected}
+                      disabled={user.status === 'inactive'}
                       onChange={(event) => {
                         if (event.target.checked) {
-                          onSelectOne?.(user.id);
+                          onSelectOne?.(user.user_id);
                         } else {
-                          onDeselectOne?.(user.id);
+                          onDeselectOne?.(user.user_id);
                         }
                       }}
                       value={isSelected}
@@ -167,7 +230,7 @@ export const UserListTable = (props) => {
                           width: 42,
                         }}
                       >
-                        {getInitials(user.businessName)}
+                        {getInitials(user.name + ' ' + user.lastname)}
                       </Avatar>
                       <div>
                         <Link
@@ -176,7 +239,7 @@ export const UserListTable = (props) => {
                           href={paths.dashboard.users.details}
                           variant="subtitle2"
                         >
-                          {user.businessName}
+                          {user.name + ' ' + user.lastname}
                         </Link>
                         <Typography
                           color="text.secondary"
@@ -187,25 +250,33 @@ export const UserListTable = (props) => {
                       </div>
                     </Stack>
                   </TableCell>
-                  <TableCell>{location}</TableCell>
-                  <TableCell>{user.totalBots || 2}</TableCell>
+                  <TableCell>
+                    <Typography variant="subtitle2">{user.dni}</Typography>
+                  </TableCell>
+                  <TableCell>
+                    <Typography variant="subtitle2">{user.phone}</Typography>
+                  </TableCell>
+                  <TableCell>
+                    <SeverityPill color={verifiedColor}>{verified}</SeverityPill>
+                  </TableCell>
+                  <TableCell>
+                    <UsersChangeStatus
+                      handleUserSelected={handleUserSelected}
+                      handleOpen={handleOpen}
+                      onClose={onClose}
+                      user={user}
+                      handleUsersGet={handleUsersGet}
+                      statusColor={statusColor}
+                      status={status}
+                    />
+                  </TableCell>
                   <TableCell align="right">
-                    <IconButton
-                      component={RouterLink}
-                      href={paths.dashboard.users.edit}
-                    >
-                      <SvgIcon>
-                        <Edit02Icon />
-                      </SvgIcon>
-                    </IconButton>
-                    <IconButton
-                      component={RouterLink}
-                      href={paths.dashboard.users.details}
-                    >
-                      <SvgIcon>
-                        <ArrowRightIcon />
-                      </SvgIcon>
-                    </IconButton>
+                    <UsersMoreMenu
+                      handleUserSelected={handleUserSelected}
+                      handleOpen={handleOpen}
+                      user={user}
+                      handleUsersGet={handleUsersGet}
+                    />
                   </TableCell>
                 </TableRow>
               );
@@ -240,4 +311,7 @@ UserListTable.propTypes = {
   page: PropTypes.number,
   rowsPerPage: PropTypes.number,
   selected: PropTypes.array,
+  handleOpen: PropTypes.func,
+  handleUsersGet: PropTypes.func,
+  onClose: PropTypes.func,
 };

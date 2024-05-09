@@ -1,50 +1,45 @@
 import axios from 'axios';
+import { handleApiError } from '../apiHelpers';
+
+const BASE_URL = 'http://localhost:5000/api/v1/bot';
 
 export const getBots = async () => {
   try {
-    const { data } = await axios.get(`http://localhost:5000/api/v1/bot`);
-    const bots = JSON.parse(data.bots);
-    return bots;
+    const { data } = await axios.get(BASE_URL);
+    return JSON.parse(data.bots);
   } catch (error) {
-    const { response } = error;
-    return response.data;
+    return handleApiError(error);
   }
 };
 
-export const createBot = async (tag, name, description) => {
+export const createBot = async (name, description, identifier_tag, required_clave_sol) => {
   try {
-    const { data } = await axios.post('http://localhost:5000/api/v1/bot/', {
-      tag,
+    const { data } = await axios.post(BASE_URL, {
       name,
       description,
+      identifier_tag,
+      required_clave_sol,
     });
     return data;
   } catch (error) {
-    const { response } = error;
-    return response.data;
+    return handleApiError(error);
   }
 };
 
 export const deleteBot = async (botId) => {
   try {
-    const response = await axios.delete(`http://localhost:5000/api/v1/bot/${botId}`);
-    const bot = response?.data;
-    return bot;
-  } catch (err) {
-    console.error('[Auth Api]: ', err);
+    const response = await axios.delete(`${BASE_URL}/${botId}`);
+    return response.data;
+  } catch (error) {
+    return handleApiError(error);
   }
 };
 
-export const updateBot = async (id, name, description) => {
+export const updateBot = async (bot_id, name, description, required_clave_sol) => {
   try {
-    const { data } = await axios.put('http://localhost:5000/api/v1/bot/', {
-      id,
-      name,
-      description,
-    });
+    const { data } = await axios.put(BASE_URL, { bot_id, name, description, required_clave_sol });
     return data;
   } catch (error) {
-    const { response } = error;
-    return response.data;
+    return handleApiError(error);
   }
 };

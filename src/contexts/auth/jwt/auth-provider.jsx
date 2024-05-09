@@ -117,8 +117,8 @@ export const AuthProvider = (props) => {
   );
 
   const signUp = useCallback(
-    async (email, name, password) => {
-      await authApi.signUp({ email, name, password });
+    async (dataUser) => {
+      await authApi.signUp({ ...dataUser });
 
       dispatch({
         type: ActionType.SIGN_UP,

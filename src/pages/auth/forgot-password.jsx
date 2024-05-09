@@ -46,7 +46,7 @@ const Page = () => {
         return;
       }
 
-      router.push(paths.auth.login + `?error=${false}&resp=${response.message}`);
+      router.push(paths.index + `?error=${false}&resp=${response.message}`);
     },
   });
 
@@ -58,7 +58,7 @@ const Page = () => {
           <Link
             color="text.primary"
             component={RouterLink}
-            href={paths.auth.login}
+            href={paths.index}
             sx={{
               alignItems: 'center',
               display: 'inline-flex',
@@ -92,7 +92,6 @@ const Page = () => {
                 helperText={formik.touched.email && formik.errors.email}
                 label="Correo electrónico"
                 name="email"
-                onBlur={formik.handleBlur}
                 onChange={formik.handleChange}
                 type="email"
                 value={formik.values.email}

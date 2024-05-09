@@ -64,7 +64,7 @@ export const Layout = (props) => {
                 sx={{
                   color: 'text.primary',
                   fontFamily: "'Plus Jakarta Sans', sans-serif",
-                  fontSize: 14,
+                  fontSize: 24,
                   fontWeight: 800,
                   letterSpacing: '0.3px',
                   lineHeight: 2.5,
@@ -73,7 +73,7 @@ export const Layout = (props) => {
                   },
                 }}
               >
-                Impuestos <span>SUNAT</span>
+                Izi<span>tax</span>
               </Box>
             </Stack>
           </Stack>

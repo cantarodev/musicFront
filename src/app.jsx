@@ -31,22 +31,23 @@ export const App = () => {
   useNprogress();
   const [user, setUser] = useState(null);
 
-  const filteredRoutes = user?.isAdmin
-    ? routes
-    : routes
-        .map((route) => {
-          if (route.children) {
-            return {
-              ...route,
-              children: route.children.filter(
-                (child) => child.path !== 'bots' && child.path !== 'users'
-              ),
-            };
-          } else {
-            return route;
-          }
-        })
-        .filter((route) => route.path !== 'bots' && route.path !== 'users');
+  const filteredRoutes =
+    user?.role_id === 1
+      ? routes
+      : routes
+          .map((route) => {
+            if (route.children) {
+              return {
+                ...route,
+                children: route.children.filter(
+                  (child) => child.path !== 'bots' && child.path !== 'users'
+                ),
+              };
+            } else {
+              return route;
+            }
+          })
+          .filter((route) => route.path !== 'bots' && route.path !== 'users');
 
   const element = useRoutes(filteredRoutes);
 

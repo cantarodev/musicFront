@@ -16,7 +16,7 @@ const style = {
 };
 
 export const SunKeyModal = (props) => {
-  const { action, onClose, open = false, handleSunKeyAccountsGet, sunKey } = props;
+  const { action, onClose, open = false, handleClaveSolAccountsGet, claveSol } = props;
   return (
     <Modal
       open={open}
@@ -32,8 +32,8 @@ export const SunKeyModal = (props) => {
         >
           <SunKeyCreateForm
             onClose={onClose}
-            handleSunKeyAccountsGet={handleSunKeyAccountsGet}
-            sunKey={sunKey}
+            handleClaveSolAccountsGet={handleClaveSolAccountsGet}
+            claveSol={claveSol}
             action={action}
           />
         </Box>
@@ -46,6 +46,6 @@ SunKeyModal.propTypes = {
   action: PropTypes.oneOf(['create', 'edit']),
   onClose: PropTypes.func,
   open: PropTypes.bool,
-  handleSunKeyAccountsGet: PropTypes.func,
-  sunKey: PropTypes.object,
+  handleClaveSolAccountsGet: PropTypes.func,
+  claveSol: PropTypes.object,
 };

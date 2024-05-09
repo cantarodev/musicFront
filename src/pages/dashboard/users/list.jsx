@@ -102,12 +102,13 @@ const useUsersStore = (searchState) => {
 
   return {
     ...state,
+    handleUsersGet,
   };
 };
 
 const useUsersIds = (users = []) => {
   return useMemo(() => {
-    return users.map((user) => user.id);
+    return users.filter((user) => !user.isAdmin).map((user) => user.id);
   }, [users]);
 };
 
@@ -116,6 +117,13 @@ const Page = () => {
   const usersStore = useUsersStore(usersSearch.state);
   const usersIds = useUsersIds(usersStore.users);
   const usersSelection = useSelection(usersIds);
+  const [open, setOpen] = useState(false);
+
+  const handleOpen = (option) => {
+    setOpen(true);
+  };
+
+  const handleClose = () => setOpen(false);
 
   usePageView();
 
@@ -182,7 +190,7 @@ const Page = () => {
               />
               <UserListTable
                 count={usersStore.usersCount}
-                items={usersStore.users}
+                items={usersStore.users.filter((user) => !user.isAdmin)}
                 onDeselectAll={usersSelection.handleDeselectAll}
                 onDeselectOne={usersSelection.handleDeselectOne}
                 onPageChange={usersSearch.handlePageChange}
@@ -192,6 +200,10 @@ const Page = () => {
                 page={usersSearch.state.page}
                 rowsPerPage={usersSearch.state.rowsPerPage}
                 selected={usersSelection.selected}
+                handleUsersGet={usersStore.handleUsersGet}
+                open={open}
+                handleOpen={handleOpen}
+                onClose={handleClose}
               />
             </Card>
           </Stack>

@@ -7,32 +7,33 @@ import Button from '@mui/material/Button';
 import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
-import { useRouter } from 'src/hooks/use-router';
 import { useMockedUser } from 'src/hooks/use-mocked-user';
 import { Box, Divider, IconButton, InputAdornment } from '@mui/material';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 
-import { sunKeyAccountsApi } from 'src/api/sun-key-accounts/index';
+import { claveSolAccountsApi } from 'src/api/sun-key-accounts/index';
 
 export const SunKeyCreateForm = (props) => {
-  const { action, onClose, handleSunKeyAccountsGet, sunKey } = props;
-  const [inputRucValue, setInputRucValue] = useState(sunKey?.ruc || '');
+  const { action, onClose, handleClaveSolAccountsGet, claveSol } = props;
+  const [inputRucValue, setInputRucValue] = useState(claveSol?.ruc || '');
   const [showPassword, setShowPassword] = useState(false);
   const [showPasswordConfirm, setShowPasswordConfirm] = useState(false);
   const user = useMockedUser();
 
   const initialValues = {
-    id: sunKey?.id || '',
-    userId: sunKey?.userId || user.id,
-    ruc: sunKey?.ruc || '',
-    username: sunKey?.username || '',
-    password: sunKey?.password || '',
-    passwordConfirm: sunKey?.password || '',
+    account_id: claveSol?.account_id || '',
+    userId: claveSol?.user_id || user.user_id,
+    name: claveSol?.name || '',
+    ruc: claveSol?.ruc || '',
+    username: claveSol?.username || '',
+    password: claveSol?.password || '',
+    passwordConfirm: claveSol?.password || '',
   };
 
   const validationSchema = Yup.object({
     userId: Yup.string().max(255),
+    name: Yup.string().max(50).required('Se requiere un nombre'),
     ruc: Yup.string()
       .matches(/^[0-9]+$/, 'Solo se permiten números')
       .min(11, 'Debe tener exactamente 11 dígitos')
@@ -54,8 +55,9 @@ export const SunKeyCreateForm = (props) => {
     validationSchema,
     onSubmit: async (values, helpers) => {
       try {
-        const response = await sunKeyAccountsApi.createSunKeyAccount(values);
-        handleSunKeyAccountsGet();
+        const isValidated = await claveSolAccountsApi.validateClaveSolAccount(values);
+        const response = await claveSolAccountsApi.createClaveSolAccount(values);
+        handleClaveSolAccountsGet();
         toast.success(response.message, { duration: 3000, position: 'top-center' });
         onClose();
       } catch (err) {
@@ -98,14 +100,13 @@ export const SunKeyCreateForm = (props) => {
         sx={{ p: 3 }}
       >
         <TextField
-          disabled
-          error={!!(formik.touched.userId && formik.errors.userId)}
+          error={!!(formik.touched.name && formik.errors.name)}
           fullWidth
-          helperText={formik.touched.userId && formik.errors.userId}
-          label="ID Usuario"
-          name="userId"
+          helperText={formik.touched.name && formik.errors.name}
+          label="Nombre"
+          name="name"
           onChange={formik.handleChange}
-          value={formik.values.userId}
+          value={formik.values.name}
         />
         <TextField
           error={!!(formik.touched.ruc && formik.errors.ruc)}
@@ -206,6 +207,6 @@ export const SunKeyCreateForm = (props) => {
 SunKeyCreateForm.propTypes = {
   action: PropTypes.string,
   onClose: PropTypes.func,
-  handleSunKeyAccountsGet: PropTypes.func,
-  sunKey: PropTypes.object,
+  handleClaveSolAccountsGet: PropTypes.func,
+  claveSol: PropTypes.object,
 };

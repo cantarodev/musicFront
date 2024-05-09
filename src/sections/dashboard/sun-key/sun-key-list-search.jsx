@@ -34,6 +34,7 @@ export const SunKeyListSearch = (props) => {
 
   const handleChipsUpdate = useCallback(() => {
     const filters = {
+      name: undefined,
       username: undefined,
       ruc: undefined,
       status: [],
@@ -41,16 +42,16 @@ export const SunKeyListSearch = (props) => {
 
     chips.forEach((chip) => {
       switch (chip.field) {
+        case 'name':
+          filters.name = chip.value;
+          break;
         case 'username':
-          // There will (or should) be only one chips with field "name"
-          // so we can set up it directly
           filters.username = chip.value;
           break;
         case 'status':
           filters.status.push(chip.value);
           break;
         case 'ruc':
-          // The value can be "available" or "outOfStock" and we transform it to a boolean
           filters.ruc = chip.value;
           break;
         default:
@@ -68,9 +69,6 @@ export const SunKeyListSearch = (props) => {
   const handleChipDelete = useCallback((deletedChip) => {
     setChips((prevChips) => {
       return prevChips.filter((chip) => {
-        // There can exist multiple chips for the same field.
-        // Filter them by value.
-
         return !(deletedChip.field === chip.field && deletedChip.value === chip.value);
       });
     });
@@ -82,29 +80,28 @@ export const SunKeyListSearch = (props) => {
     const value = queryRef.current?.value || '';
 
     setChips((prevChips) => {
-      const found = prevChips.find((chip) => chip.field === 'username');
+      const foundNameChip = prevChips.find((chip) => chip.field === 'name');
 
-      if (found && value) {
+      if (foundNameChip && value) {
         return prevChips.map((chip) => {
-          if (chip.field === 'username') {
+          if (chip.field === 'name') {
             return {
               ...chip,
               value: queryRef.current?.value || '',
             };
           }
-
           return chip;
         });
       }
 
-      if (found && !value) {
-        return prevChips.filter((chip) => chip.field !== 'username');
+      if (foundNameChip && !value) {
+        return prevChips.filter((chip) => chip.field !== 'name');
       }
 
-      if (!found && value) {
+      if (!foundNameChip && value) {
         const chip = {
-          label: 'Nombre de Usuario',
-          field: 'username',
+          label: 'Bucar por nombre...',
+          field: 'name',
           value,
         };
 

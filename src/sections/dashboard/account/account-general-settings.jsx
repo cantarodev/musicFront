@@ -25,11 +25,12 @@ import AWS from 'aws-sdk';
 import { getInitials } from 'src/utils/get-initials';
 
 export const AccountGeneralSettings = (props) => {
-  const { avatar, email, name } = props;
+  const { avatar, email, name, lastname } = props;
   const [newData, setNewData] = useState({
     avatar: avatar,
     email: email,
-    businessName: name,
+    name: name,
+    lastname: lastname,
     password: '',
   });
 
@@ -94,7 +95,7 @@ export const AccountGeneralSettings = (props) => {
     try {
       switch (auth.issuer) {
         case Issuer.JWT: {
-          const resp = await userApi.updateUser(newData);
+          const resp = await usersApi.updateUser(newData);
           if (resp?.status == 'SUCCESS') {
             await auth.initialize();
             setDisabled(false);
@@ -299,7 +300,7 @@ export const AccountGeneralSettings = (props) => {
                         {/* <SvgIcon>
                           <User01Icon />
                         </SvgIcon> */}
-                        {getInitials(name)}
+                        {getInitials(name + ' ' + lastname)}
                       </Avatar>
                     </Box>
                   </Box>
@@ -319,10 +320,18 @@ export const AccountGeneralSettings = (props) => {
                 >
                   <TextField
                     fullWidth
-                    value={newData?.businessName}
-                    name="businessName"
+                    value={newData?.name}
+                    name="name"
                     onChange={handleChange}
-                    label="Nombre Completo"
+                    label="Nombre"
+                    sx={{ flexGrow: 1 }}
+                  />
+                  <TextField
+                    fullWidth
+                    value={newData?.lastname}
+                    name="lastname"
+                    onChange={handleChange}
+                    label="Apellidos"
                     sx={{ flexGrow: 1 }}
                   />
                   <Button
@@ -409,4 +418,5 @@ AccountGeneralSettings.propTypes = {
   avatar: PropTypes.string.isRequired,
   email: PropTypes.string.isRequired,
   name: PropTypes.string.isRequired,
+  lastname: PropTypes.string.isRequired,
 };

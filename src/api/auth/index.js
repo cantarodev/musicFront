@@ -18,7 +18,7 @@ class AuthApi {
             return;
           }
 
-          const accessToken = sign({ userId: data.user.id }, JWT_SECRET, {
+          const accessToken = sign({ userId: data.user.user_id }, JWT_SECRET, {
             expiresIn: JWT_EXPIRES_IN,
           });
           resolve({ accessToken });
@@ -30,14 +30,13 @@ class AuthApi {
   }
 
   async signUp(request) {
-    const { email, name, password } = request;
+    const { name, lastname, dni, phone, business_name, ruc, email, password } = request;
 
     await wait(1000);
-
     return new Promise((resolve, reject) => {
       try {
         // Check if a user already exists
-        createUser(email, name, password).then((data) => {
+        createUser(name, lastname, dni, phone, business_name, ruc, email, password).then((data) => {
           if (!data?.user) {
             reject(new Error(data.message));
             return;
@@ -69,11 +68,12 @@ class AuthApi {
           }
           const user = JSON.parse(data.user);
           resolve({
-            id: user.id,
+            user_id: user.user_id,
             avatar: user.avatar,
             email: user.email,
-            name: user.businessName,
-            isAdmin: user.isAdmin,
+            name: user.name,
+            lastname: user.lastname,
+            role_id: user.role_id,
           });
         });
       } catch (err) {

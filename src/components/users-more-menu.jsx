@@ -1,6 +1,6 @@
 import DotsHorizontalIcon from '@untitled-ui/icons-react/build/esm/DotsHorizontal';
 import Download01Icon from '@untitled-ui/icons-react/build/esm/Download01';
-import Save02Icon from '@untitled-ui/icons-react/build/esm/Save02';
+import FileSearch02 from '@untitled-ui/icons-react/build/esm/FileSearch02';
 import Trash03Icon from '@untitled-ui/icons-react/build/esm/Trash03';
 import IconButton from '@mui/material/IconButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
@@ -13,24 +13,22 @@ import PropTypes from 'prop-types';
 import { toast } from 'react-hot-toast';
 
 import { usePopover } from 'src/hooks/use-popover';
-import { claveSolAccountsApi } from 'src/api/sun-key-accounts/index';
+import { usersApi } from 'src/api/users/index';
 import { Button } from '@mui/material';
 
-export const SunKeyMoreMenu = (props) => {
-  const { handleClaveSolSelected, claveSol, handleOpen, handleClaveSolAccountsGet } = props;
+export const UsersMoreMenu = (props) => {
+  const { handleUserSelected, user, handleOpen, handleUsersGet } = props;
   const popover = usePopover();
 
   const handleDelete = async (toastId) => {
     try {
-      const response = await claveSolAccountsApi.deleteClaveSolAccount({
-        account_id: claveSol.account_id,
-      });
+      const response = await usersApi.deleteUser({ email: user.email });
       toast.dismiss(toastId);
-      handleClaveSolAccountsGet();
+      handleUsersGet();
       toast.success(response.message, { duration: 3000, position: 'top-center' });
     } catch (err) {
       console.error(err);
-      toast.error('Algo salió mal!', { duration: 3000, position: 'top-center' });
+      toast.error(err, { duration: 3000, position: 'top-center' });
     }
   };
 
@@ -60,8 +58,8 @@ export const SunKeyMoreMenu = (props) => {
     );
   };
 
-  const handleEdit = (claveSol) => {
-    handleClaveSolSelected(claveSol);
+  const handleEdit = (sunKey) => {
+    handleUserSelected(sunKey);
     handleOpen('edit');
     popover.handleClose();
   };
@@ -101,15 +99,10 @@ export const SunKeyMoreMenu = (props) => {
           vertical: 'top',
         }}
       >
-        <MenuItem onClick={() => handleEdit(claveSol)}>
-          <ListItemIcon>
-            <SvgIcon>
-              <Save02Icon />
-            </SvgIcon>
-          </ListItemIcon>
-          <ListItemText primary="Editar" />
-        </MenuItem>
-        <MenuItem onClick={() => handleConfirm()}>
+        <MenuItem
+          disabled={user.status === 'inactive'}
+          onClick={() => handleConfirm()}
+        >
           <ListItemIcon>
             <SvgIcon>
               <Trash03Icon />
@@ -122,9 +115,9 @@ export const SunKeyMoreMenu = (props) => {
   );
 };
 
-SunKeyMoreMenu.propTypes = {
+UsersMoreMenu.propTypes = {
   handleOpen: PropTypes.func,
-  handleClaveSolSelected: PropTypes.func,
-  claveSol: PropTypes.object,
-  handleClaveSolAccountsGet: PropTypes.func,
+  handleUserSelected: PropTypes.func,
+  user: PropTypes.object,
+  handleUsersGet: PropTypes.func,
 };

@@ -22,13 +22,13 @@ export const BotsMoreMenu = (props) => {
 
   const handleDelete = async (toastId) => {
     try {
-      const response = await botsApi.deleteBot({ botId: bot.id });
+      const response = await botsApi.deleteBot({ botId: bot.bot_id });
       toast.dismiss(toastId);
       handleBotsGet();
       toast.success(response.message, { duration: 3000, position: 'top-center' });
     } catch (err) {
       console.error(err);
-      toast.error('Algo salió mal!', { duration: 3000, position: 'top-center' });
+      toast.error(err, { duration: 3000, position: 'top-center' });
     }
   };
 

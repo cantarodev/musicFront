@@ -28,14 +28,14 @@ export const SunKeyListTable = (props) => {
     open,
     handleOpen,
     onClose,
-    handleSunKeyAccountsGet,
+    handleClaveSolAccountsGet,
   } = props;
 
-  const [currentSunKey, setCurrentSunKey] = useState(null);
+  const [currentClaveSol, setCurrentClaveSol] = useState(null);
 
-  const handleSunKeySelected = useCallback((sunKey) => {
-    setCurrentSunKey((prevSunKey) => {
-      return sunKey;
+  const handleClaveSolSelected = useCallback((claveSol) => {
+    setCurrentClaveSol((prevClaveSol) => {
+      return claveSol;
     });
   }, []);
 
@@ -46,8 +46,7 @@ export const SunKeyListTable = (props) => {
           <TableHead>
             <TableRow>
               <TableCell width="5%" />
-              <TableCell width="30%">ID Clave SOL</TableCell>
-              <TableCell width="30%">ID Usuario</TableCell>
+              <TableCell width="30%">Nombre</TableCell>
               <TableCell width="15%">Ruc</TableCell>
               <TableCell width="15%">Usuario</TableCell>
               <TableCell width="15%">Estado</TableCell>
@@ -55,26 +54,26 @@ export const SunKeyListTable = (props) => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {items.map((sunKey, index) => {
-              const isCurrent = sunKey.id === currentSunKey;
+            {items.map((claveSol, index) => {
+              const isCurrent = claveSol.id === currentClaveSol;
               const statusColor =
-                sunKey.status === 'active'
+                claveSol.status === 'active'
                   ? 'success'
-                  : sunKey.status === 'inactive'
+                  : claveSol.status === 'inactive'
                   ? 'error'
                   : 'warning';
               const status =
-                sunKey.status === 'active'
+                claveSol.status === 'active'
                   ? 'activo'
-                  : sunKey.status === 'inactive'
+                  : claveSol.status === 'inactive'
                   ? 'inactivo'
                   : 'pendiente';
 
               return (
-                <Fragment key={sunKey.id}>
+                <Fragment key={claveSol.account_id}>
                   <TableRow
                     hover
-                    key={sunKey.id}
+                    key={claveSol.account_id}
                   >
                     <TableCell
                       padding="checkbox"
@@ -102,31 +101,22 @@ export const SunKeyListTable = (props) => {
                           cursor: 'pointer',
                         }}
                       >
-                        <Typography variant="subtitle2">{sunKey.id}</Typography>
-                      </Box>
-                    </TableCell>
-                    <TableCell width="30%">
-                      <Box
-                        sx={{
-                          cursor: 'pointer',
-                        }}
-                      >
-                        <Typography variant="subtitle2">{sunKey.userId}</Typography>
+                        <Typography variant="subtitle2">{claveSol.name}</Typography>
                       </Box>
                     </TableCell>
                     <TableCell width="15%">
-                      <Typography variant="subtitle2">{sunKey.ruc}</Typography>
+                      <Typography variant="subtitle2">{claveSol.ruc}</Typography>
                     </TableCell>
-                    <TableCell width="15%">{sunKey.username}</TableCell>
+                    <TableCell width="15%">{claveSol.username}</TableCell>
                     <TableCell width="15%">
                       <SeverityPill color={statusColor}>{status}</SeverityPill>
                     </TableCell>
                     <TableCell align="right">
                       <SunKeyMoreMenu
-                        handleSunKeySelected={handleSunKeySelected}
+                        handleClaveSolSelected={handleClaveSolSelected}
                         handleOpen={handleOpen}
-                        sunKey={sunKey}
-                        handleSunKeyAccountsGet={handleSunKeyAccountsGet}
+                        claveSol={claveSol}
+                        handleClaveSolAccountsGet={handleClaveSolAccountsGet}
                       />
                     </TableCell>
                   </TableRow>
@@ -150,9 +140,9 @@ export const SunKeyListTable = (props) => {
       <SunKeyModal
         onClose={onClose}
         open={open}
-        sunKey={currentSunKey}
+        claveSol={currentClaveSol}
         action={action}
-        handleSunKeyAccountsGet={handleSunKeyAccountsGet}
+        handleClaveSolAccountsGet={handleClaveSolAccountsGet}
       />
     </div>
   );
@@ -169,5 +159,5 @@ SunKeyListTable.propTypes = {
   open: PropTypes.bool,
   handleOpen: PropTypes.func,
   onClose: PropTypes.func,
-  handleSunKeyAccountsGet: PropTypes.func,
+  handleClaveSolAccountsGet: PropTypes.func,
 };

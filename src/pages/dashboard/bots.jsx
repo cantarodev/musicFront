@@ -14,9 +14,9 @@ import { BotsModal } from 'src/sections/dashboard/bots/bots-modal';
 import { botsApi } from 'src/api/bots';
 import { BreadcrumbsSeparator } from 'src/components/breadcrumbs-separator';
 import { RouterLink } from 'src/components/router-link';
-import { Seo } from 'src/components/seo';
 import { useMounted } from 'src/hooks/use-mounted';
 import { usePageView } from 'src/hooks/use-page-view';
+import { Seo } from 'src/components/seo';
 import { paths } from 'src/paths';
 import { BotsListSearch } from 'src/sections/dashboard/bots/bots-list-search';
 import { BotsListTable } from 'src/sections/dashboard/bots/bots-list-table';
@@ -103,7 +103,6 @@ const Page = () => {
   const botsStore = useBotsStore(botsSearch.state);
   const [open, setOpen] = useState(false);
   const [action, setAction] = useState('create');
-  const user = useMockedUser();
 
   const handleOpen = (option) => {
     setAction(option);
@@ -149,25 +148,24 @@ const Page = () => {
                   </Typography>
                 </Breadcrumbs>
               </Stack>
-              {user?.isAdmin && (
-                <Stack
-                  alignItems="center"
-                  direction="row"
-                  spacing={3}
+
+              <Stack
+                alignItems="center"
+                direction="row"
+                spacing={3}
+              >
+                <Button
+                  onClick={() => handleOpen('create')}
+                  startIcon={
+                    <SvgIcon>
+                      <PlusIcon />
+                    </SvgIcon>
+                  }
+                  variant="contained"
                 >
-                  <Button
-                    onClick={() => handleOpen('create')}
-                    startIcon={
-                      <SvgIcon>
-                        <PlusIcon />
-                      </SvgIcon>
-                    }
-                    variant="contained"
-                  >
-                    Agregar
-                  </Button>
-                </Stack>
-              )}
+                  Agregar
+                </Button>
+              </Stack>
             </Stack>
             <Card>
               <BotsListSearch onFiltersChange={botsSearch.handleFiltersChange} />

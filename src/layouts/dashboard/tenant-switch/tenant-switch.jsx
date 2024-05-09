@@ -25,10 +25,19 @@ export const TenantSwitch = (props) => {
       >
         <Box sx={{ flexGrow: 1 }}>
           <Typography
-            color="inherit"
-            variant="h6"
+            sx={{
+              color: 'text.primary',
+              fontFamily: "'Plus Jakarta Sans', sans-serif",
+              fontSize: 24,
+              fontWeight: 800,
+              letterSpacing: '0.3px',
+              lineHeight: 1,
+              '& span': {
+                color: 'primary.main',
+              },
+            }}
           >
-            Impuestos
+            Izi<span>tax</span>
           </Typography>
           <Typography
             color="neutral.400"
@@ -37,22 +46,7 @@ export const TenantSwitch = (props) => {
             Prueba
           </Typography>
         </Box>
-        <IconButton
-          onClick={popover.handleOpen}
-          ref={popover.anchorRef}
-        >
-          <SvgIcon sx={{ fontSize: 16 }}>
-            <ChevronDownIcon />
-          </SvgIcon>
-        </IconButton>
       </Stack>
-      <TenantPopover
-        anchorEl={popover.anchorRef.current}
-        onChange={popover.handleClose}
-        onClose={popover.handleClose}
-        open={popover.open}
-        tenants={tenants}
-      />
     </>
   );
 };

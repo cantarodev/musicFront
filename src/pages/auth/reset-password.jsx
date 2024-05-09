@@ -68,7 +68,7 @@ const Page = () => {
       }
 
       router.push(
-        paths.auth.login + `?error=${false}&resp=${response.message}&email=${response.user.email}`
+        paths.index + `?error=${false}&resp=${response.message}&email=${response.user.email}`
       );
     },
   });
@@ -83,7 +83,7 @@ const Page = () => {
       const response = await verifyLink(user_id, token);
       if (response) {
         response.status != 'ACTIVE' &&
-          router.push(paths.auth.login + `?error=${true}&resp=${response.message}`);
+          router.push(paths.index + `?error=${true}&resp=${response.message}`);
       }
       setRespVerifyLink(response);
     };
@@ -99,7 +99,7 @@ const Page = () => {
             <Link
               color="text.primary"
               component={RouterLink}
-              href={paths.auth.login}
+              href={paths.index}
               sx={{
                 alignItems: 'center',
                 display: 'inline-flex',

@@ -24,11 +24,25 @@ export const getUser = async (email, password) => {
   }
 };
 
-export const createUser = async (email, businessName, password) => {
+export const createUser = async (
+  name,
+  lastname,
+  dni,
+  phone,
+  business_name,
+  ruc,
+  email,
+  password
+) => {
   try {
     const { data } = await axios.post('http://localhost:5000/api/v1/user/', {
+      name,
+      lastname,
+      dni,
+      phone,
+      business_name,
+      ruc,
       email,
-      businessName,
       password,
     });
     return data;

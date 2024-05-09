@@ -20,9 +20,7 @@ const CustomerDetailPage = lazy(() => import('src/pages/dashboard/customers/deta
 const CustomerEditPage = lazy(() => import('src/pages/dashboard/customers/edit'));
 
 // User
-const UserListPage = lazy(() => import('src/pages/dashboard/users/list'));
-const UserDetailPage = lazy(() => import('src/pages/dashboard/users/detail'));
-const UserEditPage = lazy(() => import('src/pages/dashboard/users/edit'));
+const UserPage = lazy(() => import('src/pages/dashboard/users'));
 
 // Invoice
 const InvoiceListPage = lazy(() => import('src/pages/dashboard/invoices/list'));
@@ -132,20 +130,7 @@ export const dashboardRoutes = [
       },
       {
         path: 'users',
-        children: [
-          {
-            index: true,
-            element: <UserListPage />,
-          },
-          {
-            path: ':userId',
-            element: <UserDetailPage />,
-          },
-          {
-            path: ':userId/edit',
-            element: <UserEditPage />,
-          },
-        ],
+        element: <UserPage />,
       },
       {
         path: 'invoices',

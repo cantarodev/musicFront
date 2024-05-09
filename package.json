@@ -67,6 +67,7 @@
     "nprogress": "0.2.0",
     "numeral": "2.0.6",
     "prop-types": "15.8.1",
+    "querystring": "^0.2.1",
     "react": "18.2.0",
     "react-apexcharts": "1.4.0",
     "react-beautiful-dnd": "13.1.1",
@@ -92,6 +93,7 @@
     "slick-carousel": "1.8.1",
     "stylis": "4.3.0",
     "stylis-plugin-rtl": "2.1.1",
+    "url": "^0.11.3",
     "yup": "1.2.0"
   },
   "devDependencies": {

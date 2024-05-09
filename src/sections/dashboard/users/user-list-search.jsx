@@ -34,20 +34,20 @@ const tabs = [
 
 const sortOptions = [
   {
-    label: 'Last update (newest)',
+    label: 'Última actualización (más reciente)',
     value: 'updatedAt|desc',
   },
   {
-    label: 'Last update (oldest)',
+    label: 'Última actualización (más antigua)',
     value: 'updatedAt|asc',
   },
   {
-    label: 'Total orders (highest)',
-    value: 'totalOrders|desc',
+    label: 'Total bots (Mas alto)',
+    value: 'totalBots|desc',
   },
   {
-    label: 'Total orders (lowest)',
-    value: 'totalOrders|asc',
+    label: 'Total bots (Mas bajo)',
+    value: 'totalBots|asc',
   },
 ];
 
@@ -76,7 +76,7 @@ export const UserListSearch = (props) => {
       };
 
       if (value !== 'all') {
-        updatedFilters[value] = true;
+        updatedFilters[value] = value;
       }
 
       return updatedFilters;
@@ -150,7 +150,7 @@ export const UserListSearch = (props) => {
           />
         </Box>
         <TextField
-          label="Sort By"
+          label="Ordenar por"
           name="sort"
           onChange={handleSortChange}
           select

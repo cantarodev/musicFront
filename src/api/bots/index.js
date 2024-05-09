@@ -6,111 +6,68 @@ import { getBots, createBot, deleteBot, updateBot } from './data';
 
 class BotsApi {
   async getBots(request = {}) {
-    const { filters, page, rowsPerPage, userId } = request;
-    let bots = deepCopy(await getBots(userId));
+    const { filters, page, rowsPerPage } = request;
+    let bots = deepCopy(await getBots());
     let data = bots;
-    let count = data.length;
 
-    if (typeof filters !== 'undefined') {
-      data = data.filter((product) => {
-        if (typeof filters.name !== 'undefined' && filters.name !== '') {
-          const nameMatched = product.name.toLowerCase().includes(filters.name.toLowerCase());
-
-          if (!nameMatched) {
-            return false;
-          }
-        }
-
-        return true;
-      });
-      count = data.length;
+    if (filters && filters.name) {
+      data = data.filter((bot) => bot.name.toLowerCase().includes(filters.name.toLowerCase()));
     }
 
-    if (typeof page !== 'undefined' && typeof rowsPerPage !== 'undefined') {
+    if (page !== undefined && rowsPerPage !== undefined) {
       data = applyPagination(data, page, rowsPerPage);
     }
 
-    return Promise.resolve({
+    return {
       data,
-      count,
-    });
+      count: data.length,
+    };
   }
 
-  async createBot(request) {
-    const { id, tag, name, description } = request;
-
+  async createBot(request = {}) {
+    const { bot_id, identifier_tag, name, description, required_clave_sol } = request;
     await wait(1000);
-
-    return new Promise((resolve, reject) => {
-      try {
-        // Check if a user already exists
-        if (id) {
-          updateBot(id, name, description).then((data) => {
-            if (data.status !== 'SUCCESS') {
-              reject(new Error(data.message));
-              return;
-            }
-
-            resolve(data);
-          });
-        } else {
-          createBot(tag, name, description).then((data) => {
-            if (data.status !== 'SUCCESS') {
-              reject(new Error(data.message));
-              return;
-            }
-
-            resolve(data);
-          });
-        }
-      } catch (err) {
-        console.error('[Auth Api]: ', err);
-        reject(new Error('Internal server error'));
-      }
-    });
+    try {
+      const response = bot_id
+        ? await updateBot(bot_id, name, description, required_clave_sol)
+        : await createBot(name, description, identifier_tag, required_clave_sol);
+      return response;
+    } catch (error) {
+      console.error('[Bots Api - createBot]: ', error);
+      throw new Error('Internal server error');
+    }
   }
 
   async deleteBot(request) {
     const { botId } = request;
     await wait(500);
 
-    return new Promise((resolve, reject) => {
-      try {
-        deleteBot(botId).then((data) => {
-          if (!data?.status) {
-            reject(new Error('Por favor, inténtalo más tarde.'));
-            return;
-          }
-
-          resolve(data);
-        });
-      } catch (err) {
-        reject(new Error('Internal server error'));
+    try {
+      const response = await deleteBot(botId);
+      if (!response?.status) {
+        throw new Error('Por favor, inténtalo más tarde.');
       }
-    });
+      return response;
+    } catch (error) {
+      console.error('[Bots Api - deleteBot]: ', error);
+      throw new Error('Internal server error');
+    }
   }
 
   async updateBot(request) {
     const { id, name, description } = request;
-
     await wait(1000);
 
-    return new Promise((resolve, reject) => {
-      try {
-        // Check if a user already exists
-        updateBot(id, name, description).then((data) => {
-          if (data.status !== 'SUCCESS') {
-            reject(new Error(data.message));
-            return;
-          }
-
-          resolve(data);
-        });
-      } catch (err) {
-        console.error('[Auth Api]: ', err);
-        reject(new Error('Internal server error'));
+    try {
+      const response = await updateBot(id, name, description);
+      if (response.status !== 'SUCCESS') {
+        throw new Error(response.message);
       }
-    });
+      return response;
+    } catch (error) {
+      console.error('[Bots Api - updateBot]: ', error);
+      throw new Error('Internal server error');
+    }
   }
 }
 

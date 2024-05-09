@@ -9,23 +9,31 @@ import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import { useRouter } from 'src/hooks/use-router';
 import { useMockedUser } from 'src/hooks/use-mocked-user';
-import { Box, Divider, IconButton, InputAdornment, TextareaAutosize } from '@mui/material';
+import {
+  Box,
+  Checkbox,
+  Divider,
+  FormHelperText,
+  IconButton,
+  InputAdornment,
+  TextareaAutosize,
+} from '@mui/material';
 
 import { botsApi } from 'src/api/bots/index';
 
 export const BotsCreateForm = (props) => {
   const { action, onClose, handleBotsGet, bot } = props;
-  const user = useMockedUser();
 
   const initialValues = {
-    id: bot?.id || '',
-    tag: bot?.tag || '',
+    bot_id: bot?.bot_id || '',
+    identifier_tag: bot?.identifier_tag || '',
     name: bot?.name || '',
     description: bot?.description || '',
+    required_clave_sol: bot?.required_clave_sol || false,
   };
 
   const validationSchema = Yup.object({
-    tag: Yup.string().max(50).required('Se requiere una etiqueta para el bot'),
+    identifier_tag: Yup.string().max(50).required('Se requiere una etiqueta para el bot'),
     name: Yup.string().max(50).required('Se requiere un nombre para el bot'),
     description: Yup.string().max(255),
   });
@@ -35,15 +43,27 @@ export const BotsCreateForm = (props) => {
     validationSchema,
     onSubmit: async (values, helpers) => {
       try {
+        console.log('hola', values);
         const response = await botsApi.createBot(values);
-        handleBotsGet();
-        toast.success(response.message, { duration: 3000, position: 'top-center' });
+        if (response.status !== 'FAILED') {
+          handleBotsGet();
+          toast.success(response.message, { duration: 3000, position: 'top-center' });
+        } else {
+          toast.error(response.message, {
+            duration: 3000,
+            position: 'top-center',
+          });
+        }
         onClose();
       } catch (err) {
         console.error(err);
-        toast.error('Algo salió mal!', { duration: 3000, position: 'top-center' });
+        toast.error('Hubo un problema al procesar la solicitud.', {
+          duration: 3000,
+          position: 'top-center',
+        });
+
         helpers.setStatus({ success: false });
-        helpers.setErrors({ submit: err.message });
+        helpers.setErrors({ submit: 'Hubo un problema al procesar la solicitud.' });
         helpers.setSubmitting(false);
       }
     },
@@ -67,13 +87,13 @@ export const BotsCreateForm = (props) => {
       >
         <TextField
           disabled={action === 'edit' ? true : false}
-          error={!!(formik.touched.tag && formik.errors.tag)}
+          error={!!(formik.touched.identifier_tag && formik.errors.identifier_tag)}
           fullWidth
-          helperText={formik.touched.tag && formik.errors.tag}
+          helperText={formik.touched.identifier_tag && formik.errors.identifier_tag}
           label="Etiqueta"
-          name="tag"
+          name="identifier_tag"
           onChange={formik.handleChange}
-          value={formik.values.tag}
+          value={formik.values.identifier_tag}
         />
         <TextField
           error={!!(formik.touched.name && formik.errors.name)}
@@ -96,6 +116,28 @@ export const BotsCreateForm = (props) => {
           onChange={formik.handleChange}
           value={formik.values.description}
         />
+        <Box
+          sx={{
+            alignItems: 'center',
+            display: 'flex',
+            ml: -1,
+            mt: 1,
+          }}
+        >
+          <Checkbox
+            checked={formik.values.required_clave_sol}
+            name="required_clave_sol"
+            onChange={formik.handleChange}
+          />
+          <Typography
+            color="text.secondary"
+            variant="body2"
+          >
+            {formik.values.required_clave_sol
+              ? 'Requiere Cuenta Clave Sol'
+              : 'No requiere Cuenta Clave Sol'}
+          </Typography>
+        </Box>
       </Stack>
       <Divider />
       <Stack

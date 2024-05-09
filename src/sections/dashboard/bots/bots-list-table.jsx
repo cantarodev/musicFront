@@ -54,16 +54,16 @@ export const BotsListTable = (props) => {
           </TableHead>
           <TableBody>
             {items.map((bot, index) => {
-              const isCurrent = bot.id === currentBot;
+              const isCurrent = bot.bot_id === currentBot;
               const statusColor = bot.status === 'active' ? 'success' : 'error';
 
               const status = bot.status === 'active' ? 'activo' : 'inactivo';
 
               return (
-                <Fragment key={bot.id}>
+                <Fragment key={bot.bot_id}>
                   <TableRow
                     hover
-                    key={bot.id}
+                    key={bot.bot_id}
                   >
                     <TableCell
                       padding="checkbox"
@@ -91,11 +91,11 @@ export const BotsListTable = (props) => {
                           cursor: 'pointer',
                         }}
                       >
-                        <Typography variant="subtitle2">{bot.id}</Typography>
+                        <Typography variant="subtitle2">{bot.bot_id}</Typography>
                       </Box>
                     </TableCell>
                     <TableCell width="15%">
-                      <Typography variant="subtitle2">{bot.tag}</Typography>
+                      <Typography variant="subtitle2">{bot.identifier_tag}</Typography>
                     </TableCell>
                     <TableCell width="15%">
                       <Typography variant="subtitle2">{bot.name}</Typography>

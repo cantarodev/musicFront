@@ -11,7 +11,7 @@ import SvgIcon from '@mui/material/SvgIcon';
 import Typography from '@mui/material/Typography';
 import { SunKeyModal } from 'src/sections/dashboard/sun-key/sun-key-modal';
 
-import { sunKeyAccountsApi } from 'src/api/sun-key-accounts';
+import { claveSolAccountsApi } from 'src/api/sun-key-accounts';
 import { BreadcrumbsSeparator } from 'src/components/breadcrumbs-separator';
 import { RouterLink } from 'src/components/router-link';
 import { Seo } from 'src/components/seo';
@@ -22,17 +22,18 @@ import { SunKeyListSearch } from 'src/sections/dashboard/sun-key/sun-key-list-se
 import { SunKeyListTable } from 'src/sections/dashboard/sun-key/sun-key-list-table';
 import { useMockedUser } from 'src/hooks/use-mocked-user';
 
-const useSunKeyAccountsSearch = () => {
+const useClaveSolAccountsSearch = () => {
   const user = useMockedUser();
   const [state, setState] = useState({
     filters: {
+      name: undefined,
       ruc: undefined,
       username: undefined,
       status: [],
     },
     page: 0,
     rowsPerPage: 5,
-    userId: user?.id,
+    userId: user?.user_id,
   });
 
   const handleFiltersChange = useCallback((filters) => {
@@ -64,20 +65,20 @@ const useSunKeyAccountsSearch = () => {
   };
 };
 
-const useSunKeyAccountsStore = (searchState) => {
+const useClaveSolAccountsStore = (searchState) => {
   const isMounted = useMounted();
   const [state, setState] = useState({
-    sunKeyAccounts: [],
-    sunKeyAccountsCount: 0,
+    claveSolAccounts: [],
+    claveSolAccountsCount: 0,
   });
 
-  const handleSunKeyAccountsGet = useCallback(async () => {
+  const handleClaveSolAccountsGet = useCallback(async () => {
     try {
-      const response = await sunKeyAccountsApi.getSunKeyAccounts(searchState);
+      const response = await claveSolAccountsApi.getClaveSolAccounts(searchState);
       if (isMounted()) {
         setState({
-          sunKeyAccounts: response.data,
-          sunKeyAccountsCount: response.count,
+          claveSolAccounts: response.data,
+          claveSolAccountsCount: response.count,
         });
       }
     } catch (err) {
@@ -87,7 +88,7 @@ const useSunKeyAccountsStore = (searchState) => {
 
   useEffect(
     () => {
-      handleSunKeyAccountsGet();
+      handleClaveSolAccountsGet();
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [searchState]
@@ -95,13 +96,14 @@ const useSunKeyAccountsStore = (searchState) => {
 
   return {
     ...state,
-    handleSunKeyAccountsGet,
+    handleClaveSolAccountsGet,
   };
 };
 
 const Page = () => {
-  const sunKeyAccountsSearch = useSunKeyAccountsSearch();
-  const sunKeyAccountsStore = useSunKeyAccountsStore(sunKeyAccountsSearch.state);
+  const claveSolAccountsSearch = useClaveSolAccountsSearch();
+  console.log(claveSolAccountsSearch);
+  const claveSolAccountsStore = useClaveSolAccountsStore(claveSolAccountsSearch.state);
   const [open, setOpen] = useState(false);
   const [action, setAction] = useState('create');
   const handleOpen = (option) => {
@@ -167,15 +169,15 @@ const Page = () => {
               </Stack>
             </Stack>
             <Card>
-              <SunKeyListSearch onFiltersChange={sunKeyAccountsSearch.handleFiltersChange} />
+              <SunKeyListSearch onFiltersChange={claveSolAccountsSearch.handleFiltersChange} />
               <SunKeyListTable
-                onPageChange={sunKeyAccountsSearch.handlePageChange}
-                onRowsPerPageChange={sunKeyAccountsSearch.handleRowsPerPageChange}
-                page={sunKeyAccountsSearch.state.page}
-                items={sunKeyAccountsStore.sunKeyAccounts}
-                count={sunKeyAccountsStore.sunKeyAccountsCount}
-                rowsPerPage={sunKeyAccountsSearch.state.rowsPerPage}
-                handleSunKeyAccountsGet={sunKeyAccountsStore.handleSunKeyAccountsGet}
+                onPageChange={claveSolAccountsSearch.handlePageChange}
+                onRowsPerPageChange={claveSolAccountsSearch.handleRowsPerPageChange}
+                page={claveSolAccountsSearch.state.page}
+                items={claveSolAccountsStore.claveSolAccounts}
+                count={claveSolAccountsStore.claveSolAccountsCount}
+                rowsPerPage={claveSolAccountsSearch.state.rowsPerPage}
+                handleClaveSolAccountsGet={claveSolAccountsStore.handleClaveSolAccountsGet}
                 open={open}
                 handleOpen={handleOpen}
                 onClose={handleClose}
@@ -189,8 +191,8 @@ const Page = () => {
         action={action}
         onClose={handleClose}
         open={action === 'create' && open}
-        handleSunKeyAccountsGet={sunKeyAccountsStore.handleSunKeyAccountsGet}
-        sunKey={{}}
+        handleClaveSolAccountsGet={claveSolAccountsStore.handleClaveSolAccountsGet}
+        claveSol={{}}
       />
     </>
   );
