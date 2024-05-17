@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import PlusIcon from '@untitled-ui/icons-react/build/esm/Plus';
 import Box from '@mui/material/Box';
 import Breadcrumbs from '@mui/material/Breadcrumbs';
@@ -16,6 +16,7 @@ import { BreadcrumbsSeparator } from 'src/components/breadcrumbs-separator';
 import { RouterLink } from 'src/components/router-link';
 import { Seo } from 'src/components/seo';
 import { useMounted } from 'src/hooks/use-mounted';
+import { useSelection } from 'src/hooks/use-selection';
 import { usePageView } from 'src/hooks/use-page-view';
 import { paths } from 'src/paths';
 import { SunKeyListSearch } from 'src/sections/dashboard/sun-key/sun-key-list-search';
@@ -75,6 +76,7 @@ const useClaveSolAccountsStore = (searchState) => {
   const handleClaveSolAccountsGet = useCallback(async () => {
     try {
       const response = await claveSolAccountsApi.getClaveSolAccounts(searchState);
+      console.log(response.data);
       if (isMounted()) {
         setState({
           claveSolAccounts: response.data,
@@ -100,10 +102,19 @@ const useClaveSolAccountsStore = (searchState) => {
   };
 };
 
+const useClaveSolAccountIds = (accounts = []) => {
+  return useMemo(() => {
+    return accounts.map((account) => account.account_id);
+  }, [accounts]);
+};
+
 const Page = () => {
   const claveSolAccountsSearch = useClaveSolAccountsSearch();
-  console.log(claveSolAccountsSearch);
   const claveSolAccountsStore = useClaveSolAccountsStore(claveSolAccountsSearch.state);
+  const claveSolAccountIds = useClaveSolAccountIds(claveSolAccountsStore.claveSolAccounts);
+  const claveSolAccountsSelection = useSelection(claveSolAccountIds);
+
+  console.log(claveSolAccountIds);
   const [open, setOpen] = useState(false);
   const [action, setAction] = useState('create');
   const handleOpen = (option) => {
@@ -174,9 +185,14 @@ const Page = () => {
                 onPageChange={claveSolAccountsSearch.handlePageChange}
                 onRowsPerPageChange={claveSolAccountsSearch.handleRowsPerPageChange}
                 page={claveSolAccountsSearch.state.page}
-                items={claveSolAccountsStore.claveSolAccounts}
                 count={claveSolAccountsStore.claveSolAccountsCount}
+                items={claveSolAccountsStore.claveSolAccounts}
+                onDeselectAll={claveSolAccountsSelection.handleDeselectAll}
+                onDeselectOne={claveSolAccountsSelection.handleDeselectOne}
+                onSelectAll={claveSolAccountsSelection.handleSelectAll}
+                onSelectOne={claveSolAccountsSelection.handleSelectOne}
                 rowsPerPage={claveSolAccountsSearch.state.rowsPerPage}
+                selected={claveSolAccountsSelection.selected}
                 handleClaveSolAccountsGet={claveSolAccountsStore.handleClaveSolAccountsGet}
                 open={open}
                 handleOpen={handleOpen}

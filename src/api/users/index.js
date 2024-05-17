@@ -20,7 +20,6 @@ class UsersApi {
     let count = data.length;
 
     if (typeof filters !== 'undefined') {
-      console.log('aqui');
       data = data.filter((user) => {
         if (typeof filters.query !== 'undefined' && filters.query !== '') {
           let queryMatched = false;
@@ -117,7 +116,7 @@ class UsersApi {
   async changeStatusUser(request) {
     const { email, status } = request;
     await wait(500);
-    console.log(status);
+
     return new Promise((resolve, reject) => {
       try {
         changeStatusUser(email, status).then((data) => {

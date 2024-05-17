@@ -6,6 +6,7 @@ import {
   getClaveSolAccounts,
   createClaveSolAccount,
   deleteClaveSolAccount,
+  deleteClaveSolAccounts,
   updateClaveSolAccount,
   validateClaveSolAccount,
 } from './data';
@@ -16,7 +17,7 @@ class ClaveSolAccountsApi {
     let claveSolAccounts = deepCopy(await getClaveSolAccounts(userId));
     let data = claveSolAccounts;
     let count = data.length;
-    console.log(filters);
+
     if (typeof filters !== 'undefined') {
       data = data.filter((claveSol) => {
         if (typeof filters.username !== 'undefined' && filters.username !== '') {
@@ -62,7 +63,7 @@ class ClaveSolAccountsApi {
   }
 
   async createClaveSolAccount(request) {
-    const { account_id, userId, name, ruc, username, password } = request;
+    const { account_id, userId, verified, name, ruc, username, password } = request;
 
     await wait(1000);
 
@@ -70,16 +71,18 @@ class ClaveSolAccountsApi {
       try {
         // Check if a user already exists
         if (account_id) {
-          updateClaveSolAccount(account_id, name, ruc, username, password).then((data) => {
-            if (data.status !== 'SUCCESS') {
-              reject(new Error(data.message));
-              return;
-            }
+          updateClaveSolAccount(account_id, verified, name, ruc, username, password).then(
+            (data) => {
+              if (data.status !== 'SUCCESS') {
+                reject(new Error(data.message));
+                return;
+              }
 
-            resolve(data);
-          });
+              resolve(data);
+            }
+          );
         } else {
-          createClaveSolAccount(userId, name, ruc, username, password).then((data) => {
+          createClaveSolAccount(userId, verified, name, ruc, username, password).then((data) => {
             if (data.status !== 'SUCCESS') {
               reject(new Error(data.message));
               return;
@@ -96,19 +99,15 @@ class ClaveSolAccountsApi {
   }
 
   async validateClaveSolAccount(request) {
-    const { ruc, username, password } = request;
+    console.log(request);
+    const { account_id, ruc, username, password } = request;
 
     await wait(1000);
 
     return new Promise((resolve, reject) => {
       try {
         // Check if a user already exists
-        validateClaveSolAccount(ruc, username, password).then((data) => {
-          if (data.status !== 'SUCCESS') {
-            reject(new Error(data.message));
-            return;
-          }
-
+        validateClaveSolAccount(account_id, ruc, username, password).then((data) => {
           resolve(data);
         });
       } catch (err) {
@@ -156,6 +155,26 @@ class ClaveSolAccountsApi {
         });
       } catch (err) {
         console.error('[Auth Api]: ', err);
+        reject(new Error('Internal server error'));
+      }
+    });
+  }
+
+  async deleteClaveSolAccounts(request) {
+    const { accountIds } = request;
+    await wait(500);
+
+    return new Promise((resolve, reject) => {
+      try {
+        deleteClaveSolAccounts(accountIds).then((data) => {
+          if (!data?.message) {
+            reject(new Error('Por favor, inténtalo más tarde.'));
+            return;
+          }
+
+          resolve(data);
+        });
+      } catch (err) {
         reject(new Error('Internal server error'));
       }
     });

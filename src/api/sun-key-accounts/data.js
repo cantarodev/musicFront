@@ -11,10 +11,11 @@ export const getClaveSolAccounts = async (user_id) => {
   }
 };
 
-export const createClaveSolAccount = async (user_id, name, ruc, username, password) => {
+export const createClaveSolAccount = async (user_id, verified, name, ruc, username, password) => {
   try {
     const { data } = await axios.post('http://localhost:5000/api/v1/claveSolAccount/', {
       user_id,
+      verified,
       name,
       ruc,
       username,
@@ -27,9 +28,10 @@ export const createClaveSolAccount = async (user_id, name, ruc, username, passwo
   }
 };
 
-export const validateClaveSolAccount = async (ruc, username, password) => {
+export const validateClaveSolAccount = async (account_id, ruc, username, password) => {
   try {
     const { data } = await axios.post('http://localhost:5000/api/v1/claveSolAccount/validate', {
+      account_id,
       ruc,
       username,
       password,
@@ -53,11 +55,18 @@ export const deleteClaveSolAccount = async (account_id) => {
   }
 };
 
-export const updateClaveSolAccount = async (account_id, name, ruc, username, password) => {
+export const updateClaveSolAccount = async (
+  account_id,
+  verified,
+  name,
+  ruc,
+  username,
+  password
+) => {
   try {
-    console.log('aquii');
     const { data } = await axios.put('http://localhost:5000/api/v1/claveSolAccount/', {
       account_id,
+      verified,
       name,
       ruc,
       username,
@@ -67,5 +76,17 @@ export const updateClaveSolAccount = async (account_id, name, ruc, username, pas
   } catch (error) {
     const { response } = error;
     return response.data;
+  }
+};
+
+export const deleteClaveSolAccounts = async (accountIds) => {
+  try {
+    const response = await axios.delete(
+      `http://localhost:5000/api/v1/claveSolAccount/deleteAll/${accountIds}`
+    );
+    const accounts = response?.data;
+    return accounts;
+  } catch (err) {
+    console.error('[Auth Api]: ', err);
   }
 };

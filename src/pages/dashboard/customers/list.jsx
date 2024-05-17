@@ -80,7 +80,7 @@ const useCustomersStore = (searchState) => {
   const handleCustomersGet = useCallback(async () => {
     try {
       const response = await customersApi.getCustomers(searchState);
-
+      console.log(response.data);
       if (isMounted()) {
         setState({
           customers: response.data,
@@ -116,6 +116,7 @@ const Page = () => {
   const customersStore = useCustomersStore(customersSearch.state);
   const customersIds = useCustomersIds(customersStore.customers);
   const customersSelection = useSelection(customersIds);
+  console.log(customersIds);
 
   usePageView();
 

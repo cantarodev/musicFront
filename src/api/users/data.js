@@ -4,10 +4,12 @@ export const getUsers = async () => {
   try {
     const { data } = await axios.get(`http://localhost:5000/api/v1/user`);
     const users = JSON.parse(data.users);
-    const newUsers = users.map((user) => {
-      return { ...user, totalBots: Math.floor(Math.random() * 8) };
-    });
-    console.log(newUsers);
+    const newUsers = users
+      .filter((user) => user.role_id != 1)
+      .map((user) => {
+        return user;
+      });
+
     return newUsers;
   } catch (error) {
     const { response } = error;

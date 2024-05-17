@@ -107,7 +107,7 @@ const useUsersStore = (searchState) => {
 
 const useUsersIds = (users = []) => {
   return useMemo(() => {
-    return users.filter((user) => !user.isAdmin).map((user) => user.id);
+    return users.map((user) => user.user_id);
   }, [users]);
 };
 
