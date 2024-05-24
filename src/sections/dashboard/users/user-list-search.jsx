@@ -34,20 +34,20 @@ const tabs = [
 
 const sortOptions = [
   {
-    label: 'Última actualización (más reciente)',
+    label: 'Actualización (más reciente)',
     value: 'updatedAt|desc',
   },
   {
-    label: 'Última actualización (más antigua)',
+    label: 'Actualización (más antigua)',
     value: 'updatedAt|asc',
   },
   {
-    label: 'Total bots (Mas alto)',
-    value: 'totalBots|desc',
+    label: 'Creación (más reciente)',
+    value: 'createdAt|desc',
   },
   {
-    label: 'Total bots (Mas bajo)',
-    value: 'totalBots|asc',
+    label: 'Creación (más antigua)',
+    value: 'createdAt|asc',
   },
 ];
 

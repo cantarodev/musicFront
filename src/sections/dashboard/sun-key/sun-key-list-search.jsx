@@ -11,6 +11,7 @@ import Typography from '@mui/material/Typography';
 
 import { MultiSelect } from 'src/components/multi-select';
 import { useUpdateEffect } from 'src/hooks/use-update-effect';
+import ComboBox from './sun-key-combobox-users';
 
 const statusOptions = [
   {
@@ -168,23 +169,33 @@ export const SunKeyListSearch = (props) => {
     <div {...other}>
       <Stack
         alignItems="center"
-        component="form"
         direction="row"
-        onSubmit={handleQueryChange}
-        spacing={2}
-        sx={{ p: 2 }}
+        flexWrap="wrap"
+        justifyContent="space-between"
+        spacing={1}
+        sx={{ p: 1 }}
       >
-        <SvgIcon>
-          <SearchMdIcon />
-        </SvgIcon>
-        <Input
-          defaultValue=""
-          disableUnderline
-          fullWidth
-          inputProps={{ ref: queryRef }}
-          placeholder="Buscar por nombre de usuario"
-          sx={{ flexGrow: 1 }}
-        />
+        <Stack
+          alignItems="center"
+          component="form"
+          direction="row"
+          onSubmit={handleQueryChange}
+          spacing={2}
+          sx={{ p: 2 }}
+        >
+          <SvgIcon>
+            <SearchMdIcon />
+          </SvgIcon>
+          <Input
+            defaultValue=""
+            disableUnderline
+            fullWidth
+            inputProps={{ ref: queryRef }}
+            placeholder="Nombre..."
+            sx={{ flexGrow: 1 }}
+          />
+        </Stack>
+        <ComboBox />
       </Stack>
       <Divider />
       {showChips ? (

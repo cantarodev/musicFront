@@ -76,7 +76,6 @@ const useClaveSolAccountsStore = (searchState) => {
   const handleClaveSolAccountsGet = useCallback(async () => {
     try {
       const response = await claveSolAccountsApi.getClaveSolAccounts(searchState);
-      console.log(response.data);
       if (isMounted()) {
         setState({
           claveSolAccounts: response.data,
@@ -114,7 +113,6 @@ const Page = () => {
   const claveSolAccountIds = useClaveSolAccountIds(claveSolAccountsStore.claveSolAccounts);
   const claveSolAccountsSelection = useSelection(claveSolAccountIds);
 
-  console.log(claveSolAccountIds);
   const [open, setOpen] = useState(false);
   const [action, setAction] = useState('create');
   const handleOpen = (option) => {

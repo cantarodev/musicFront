@@ -99,15 +99,14 @@ class ClaveSolAccountsApi {
   }
 
   async validateClaveSolAccount(request) {
-    console.log(request);
-    const { account_id, ruc, username, password } = request;
+    const { account_id, ruc, username, password, mode } = request;
 
     await wait(1000);
 
     return new Promise((resolve, reject) => {
       try {
         // Check if a user already exists
-        validateClaveSolAccount(account_id, ruc, username, password).then((data) => {
+        validateClaveSolAccount(account_id, ruc, username, password, mode).then((data) => {
           resolve(data);
         });
       } catch (err) {

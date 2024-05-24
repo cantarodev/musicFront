@@ -1,57 +1,46 @@
-import { Fragment, useCallback, useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { createRoot } from 'react-dom/client';
 import PropTypes from 'prop-types';
-import { toast } from 'react-hot-toast';
-import Box from '@mui/material/Box';
-import Table from '@mui/material/Table';
-import TableBody from '@mui/material/TableBody';
-import TableCell from '@mui/material/TableCell';
-import TableHead from '@mui/material/TableHead';
-import TablePagination from '@mui/material/TablePagination';
-import TableRow from '@mui/material/TableRow';
-import Typography from '@mui/material/Typography';
-
-import CloseIcon from '@mui/icons-material/Close';
+import { Box, TablePagination, Button } from '@mui/material';
+import { BulkActions } from './sun-key-bulk-actions';
+import { AccountTable } from './sun-key-account-table';
+import { SunKeyModal } from './sun-key-modal'; // Assuming SunKeyModal is another custom component
+import CircularProgress from '@mui/material/CircularProgress';
 import CheckIcon from '@mui/icons-material/Check';
-
+import CloseIcon from '@mui/icons-material/Close';
+import toast from 'react-hot-toast';
+import { claveSolAccountsApi } from 'src/api/sun-key-accounts'; // Assuming the API file location
 import { Scrollbar } from 'src/components/scrollbar';
-import { SeverityPill } from 'src/components/severity-pill';
-
-import { SunKeyMoreMenu } from 'src/components/sun-key-more-menu';
-import { SunKeyModal } from './sun-key-modal';
-import { Button, Checkbox, Stack } from '@mui/material';
-
-import { claveSolAccountsApi } from 'src/api/sun-key-accounts';
 
 export const SunKeyListTable = (props) => {
   const {
-    action,
-    count = 0,
-    items = [],
-    onDeselectAll,
-    onDeselectOne,
+    items,
+    selected,
     onSelectAll,
+    onDeselectAll,
     onSelectOne,
-    onPageChange = () => {},
-    onRowsPerPageChange,
-    page = 0,
-    rowsPerPage = 0,
-    open,
+    onDeselectOne,
     handleOpen,
-    onClose,
-    selected = [],
     handleClaveSolAccountsGet,
+    count,
+    onPageChange,
+    onRowsPerPageChange,
+    page,
+    rowsPerPage,
+    open,
+    onClose,
+    action,
   } = props;
-
-  const selectedSome = selected.length > 0 && selected.length < items.length;
-  const selectedAll = items.length > 0 && selected.length === items.length;
-  const enableBulkActions = selected.length > 0;
-
   const [currentClaveSol, setCurrentClaveSol] = useState(null);
+  const [enableBulkActions, setEnableBulkActions] = useState(false);
+  const rootMap = new Map();
+
+  useEffect(() => {
+    setEnableBulkActions(selected.length > 0);
+  }, [selected]);
 
   const handleClaveSolSelected = useCallback((claveSol) => {
-    setCurrentClaveSol((prevClaveSol) => {
-      return claveSol;
-    });
+    setCurrentClaveSol(claveSol);
   }, []);
 
   const deleteAllAccounts = async (toastId) => {
@@ -59,10 +48,13 @@ export const SunKeyListTable = (props) => {
       const response = await claveSolAccountsApi.deleteClaveSolAccounts({ accountIds: selected });
       toast.dismiss(toastId);
       handleClaveSolAccountsGet();
-      toast.success(response.message, { duration: 3000, position: 'top-center' });
+      toast.success(response.message, { duration: 5000, position: 'top-center' });
     } catch (err) {
       console.error(err);
-      toast.error('Algo salió mal!', { duration: 3000, position: 'top-center' });
+      toast.error(
+        'Hubo un error al intentar eliminar los registros seleccionados. Por favor, inténtalo de nuevo más tarde.',
+        { duration: 5000, position: 'top-center' }
+      );
     }
   };
 
@@ -70,14 +62,19 @@ export const SunKeyListTable = (props) => {
     toast(
       (t) => (
         <span>
-          ¿Eliminar todas las cuentas?
+          <p style={{ fontSize: '13px' }}>
+            ¿Estás seguro de que deseas eliminar los registros seleccionados? Esta acción no se
+            puede deshacer.
+          </p>
           <Button
-            sx={{ ml: 1, mr: 1 }}
+            sx={{ mr: 1, fontSize: '13px' }}
             onClick={() => toast.dismiss(t.id)}
+            variant="outlined"
           >
             Cancelar
           </Button>
           <Button
+            sx={{ fontSize: '13px' }}
             onClick={() => deleteAllAccounts(t.id)}
             variant="contained"
           >
@@ -85,22 +82,64 @@ export const SunKeyListTable = (props) => {
           </Button>
         </span>
       ),
-      {
-        duration: 5000,
-      }
+      { duration: 50000 }
     );
   };
 
   const validateAllAccounts = async (toastId) => {
     try {
-      for (let index = 0; index < items.length; index++) {
-        await claveSolAccountsApi.validateClaveSolAccount(items[index]);
-      }
       toast.dismiss(toastId);
-      handleClaveSolAccountsGet();
+      const tabla = document.getElementById('tbl_accounts');
+      const filas = tabla.getElementsByTagName('tr');
+
+      const registrosFiltrados = items.filter((registro) => selected.includes(registro.account_id));
+
+      for (let index = 1; index < filas.length; index++) {
+        const celdas = filas[index].getElementsByTagName('td');
+        const account = registrosFiltrados.find(
+          (obj) => obj.account_id == celdas[1].querySelector('input').value
+        );
+        if (account) {
+          const loaderContainer = celdas[4].querySelector('div');
+
+          let root = rootMap.get(loaderContainer);
+          if (!root) {
+            root = createRoot(loaderContainer);
+            rootMap.set(loaderContainer, root);
+          } else {
+            root.unmount();
+          }
+
+          root.render(
+            <CircularProgress
+              className="progress"
+              color="primary"
+              style={{ color: '#6366f1', width: '25px', height: '25px' }}
+            />
+          );
+
+          const resp = await claveSolAccountsApi.validateClaveSolAccount(account);
+
+          if (resp.validated) {
+            root.render(<CheckIcon color="success" />);
+          } else {
+            root.render(<CloseIcon color="error" />);
+          }
+        }
+      }
+
+      onDeselectAll();
+      toast.success('Las cuentas CLAVE SOL seleccionadas han sido procesadas correctamente.', {
+        duration: 5000,
+        position: 'top-center',
+        fontSize: '13px',
+      });
     } catch (err) {
       console.error(err);
-      toast.error('Algo salió mal!', { duration: 3000, position: 'top-center' });
+      toast.error(
+        'Hubo un error al intentar validar los registros seleccionados. Por favor, inténtalo de nuevo más tarde.',
+        { duration: 5000, position: 'top-center', fontSize: '13px' }
+      );
     }
   };
 
@@ -108,14 +147,16 @@ export const SunKeyListTable = (props) => {
     toast(
       (t) => (
         <span>
-          ¿Validar los seleccionados?
+          <p style={{ fontSize: '13px' }}>¿Validar los registros seleccionados?</p>
           <Button
-            sx={{ ml: 1, mr: 1 }}
+            sx={{ mr: 1, fontSize: '13px' }}
             onClick={() => toast.dismiss(t.id)}
+            variant="outlined"
           >
             Cancelar
           </Button>
           <Button
+            sx={{ fontSize: '13px' }}
             onClick={() => validateAllAccounts(t.id)}
             variant="contained"
           >
@@ -123,158 +164,33 @@ export const SunKeyListTable = (props) => {
           </Button>
         </span>
       ),
-      {
-        duration: 5000,
-      }
+      { duration: 5000 }
     );
   };
 
   return (
     <Box sx={{ position: 'relative' }}>
-      {enableBulkActions && (
-        <Stack
-          direction="row"
-          spacing={2}
-          sx={{
-            alignItems: 'center',
-            backgroundColor: (theme) =>
-              theme.palette.mode === 'dark' ? 'neutral.800' : 'neutral.50',
-            display: enableBulkActions ? 'flex' : 'none',
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            width: '100%',
-            px: 2,
-            py: 0.5,
-            zIndex: 10,
-          }}
-        >
-          <Checkbox
-            checked={selectedAll}
-            indeterminate={selectedSome}
-            onChange={(event) => {
-              if (event.target.checked) {
-                onSelectAll?.();
-              } else {
-                onDeselectAll?.();
-              }
-            }}
-          />
-          <Button
-            color="inherit"
-            size="small"
-            onClick={confirmValidateAll}
-          >
-            Validar
-          </Button>
-          <Button
-            color="inherit"
-            size="small"
-            onClick={confirmDeleteAll}
-          >
-            Eliminar
-          </Button>
-        </Stack>
-      )}
+      <BulkActions
+        enableBulkActions={enableBulkActions}
+        selectedAll={selected.length === items.length}
+        selectedSome={selected.length > 0 && selected.length < items.length}
+        onSelectAll={onSelectAll}
+        onDeselectAll={onDeselectAll}
+        confirmValidateAll={confirmValidateAll}
+        confirmDeleteAll={confirmDeleteAll}
+      />
       <Scrollbar>
-        <Table sx={{ minWidth: 700 }}>
-          <TableHead>
-            <TableRow>
-              <TableCell padding="checkbox">
-                <Checkbox
-                  checked={selectedAll}
-                  indeterminate={selectedSome}
-                  onChange={(event) => {
-                    if (event.target.checked) {
-                      onSelectAll?.();
-                    } else {
-                      onDeselectAll?.();
-                    }
-                  }}
-                />
-              </TableCell>
-              <TableCell width="30%">Nombre</TableCell>
-              <TableCell width="15%">Ruc</TableCell>
-              <TableCell width="15%">Usuario</TableCell>
-              <TableCell width="15%">Verificado</TableCell>
-              <TableCell width="15%">Estado</TableCell>
-              <TableCell align="right">Acciones</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {items.map((claveSol) => {
-              const isSelected = selected.includes(claveSol.account_id);
-              const statusColor =
-                claveSol.status === 'active'
-                  ? 'success'
-                  : claveSol.status === 'inactive'
-                  ? 'error'
-                  : 'warning';
-              const status =
-                claveSol.status === 'active'
-                  ? 'activo'
-                  : claveSol.status === 'inactive'
-                  ? 'inactivo'
-                  : 'pendiente';
-
-              return (
-                <Fragment key={claveSol.account_id}>
-                  <TableRow
-                    hover
-                    key={claveSol.account_id}
-                    selected={isSelected}
-                  >
-                    <TableCell padding="checkbox">
-                      <Checkbox
-                        checked={isSelected}
-                        disabled={claveSol.status === 'inactive'}
-                        onChange={(event) => {
-                          if (event.target.checked) {
-                            onSelectOne?.(claveSol.account_id);
-                          } else {
-                            onDeselectOne?.(claveSol.account_id);
-                          }
-                        }}
-                        value={isSelected}
-                      />
-                    </TableCell>
-                    <TableCell width="30%">
-                      <Box
-                        sx={{
-                          cursor: 'pointer',
-                        }}
-                      >
-                        <Typography variant="subtitle2">{claveSol.name}</Typography>
-                      </Box>
-                    </TableCell>
-                    <TableCell width="15%">
-                      <Typography variant="subtitle2">{claveSol.ruc}</Typography>
-                    </TableCell>
-                    <TableCell width="15%">{claveSol.username}</TableCell>
-                    <TableCell width="15%">
-                      {claveSol.verified ? (
-                        <CheckIcon color="success" />
-                      ) : (
-                        <CloseIcon color="error" />
-                      )}
-                    </TableCell>
-                    <TableCell width="15%">
-                      <SeverityPill color={statusColor}>{status}</SeverityPill>
-                    </TableCell>
-                    <TableCell align="right">
-                      <SunKeyMoreMenu
-                        handleClaveSolSelected={handleClaveSolSelected}
-                        handleOpen={handleOpen}
-                        claveSol={claveSol}
-                        handleClaveSolAccountsGet={handleClaveSolAccountsGet}
-                      />
-                    </TableCell>
-                  </TableRow>
-                </Fragment>
-              );
-            })}
-          </TableBody>
-        </Table>
+        <AccountTable
+          items={items}
+          selected={selected}
+          onSelectAll={onSelectAll}
+          onDeselectAll={onDeselectAll}
+          onSelectOne={onSelectOne}
+          onDeselectOne={onDeselectOne}
+          handleClaveSolSelected={handleClaveSolSelected}
+          handleOpen={handleOpen}
+          handleClaveSolAccountsGet={handleClaveSolAccountsGet}
+        />
       </Scrollbar>
       <TablePagination
         component="div"

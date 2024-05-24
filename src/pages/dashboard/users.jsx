@@ -145,23 +145,6 @@ const Page = () => {
             >
               <Stack spacing={1}>
                 <Typography variant="h4">Usuarios</Typography>
-                {/* <Stack
-                  alignItems="center"
-                  direction="row"
-                  spacing={1}
-                >
-                  <Button
-                    color="inherit"
-                    size="small"
-                    startIcon={
-                      <SvgIcon>
-                        <Download01Icon />
-                      </SvgIcon>
-                    }
-                  >
-                    Exportar
-                  </Button>
-                </Stack> */}
                 <Breadcrumbs separator={<BreadcrumbsSeparator />}>
                   <Link
                     color="text.primary"
@@ -179,22 +162,6 @@ const Page = () => {
                   </Typography>
                 </Breadcrumbs>
               </Stack>
-              {/* <Stack
-                alignItems="center"
-                direction="row"
-                spacing={3}
-              >
-                <Button
-                  startIcon={
-                    <SvgIcon>
-                      <PlusIcon />
-                    </SvgIcon>
-                  }
-                  variant="contained"
-                >
-                  Agregar
-                </Button>
-              </Stack> */}
             </Stack>
             <Card>
               <UserListSearch

@@ -6,6 +6,7 @@ export const getClaveSolAccounts = async (user_id) => {
     const claveSolAccounts = JSON.parse(data.claveSolAccounts);
     return claveSolAccounts;
   } catch (error) {
+    console.log(error);
     const { response } = error;
     return response.data;
   }
@@ -28,18 +29,18 @@ export const createClaveSolAccount = async (user_id, verified, name, ruc, userna
   }
 };
 
-export const validateClaveSolAccount = async (account_id, ruc, username, password) => {
+export const validateClaveSolAccount = async (account_id, ruc, username, password, mode) => {
   try {
     const { data } = await axios.post('http://localhost:5000/api/v1/claveSolAccount/validate', {
       account_id,
       ruc,
       username,
       password,
+      mode,
     });
     return data;
   } catch (error) {
-    const { response } = error;
-    return response.data;
+    console.log(error);
   }
 };
 

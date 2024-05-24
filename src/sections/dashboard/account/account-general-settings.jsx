@@ -46,7 +46,7 @@ export const AccountGeneralSettings = (props) => {
     toast(
       (t) => (
         <span>
-          ¿Estás seguro de eliminar esta cuenta?
+          ¿Estás seguro?
           <Button onClick={() => toast.dismiss(t.id)}>Cancelar</Button>
           <Button
             onClick={() => handleLogout(t.id)}
@@ -67,18 +67,18 @@ export const AccountGeneralSettings = (props) => {
       try {
         switch (auth.issuer) {
           case Issuer.JWT: {
-            const resp = await userApi.delete({ email: newData.email });
-            if (resp == 'Usuario eliminado exitosamente') {
+            const response = await usersApi.deleteUser({ email: newData.email });
+            if (response.status == 'SUCCESS') {
               await auth.signOut();
-              toast.success(resp);
+              toast.success(response.message, { duration: 5000, position: 'top-center' });
               toast.dismiss(toastId);
             }
             break;
           }
         }
-        router.push(paths.auth.login);
+        router.push(paths.index);
       } catch (err) {
-        console.error(err);
+        console.error(err, { duration: 5000, position: 'top-center' });
         toast.error('Algo salió mal!');
       }
     },

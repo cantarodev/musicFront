@@ -19,7 +19,7 @@ export const SunKeyCreateForm = (props) => {
   const [inputRucValue, setInputRucValue] = useState(claveSol?.ruc || '');
   const [showPassword, setShowPassword] = useState(false);
   const [showPasswordConfirm, setShowPasswordConfirm] = useState(false);
-  const [accountValidated, setAccountValidated] = useState(false);
+  const [accountValidated, setAccountValidated] = useState(claveSol?.verified || false);
   const [btnSelected, setBtnSelected] = useState('');
   const [loading, setLoading] = useState(false);
   const user = useMockedUser();
@@ -60,6 +60,7 @@ export const SunKeyCreateForm = (props) => {
     onSubmit: async (values, helpers) => {
       try {
         if (btnSelected === 'test') {
+          values = { ...values, mode: 'test' };
           const response = await claveSolAccountsApi.validateClaveSolAccount(values);
           response.validated
             ? toast.success(response.message, { duration: 3000, position: 'top-center' })
@@ -69,6 +70,7 @@ export const SunKeyCreateForm = (props) => {
         }
         if (btnSelected === 'editCreate') {
           values = { ...values, verified: accountValidated };
+          console.log(values);
           const response = await claveSolAccountsApi.createClaveSolAccount(values);
           handleClaveSolAccountsGet();
           toast.success(response.message, { duration: 3000, position: 'top-center' });
