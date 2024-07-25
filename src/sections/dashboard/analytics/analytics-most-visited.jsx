@@ -23,7 +23,7 @@ export const AnalyticsMostVisited = (props) => {
   return (
     <Card>
       <CardHeader
-        title="Most Visited Pages"
+        title="PLEs"
         action={
           <Tooltip title="Refresh rate is 24h">
             <SvgIcon color="action">
@@ -36,16 +36,16 @@ export const AnalyticsMostVisited = (props) => {
         <Table sx={{ minWidth: 600 }}>
           <TableHead>
             <TableRow>
-              <TableCell>Page Name</TableCell>
-              <TableCell>Visitors</TableCell>
-              <TableCell>Unique page visits</TableCell>
-              <TableCell>Bounce rate</TableCell>
+              <TableCell>Periodo</TableCell>
+              <TableCell>Nombre</TableCell>
+              <TableCell>PLE</TableCell>
+              <TableCell>Base de datos</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {pages.map((page) => {
-              const visitors = numeral(page.visitors).format('0,0');
-              const uniqueVisitors = numeral(page.uniqueVisits).format('0,0');
+              const formatPle = numeral(page.ple).format('0,0');
+              const formatDb = numeral(page.db).format('0,0');
 
               return (
                 <TableRow
@@ -62,16 +62,28 @@ export const AnalyticsMostVisited = (props) => {
                         direction="row"
                         spacing={2}
                       >
-                        <SvgIcon fontSize="small">
-                          <LinkExternal01Icon />
-                        </SvgIcon>
-                        <Typography variant="body2">{page.url}</Typography>
+                        <Typography variant="body2">{page.period}</Typography>
                       </Stack>
                     </Link>
                   </TableCell>
-                  <TableCell>{visitors}</TableCell>
-                  <TableCell>{uniqueVisitors}</TableCell>
-                  <TableCell>{page.bounceRate}%</TableCell>
+                  <TableCell>
+                    <Tooltip title={page.name}>
+                      <Typography
+                        sx={{ cursor: 'pointer' }}
+                        variant="subtitle2"
+                        style={{
+                          whiteSpace: 'nowrap',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          maxWidth: '200px',
+                        }}
+                      >
+                        {page.name}
+                      </Typography>
+                    </Tooltip>
+                  </TableCell>
+                  <TableCell>{formatPle}</TableCell>
+                  <TableCell>{formatDb}</TableCell>
                 </TableRow>
               );
             })}

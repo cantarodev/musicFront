@@ -1,6 +1,7 @@
 import { useCallback } from 'react';
 import PropTypes from 'prop-types';
 import { format } from 'date-fns';
+import { es } from 'date-fns/locale';
 import Globe01Icon from '@untitled-ui/icons-react/build/esm/Globe03';
 import Star01Icon from '@untitled-ui/icons-react/build/esm/Star01';
 import DotsVerticalIcon from '@untitled-ui/icons-react/build/esm/DotsVertical';
@@ -27,22 +28,24 @@ export const ItemListRow = (props) => {
 
   const handleDelete = useCallback(() => {
     popover.handleClose();
-    onDelete?.(item.id);
+    onDelete?.(item._id);
   }, [item, popover, onDelete]);
 
   let size = bytesToSize(item.size);
 
-  if (item.type === 'folder') {
-    size += `• ${item.itemsCount} items`;
-  }
+  // if (item.type === 'folder') {
+  //   size += `• ${item.itemsCount} items`;
+  // }
 
-  const createdAt = item.createdAt && format(item.createdAt, 'MMM dd, yyyy');
-  const showShared = !item.isPublic && (item.shared || []).length > 0;
+  // const createdAt = item.createdAt && format(item.createdAt, 'MMM dd, yyyy');
+  const createDate = new Date(item.createdAt);
+  const createdAtFormat = createDate && format(createDate, 'MMMM dd, yyyy', { locale: es });
+  // const showShared = !item.isPublic && (item.shared || []).length > 0;
 
   return (
     <>
       <TableRow
-        key={item.id}
+        key={item._id}
         sx={{
           backgroundColor: 'transparent',
           borderRadius: 1.5,
@@ -87,18 +90,18 @@ export const ItemListRow = (props) => {
             spacing={2}
           >
             <Box
-              onClick={() => onOpen?.(item.id)}
+              onClick={() => onOpen?.(item._id)}
               sx={{ cursor: 'pointer' }}
             >
               <ItemIcon
-                type={item.type}
-                extension={item.extension}
+                type="file"
+                extension="txt"
               />
             </Box>
             <div>
               <Typography
                 noWrap
-                onClick={() => onOpen?.(item.id)}
+                onClick={() => onOpen?.(item._id)}
                 sx={{ cursor: 'pointer' }}
                 variant="subtitle2"
               >
@@ -119,57 +122,15 @@ export const ItemListRow = (props) => {
             noWrap
             variant="subtitle2"
           >
-            Created at
+            Creado en
           </Typography>
           <Typography
             color="text.secondary"
             noWrap
             variant="body2"
           >
-            {createdAt}
+            {createdAtFormat.charAt(0).toUpperCase() + createdAtFormat.slice(1)}
           </Typography>
-        </TableCell>
-        <TableCell>
-          <Box sx={{ display: 'flex' }}>
-            {item.isPublic && (
-              <Tooltip title="Public">
-                <Avatar
-                  sx={{
-                    height: 32,
-                    width: 32,
-                  }}
-                >
-                  <SvgIcon fontSize="small">
-                    <Globe01Icon />
-                  </SvgIcon>
-                </Avatar>
-              </Tooltip>
-            )}
-            {showShared && (
-              <AvatarGroup max={3}>
-                {item.shared?.map((person) => (
-                  <Avatar
-                    key={person.name}
-                    src={person.avatar}
-                    sx={{
-                      height: 32,
-                      width: 32,
-                    }}
-                  />
-                ))}
-              </AvatarGroup>
-            )}
-          </Box>
-        </TableCell>
-        <TableCell align="right">
-          <IconButton onClick={() => onFavorite?.(item.id, !item.isFavorite)}>
-            <SvgIcon
-              fontSize="small"
-              sx={{ color: item.isFavorite ? 'warning.main' : 'action.active' }}
-            >
-              <Star01Icon />
-            </SvgIcon>
-          </IconButton>
         </TableCell>
         <TableCell align="right">
           <IconButton

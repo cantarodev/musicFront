@@ -10,7 +10,7 @@ class CustomersApi {
 
     let data = deepCopy(customers);
     let count = data.length;
-
+    console.log(filters);
     if (typeof filters !== 'undefined') {
       data = data.filter((customer) => {
         if (typeof filters.query !== 'undefined' && filters.query !== '') {

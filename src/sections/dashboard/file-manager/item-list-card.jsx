@@ -1,11 +1,9 @@
 import { useCallback } from 'react';
 import PropTypes from 'prop-types';
-import { format } from 'date-fns';
+import { subDays, subHours, subMinutes, format } from 'date-fns';
+import { es } from 'date-fns/locale';
 import Star01Icon from '@untitled-ui/icons-react/build/esm/Star01';
 import DotsVerticalIcon from '@untitled-ui/icons-react/build/esm/DotsVertical';
-import Globe01Icon from '@untitled-ui/icons-react/build/esm/Globe03';
-import Avatar from '@mui/material/Avatar';
-import AvatarGroup from '@mui/material/AvatarGroup';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Divider from '@mui/material/Divider';
@@ -21,28 +19,66 @@ import { bytesToSize } from 'src/utils/bytes-to-size';
 import { ItemIcon } from './item-icon';
 import { ItemMenu } from './item-menu';
 
+import { convertToPeriodDate } from '../../../utils/date';
+import { Button } from '@mui/material';
+import toast from 'react-hot-toast';
+
 export const ItemListCard = (props) => {
-  const { item, onDelete, onFavorite, onOpen } = props;
+  const { item, onDelete, onOpen } = props;
   const popover = usePopover();
 
-  const handleDelete = useCallback(() => {
-    popover.handleClose();
-    onDelete?.(item.id);
-  }, [item, popover, onDelete]);
+  const confirmDeleteFile = () => {
+    toast(
+      (t) => (
+        <span>
+          <p style={{ fontSize: '13px' }}>
+            ¿Estás seguro de que deseas eliminar el PLE seleccionado? Esta acción no se puede
+            deshacer.
+          </p>
+          <Button
+            sx={{ mr: 1, fontSize: '13px' }}
+            onClick={() => toast.dismiss(t.id)}
+            variant="outlined"
+          >
+            Cancelar
+          </Button>
+          <Button
+            sx={{ fontSize: '13px' }}
+            onClick={() => handleDelete(t.id)}
+            variant="contained"
+          >
+            Sí
+          </Button>
+        </span>
+      ),
+      { duration: 50000 }
+    );
+  };
+
+  const handleDelete = useCallback(
+    (toast_id) => {
+      popover.handleClose();
+      onDelete?.(item._id);
+      toast.dismiss(toast_id);
+    },
+    [item, popover, onDelete]
+  );
 
   let size = bytesToSize(item.size);
 
-  if (item.type === 'folder') {
-    size += `• ${item.itemsCount} items`;
-  }
+  size += ` • ${item.count} documentos`;
+  const name = item.type == '08' ? 'Compras' : 'Ventas';
 
-  const createdAt = item.createdAt && format(item.createdAt, 'MMM dd, yyyy');
-  const showShared = !item.isPublic && (item.shared || []).length > 0;
+  const createDate = new Date(item.createdAt);
+  const createdAtFormat = createDate && format(createDate, 'MMMM dd, yyyy', { locale: es });
+
+  const convertedPeriod = convertToPeriodDate(item.period);
+  const periodFormat = convertedPeriod && format(convertedPeriod, 'MMMM, yyyy', { locale: es });
 
   return (
     <>
       <Card
-        key={item.id}
+        key={item._id}
         sx={{
           backgroundColor: 'transparent',
           boxShadow: 0,
@@ -61,21 +97,13 @@ export const ItemListCard = (props) => {
         <Stack
           alignItems="center"
           direction="row"
-          justifyContent="space-between"
+          justifyContent="flex-end"
           spacing={3}
           sx={{
             pt: 2,
             px: 2,
           }}
         >
-          <IconButton onClick={() => onFavorite?.(item.id, !item.isFavorite)}>
-            <SvgIcon
-              fontSize="small"
-              sx={{ color: item.isFavorite ? 'warning.main' : 'action.active' }}
-            >
-              <Star01Icon />
-            </SvgIcon>
-          </IconButton>
           <IconButton
             onClick={popover.handleOpen}
             ref={popover.anchorRef}
@@ -89,29 +117,51 @@ export const ItemListCard = (props) => {
           <Box
             sx={{
               display: 'flex',
+              flexDirection: 'column',
               mb: 1,
             }}
           >
             <Box
-              onClick={() => onOpen?.(item.id)}
+              onClick={() => onOpen?.(item._id)}
               sx={{
                 display: 'inline-flex',
                 cursor: 'pointer',
               }}
             >
               <ItemIcon
-                type={item.type}
-                extension={item.extension}
+                type="file"
+                extension="txt"
               />
+              <Stack>
+                <Typography
+                  color="text.secondary"
+                  variant="h6"
+                >
+                  {periodFormat.charAt(0).toUpperCase() + periodFormat.slice(1)}
+                </Typography>
+                <Typography
+                  color="text.secondary"
+                  variant="body2"
+                >
+                  {name}
+                </Typography>
+              </Stack>
             </Box>
           </Box>
-          <Typography
-            onClick={() => onOpen?.(item.id)}
-            sx={{ cursor: 'pointer' }}
-            variant="subtitle2"
-          >
-            {item.name}
-          </Typography>
+          <Tooltip title={item.name}>
+            <Typography
+              onClick={() => onOpen?.(item._id)}
+              sx={{ cursor: 'pointer' }}
+              variant="subtitle2"
+              style={{
+                whiteSpace: 'nowrap',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+              }}
+            >
+              {item.name}
+            </Typography>
+          </Tooltip>
           <Divider sx={{ my: 1 }} />
           <Stack
             alignItems="center"
@@ -127,50 +177,21 @@ export const ItemListCard = (props) => {
                 {size}
               </Typography>
             </div>
-            <div>
-              {item.isPublic && (
-                <Tooltip title="Public">
-                  <Avatar
-                    sx={{
-                      height: 32,
-                      width: 32,
-                    }}
-                  >
-                    <SvgIcon fontSize="small">
-                      <Globe01Icon />
-                    </SvgIcon>
-                  </Avatar>
-                </Tooltip>
-              )}
-              {showShared && (
-                <AvatarGroup max={3}>
-                  {item.shared?.map((person) => (
-                    <Avatar
-                      key={person.name}
-                      src={person.avatar}
-                      sx={{
-                        height: 32,
-                        width: 32,
-                      }}
-                    />
-                  ))}
-                </AvatarGroup>
-              )}
-            </div>
           </Stack>
           <Typography
             color="text.secondary"
             variant="caption"
           >
-            Created at {createdAt}
+            Creado en {createdAtFormat.charAt(0).toUpperCase() + createdAtFormat.slice(1)}
           </Typography>
         </Box>
       </Card>
       <ItemMenu
         anchorEl={popover.anchorRef.current}
         onClose={popover.handleClose}
-        onDelete={handleDelete}
+        onDelete={confirmDeleteFile}
         open={popover.open}
+        item={item}
       />
     </>
   );

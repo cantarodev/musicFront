@@ -15,11 +15,11 @@ import ToggleButtonGroup, { toggleButtonGroupClasses } from '@mui/material/Toggl
 
 const sortOptions = [
   {
-    label: 'Latest',
+    label: 'El último',
     value: 'desc',
   },
   {
-    label: 'Oldest',
+    label: 'Más antiguo',
     value: 'asc',
   },
 ];
@@ -80,7 +80,7 @@ export const ItemSearch = (props) => {
             fullWidth
             inputProps={{ ref: queryRef }}
             name="itemName"
-            placeholder="Search"
+            placeholder="Buscar"
             startAdornment={
               <InputAdornment position="start">
                 <SvgIcon>
@@ -122,7 +122,7 @@ export const ItemSearch = (props) => {
           </ToggleButton>
         </ToggleButtonGroup>
         <TextField
-          label="Sort By"
+          label="Ordenar por"
           name="sort"
           onChange={handleSortChange}
           select

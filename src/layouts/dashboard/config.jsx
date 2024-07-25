@@ -41,24 +41,24 @@ export const useSections = () => {
     const sections = [
       {
         items: [
-          {
-            title: t(tokens.nav.overview),
-            path: paths.dashboard.index,
-            icon: (
-              <SvgIcon fontSize="small">
-                <HomeSmileIcon />
-              </SvgIcon>
-            ),
-          },
           // {
-          //   title: t(tokens.nav.analytics),
-          //   path: paths.dashboard.analytics,
+          //   title: t(tokens.nav.overview),
+          //   path: paths.dashboard.index,
           //   icon: (
           //     <SvgIcon fontSize="small">
-          //       <BarChartSquare02Icon />
+          //       <HomeSmileIcon />
           //     </SvgIcon>
           //   ),
           // },
+          {
+            title: t(tokens.nav.analytics),
+            path: paths.dashboard.analytics,
+            icon: (
+              <SvgIcon fontSize="small">
+                <BarChartSquare02Icon />
+              </SvgIcon>
+            ),
+          },
           // {
           //   title: t(tokens.nav.ecommerce),
           //   path: paths.dashboard.ecommerce,
@@ -104,6 +104,15 @@ export const useSections = () => {
             icon: (
               <SvgIcon fontSize="small">
                 <Lock01Icon />
+              </SvgIcon>
+            ),
+          },
+          {
+            title: t(tokens.nav.fileManager),
+            path: paths.dashboard.fileManager,
+            icon: (
+              <SvgIcon fontSize="small">
+                <Upload04Icon />
               </SvgIcon>
             ),
           },
@@ -289,15 +298,6 @@ export const useSections = () => {
                 path: paths.dashboard.blog.postCreate,
               },
             ],
-          },
-          {
-            title: t(tokens.nav.fileManager),
-            path: paths.dashboard.fileManager,
-            icon: (
-              <SvgIcon fontSize="small">
-                <Upload04Icon />
-              </SvgIcon>
-            ),
           },
           {
             title: t(tokens.nav.kanban),

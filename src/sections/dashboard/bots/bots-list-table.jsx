@@ -54,16 +54,15 @@ export const BotsListTable = (props) => {
           </TableHead>
           <TableBody>
             {items.map((bot, index) => {
-              const isCurrent = bot.bot_id === currentBot;
+              const isCurrent = bot._id === currentBot;
               const statusColor = bot.status === 'active' ? 'success' : 'error';
 
               const status = bot.status === 'active' ? 'activo' : 'inactivo';
-
               return (
-                <Fragment key={bot.bot_id}>
+                <Fragment key={bot._id}>
                   <TableRow
                     hover
-                    key={bot.bot_id}
+                    key={bot._id}
                   >
                     <TableCell
                       padding="checkbox"

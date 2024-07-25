@@ -62,7 +62,7 @@ export const ItemList = (props) => {
               <TableBody>
                 {items.map((item) => (
                   <ItemListRow
-                    key={item.id}
+                    key={item._id}
                     item={item}
                     onDelete={onDelete}
                     onFavorite={onFavorite}

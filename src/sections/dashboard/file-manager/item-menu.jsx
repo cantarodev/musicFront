@@ -1,12 +1,41 @@
 import PropTypes from 'prop-types';
-import Link01Icon from '@untitled-ui/icons-react/build/esm/Link01';
+import Download01Icon from '@untitled-ui/icons-react/build/esm/Download01';
 import Trash02Icon from '@untitled-ui/icons-react/build/esm/Trash02';
 import Menu from '@mui/material/Menu';
 import MenuItem, { menuItemClasses } from '@mui/material/MenuItem';
 import SvgIcon from '@mui/material/SvgIcon';
 
+import axios from 'axios';
+import { fileManagerApi } from 'src/api/file-manager';
+
 export const ItemMenu = (props) => {
-  const { anchorEl, onClose, onDelete, open = false } = props;
+  const { anchorEl, onClose, onDelete, item, open = false } = props;
+
+  const handleDownload = async () => {
+    try {
+      const response = await fileManagerApi.downloadFile({
+        user_id: item?.user_id,
+        file_id: item?._id,
+      });
+
+      if (response.status == 'SUCCESS') {
+        const fileResponse = await axios.get(response.message, {
+          responseType: 'blob', // Importante para obtener los datos binarios
+        });
+
+        const blob = new Blob([fileResponse.data], { type: fileResponse.data.type });
+
+        const link = document.createElement('a');
+        link.href = window.URL.createObjectURL(blob);
+        link.setAttribute('download', item?.name);
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+      }
+    } catch (error) {
+      console.error('Error al descargar el archivo:', error);
+    }
+  };
 
   return (
     <Menu
@@ -30,11 +59,11 @@ export const ItemMenu = (props) => {
         vertical: 'top',
       }}
     >
-      <MenuItem onClick={onClose}>
+      <MenuItem onClick={handleDownload}>
         <SvgIcon fontSize="small">
-          <Link01Icon />
+          <Download01Icon />
         </SvgIcon>
-        Copy Link
+        Descargar
       </MenuItem>
       <MenuItem
         onClick={onDelete}
@@ -43,7 +72,7 @@ export const ItemMenu = (props) => {
         <SvgIcon fontSize="small">
           <Trash02Icon />
         </SvgIcon>
-        Delete
+        Eliminar
       </MenuItem>
     </Menu>
   );
@@ -54,4 +83,5 @@ ItemMenu.propTypes = {
   onClose: PropTypes.func,
   onDelete: PropTypes.func,
   open: PropTypes.bool,
+  item: PropTypes.object,
 };

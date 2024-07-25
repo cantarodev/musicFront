@@ -1,212 +1,156 @@
-import Lightning01Icon from '@untitled-ui/icons-react/build/esm/Lightning01';
+import PropTypes from 'prop-types';
+import numeral from 'numeral';
 import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
 import Card from '@mui/material/Card';
-import CardActions from '@mui/material/CardActions';
 import CardContent from '@mui/material/CardContent';
 import CardHeader from '@mui/material/CardHeader';
-import Divider from '@mui/material/Divider';
-import List from '@mui/material/List';
-import ListItem from '@mui/material/ListItem';
-import ListItemIcon from '@mui/material/ListItemIcon';
-import ListItemText from '@mui/material/ListItemText';
+import Grid from '@mui/material/Unstable_Grid2';
 import Stack from '@mui/material/Stack';
-import SvgIcon from '@mui/material/SvgIcon';
 import Typography from '@mui/material/Typography';
-import { useTheme } from '@mui/material/styles';
-
-import { Chart } from 'src/components/chart';
-import { FileIcon } from 'src/components/file-icon';
+import { useEffect, useState } from 'react';
 import { bytesToSize } from 'src/utils/bytes-to-size';
+import { ListItemIcon } from '@mui/material';
+import { FileIcon } from 'src/components/file-icon';
 
-const useChartOptions = (usage) => {
-  const theme = useTheme();
+export const StorageStats = (props) => {
+  const { items } = props;
+  const [totalStorage, setTotalStorage] = useState(0);
+  const [totalPle, setTotalPle] = useState(0);
 
-  return {
-    chart: {
-      background: 'transparent',
-      redrawOnParentResize: false,
-      redrawOnWindowResize: false,
-    },
-    colors: [theme.palette.primary.main],
-    fill: {
-      opacity: 1,
-      type: 'solid',
-    },
-    grid: {
-      padding: {
-        bottom: 0,
-        left: 0,
-        right: 0,
-        top: 0,
-      },
-    },
-    labels: [usage],
-    plotOptions: {
-      radialBar: {
-        dataLabels: {
-          name: {
-            color: theme.palette.text.primary,
-            fontSize: '24px',
-            fontWeight: 500,
-            show: true,
-            offsetY: -15,
-          },
-          value: {
-            show: false,
-          },
-        },
-        endAngle: 90,
-        hollow: {
-          size: '60%',
-        },
-        startAngle: -90,
-        track: {
-          background:
-            theme.palette.mode === 'dark'
-              ? theme.palette.primary.dark
-              : theme.palette.primary.light,
-          strokeWidth: '100%',
-        },
-      },
-    },
-    states: {
-      active: {
-        filter: {
-          type: 'none',
-        },
-      },
-      hover: {
-        filter: {
-          type: 'none',
-        },
-      },
-    },
-    stroke: {
-      lineCap: 'round',
-    },
-    theme: {
-      mode: theme.palette.mode,
-    },
+  const getTotalStorage = () => {
+    let sum = 0;
+    let total = 0;
+    items.forEach((item) => {
+      sum += item.size;
+      total += item.countPle;
+    });
+
+    setTotalStorage(sum);
+    setTotalPle(total);
   };
-};
 
-const totals = [
-  {
-    extension: 'mp4',
-    itemsCount: 25,
-    label: 'MP4',
-    size: 24431234531,
-  },
-  {
-    extension: 'png',
-    itemsCount: 591,
-    label: 'PNG',
-    size: 58723843923,
-  },
-  {
-    extension: 'pdf',
-    itemsCount: 95,
-    label: 'PDF',
-    size: 432424040,
-  },
-  {
-    extension: null,
-    itemsCount: 210,
-    label: 'Other',
-    size: 274128437,
-  },
-];
-
-export const StorageStats = () => {
-  const currentUsage = '75 GB';
-  const currentUsagePercentage = 75;
-  const chartOptions = useChartOptions(currentUsage);
-  const chartSeries = [currentUsagePercentage];
+  useEffect(() => {
+    getTotalStorage();
+  }, [items]);
 
   return (
     <Card>
       <CardHeader
-        title="Storage"
-        subheader="Upgrade before reaching it"
+        title="Tus archivos PLEs de compras y ventas"
+        sx={{ pb: 0 }}
       />
       <CardContent>
-        <Stack alignItems="center">
-          <Box
-            sx={{
-              height: 260,
-              mt: '-48px',
-              mb: '-100px',
-            }}
-          >
-            <Chart
-              width={260}
-              height={260}
-              options={chartOptions}
-              series={chartSeries}
-              type="radialBar"
-            />
-          </Box>
-          <Typography
-            variant="h6"
-            sx={{ mb: 1 }}
-          >
-            You’ve almost reached your limit
-          </Typography>
-          <Typography
-            color="text.secondary"
-            variant="body2"
-          >
-            You have used {currentUsagePercentage}% of your available storage.
-          </Typography>
-        </Stack>
-        <List
-          disablePadding
-          sx={{ mt: 2 }}
+        <Grid
+          container
+          spacing={3}
         >
-          {totals.map((total) => {
-            const size = bytesToSize(total.size);
-
-            return (
-              <ListItem
-                disableGutters
-                key={total.extension}
+          <Grid
+            xs={12}
+            md={4}
+          >
+            <Stack
+              alignItems="center"
+              direction="row"
+              spacing={2}
+              sx={{
+                backgroundColor: (theme) =>
+                  theme.palette.mode === 'dark' ? 'neutral.800' : 'error.lightest',
+                borderRadius: 2.5,
+                px: 3,
+                py: 4,
+              }}
+            >
+              <Box
+                sx={{
+                  flexShrink: 0,
+                  height: 48,
+                  width: 48,
+                }}
               >
                 <ListItemIcon>
                   <Box sx={{ color: 'primary.main' }}>
-                    <FileIcon extension={total.extension} />
+                    <FileIcon extension="txt" />
                   </Box>
                 </ListItemIcon>
-                <ListItemText
-                  primary={<Typography variant="caption">{total.label}</Typography>}
-                  secondary={
+              </Box>
+              <div>
+                <Typography
+                  color="text.secondary"
+                  variant="body2"
+                >
+                  Todos
+                </Typography>
+                <Typography variant="h5">{bytesToSize(totalStorage)}</Typography>
+                <Typography
+                  color="text.secondary"
+                  variant="body2"
+                >
+                  • {totalPle}
+                  {totalPle > 1 ? ' PLEs' : ' PLE'}
+                </Typography>
+              </div>
+            </Stack>
+          </Grid>
+          {items?.map((total, index) => {
+            const size = bytesToSize(total.size);
+            const name = total.type == '08' ? 'Compras' : 'Ventas';
+            return (
+              <Grid
+                xs={12}
+                md={4}
+                key={index}
+              >
+                <Stack
+                  alignItems="center"
+                  direction="row"
+                  spacing={2}
+                  sx={{
+                    backgroundColor: (theme) =>
+                      theme.palette.mode === 'dark' ? 'neutral.800' : 'error.lightest',
+                    borderRadius: 2.5,
+                    px: 3,
+                    py: 4,
+                  }}
+                >
+                  <Box
+                    sx={{
+                      flexShrink: 0,
+                      height: 48,
+                      width: 48,
+                    }}
+                  >
+                    <ListItemIcon>
+                      <Box sx={{ color: 'primary.main' }}>
+                        <FileIcon extension="txt" />
+                      </Box>
+                    </ListItemIcon>
+                  </Box>
+                  <div>
                     <Typography
                       color="text.secondary"
                       variant="body2"
                     >
-                      {size} • {total.itemsCount} items
+                      {name}
                     </Typography>
-                  }
-                />
-              </ListItem>
+                    <Typography variant="h5">{size}</Typography>
+                    <Typography
+                      color="text.secondary"
+                      variant="body2"
+                    >
+                      • {total.countPle}
+                      {total.countPle > 1 ? ' PLEs' : ' PLE'} • {total.countDoc} documentos
+                    </Typography>
+                  </div>
+                </Stack>
+              </Grid>
             );
           })}
-        </List>
+        </Grid>
       </CardContent>
-      <Divider />
-      <CardActions sx={{ justifyContent: 'flex-end' }}>
-        <Button
-          endIcon={
-            <SvgIcon fontSize="small">
-              <Lightning01Icon />
-            </SvgIcon>
-          }
-          size="small"
-          variant="contained"
-        >
-          Upgrade Plan
-        </Button>
-      </CardActions>
     </Card>
   );
+};
+
+StorageStats.propTypes = {
+  items: PropTypes.array,
 };

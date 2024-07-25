@@ -27,14 +27,13 @@ const useClaveSolAccountsSearch = () => {
   const user = useMockedUser();
   const [state, setState] = useState({
     filters: {
-      name: undefined,
-      ruc: undefined,
-      username: undefined,
+      query: undefined,
       status: [],
+      user_id: undefined,
     },
     page: 0,
     rowsPerPage: 5,
-    userId: user?.user_id,
+    user_id: user?.user_id,
   });
 
   const handleFiltersChange = useCallback((filters) => {
@@ -76,6 +75,7 @@ const useClaveSolAccountsStore = (searchState) => {
   const handleClaveSolAccountsGet = useCallback(async () => {
     try {
       const response = await claveSolAccountsApi.getClaveSolAccounts(searchState);
+
       if (isMounted()) {
         setState({
           claveSolAccounts: response.data,

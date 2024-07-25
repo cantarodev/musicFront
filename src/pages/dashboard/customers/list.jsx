@@ -80,7 +80,6 @@ const useCustomersStore = (searchState) => {
   const handleCustomersGet = useCallback(async () => {
     try {
       const response = await customersApi.getCustomers(searchState);
-      console.log(response.data);
       if (isMounted()) {
         setState({
           customers: response.data,

@@ -26,7 +26,7 @@ export const SunKeyCreateForm = (props) => {
 
   const initialValues = {
     account_id: claveSol?.account_id || '',
-    userId: claveSol?.user_id || user.user_id,
+    user_id: claveSol?.user_id || user.user_id,
     verified: claveSol?.verified || false,
     name: claveSol?.name || '',
     ruc: claveSol?.ruc || '',
@@ -36,7 +36,7 @@ export const SunKeyCreateForm = (props) => {
   };
 
   const validationSchema = Yup.object({
-    userId: Yup.string().max(255),
+    user_id: Yup.string().max(255),
     name: Yup.string().max(50).required('Se requiere un nombre'),
     ruc: Yup.string()
       .matches(/^[0-9]+$/, 'Solo se permiten números')
@@ -62,6 +62,7 @@ export const SunKeyCreateForm = (props) => {
         if (btnSelected === 'test') {
           values = { ...values, mode: 'test' };
           const response = await claveSolAccountsApi.validateClaveSolAccount(values);
+          console.log(response);
           response.validated
             ? toast.success(response.message, { duration: 3000, position: 'top-center' })
             : toast.error(response.message, { duration: 3000, position: 'top-center' });
@@ -70,7 +71,6 @@ export const SunKeyCreateForm = (props) => {
         }
         if (btnSelected === 'editCreate') {
           values = { ...values, verified: accountValidated };
-          console.log(values);
           const response = await claveSolAccountsApi.createClaveSolAccount(values);
           handleClaveSolAccountsGet();
           toast.success(response.message, { duration: 3000, position: 'top-center' });
@@ -79,7 +79,7 @@ export const SunKeyCreateForm = (props) => {
         setBtnSelected('');
       } catch (err) {
         console.error(err);
-        toast.error('Algo salió mal!', { duration: 3000, position: 'top-center' });
+        toast.error(err.message, { duration: 3000, position: 'top-center' });
         helpers.setStatus({ success: false });
         helpers.setErrors({ submit: err.message });
         setBtnSelected('');

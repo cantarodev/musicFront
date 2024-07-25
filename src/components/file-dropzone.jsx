@@ -14,15 +14,57 @@ import Stack from '@mui/material/Stack';
 import SvgIcon from '@mui/material/SvgIcon';
 import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
+import toast from 'react-hot-toast';
+
+import { fileManagerApi } from 'src/api/file-manager/index';
 
 import { FileIcon } from 'src/components/file-icon';
 import { bytesToSize } from 'src/utils/bytes-to-size';
+import { useState } from 'react';
+import { useMockedUser } from 'src/hooks/use-mocked-user';
 
 export const FileDropzone = (props) => {
-  const { caption, files = [], onRemove, onRemoveAll, onUpload, ...other } = props;
+  const {
+    caption,
+    files = [],
+    onRemove,
+    onRemoveAll,
+    onClose,
+    handleItemsTotalsGet,
+    handleItemsGet,
+    ...other
+  } = props;
   const { getRootProps, getInputProps, isDragActive } = useDropzone(other);
+  const [uploading, setUploading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
+  const user = useMockedUser();
+  console.log(user);
   const hasAnyFiles = files.length > 0;
+
+  const handleUpload = async () => {
+    setUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append('user_id', user?.user_id);
+      files.forEach((file) => {
+        formData.append('files', file);
+      });
+      const response = await fileManagerApi.createFile(formData);
+
+      if (response.status === 'SUCCESS') {
+        toast.success(response.message, { duration: 3000, position: 'top-center' });
+        onClose();
+        handleItemsGet();
+        handleItemsTotalsGet();
+      }
+
+      setUploading(false);
+    } catch (error) {
+      setUploading(false);
+      toast.error(error.message, { duration: 3000, position: 'top-center' });
+    }
+  };
 
   return (
     <div>
@@ -75,7 +117,7 @@ export const FileDropzone = (props) => {
               }}
               variant="h6"
             >
-              <span>Click to upload</span> or drag and drop
+              <span>Haga clic para cargar</span> o arrastrar y soltar
             </Typography>
             {caption && (
               <Typography
@@ -90,6 +132,14 @@ export const FileDropzone = (props) => {
       </Box>
       {hasAnyFiles && (
         <Box sx={{ mt: 2 }}>
+          {uploading && (
+            <Typography
+              variant="body2"
+              style={{ marginTop: '10px' }}
+            >
+              Subiendo archivos, por favor espera...
+            </Typography>
+          )}
           <List>
             {files.map((file) => {
               const extension = file.name.split('.').pop();
@@ -141,15 +191,15 @@ export const FileDropzone = (props) => {
               size="small"
               type="button"
             >
-              Remove All
+              Eliminar todo
             </Button>
             <Button
-              onClick={onUpload}
+              onClick={handleUpload}
               size="small"
               type="button"
               variant="contained"
             >
-              Upload
+              Subir
             </Button>
           </Stack>
         </Box>
@@ -163,7 +213,7 @@ FileDropzone.propTypes = {
   files: PropTypes.array,
   onRemove: PropTypes.func,
   onRemoveAll: PropTypes.func,
-  onUpload: PropTypes.func,
+  onClose: PropTypes.func,
   // From Dropzone
   accept: PropTypes.objectOf(PropTypes.arrayOf(PropTypes.string.isRequired).isRequired),
   disabled: PropTypes.bool,
@@ -179,5 +229,7 @@ FileDropzone.propTypes = {
   onDropAccepted: PropTypes.func,
   onDropRejected: PropTypes.func,
   onFileDialogCancel: PropTypes.func,
+  handleItemsTotalsGet: PropTypes.func,
+  handleItemsGet: PropTypes.func,
   preventDropOnDocument: PropTypes.bool,
 };

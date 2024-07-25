@@ -19,8 +19,11 @@ import { ItemDrawer } from 'src/sections/dashboard/file-manager/item-drawer';
 import { ItemList } from 'src/sections/dashboard/file-manager/item-list';
 import { ItemSearch } from 'src/sections/dashboard/file-manager/item-search';
 import { StorageStats } from 'src/sections/dashboard/file-manager/storage-stats';
+import { useMockedUser } from 'src/hooks/use-mocked-user';
+import { set } from 'nprogress';
+import toast from 'react-hot-toast';
 
-const useItemsSearch = () => {
+const useItemsSearch = (user_id) => {
   const [state, setState] = useState({
     filters: {
       query: undefined,
@@ -29,6 +32,7 @@ const useItemsSearch = () => {
     rowsPerPage: 9,
     sortBy: 'createdAt',
     sortDir: 'desc',
+    user_id: user_id,
   });
 
   const handleFiltersChange = useCallback((filters) => {
@@ -68,6 +72,35 @@ const useItemsSearch = () => {
   };
 };
 
+const useItemsTotals = (user_id) => {
+  const [state, setState] = useState({
+    items: [],
+  });
+  const handleItemsTotalsGet = useCallback(async () => {
+    try {
+      const response = await fileManagerApi.getTotals({ user_id });
+      setState({
+        items: response,
+      });
+    } catch (err) {
+      console.error(err);
+    }
+  }, [user_id]);
+
+  useEffect(
+    () => {
+      handleItemsTotalsGet();
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [user_id]
+  );
+
+  return {
+    handleItemsTotalsGet,
+    ...state,
+  };
+};
+
 const useItemsStore = (searchState) => {
   const isMounted = useMounted();
   const [state, setState] = useState({
@@ -77,8 +110,7 @@ const useItemsStore = (searchState) => {
 
   const handleItemsGet = useCallback(async () => {
     try {
-      const response = await fileManagerApi.getItems(searchState);
-
+      const response = await fileManagerApi.getFiles(searchState);
       if (isMounted()) {
         setState({
           items: response.data,
@@ -98,37 +130,34 @@ const useItemsStore = (searchState) => {
     [searchState]
   );
 
-  const handleDelete = useCallback((itemId) => {
-    // api call should be made here, then get the list again
-    setState((prevState) => {
-      return {
-        ...prevState,
-        items: prevState.items.filter((item) => item.id !== itemId),
-      };
-    });
-  }, []);
+  const handleDelete = useCallback(async (itemId) => {
+    try {
+      const response = await fileManagerApi.deleteFile({
+        user_id: searchState?.user_id,
+        file_id: itemId,
+      });
+      if (isMounted()) {
+        setState((prevState) => {
+          return {
+            ...prevState,
+            items: prevState.items.filter((item) => item.id !== itemId),
+          };
+        });
 
-  const handleFavorite = useCallback((itemId, value) => {
-    setState((prevState) => {
-      return {
-        ...prevState,
-        items: prevState.items.map((item) => {
-          if (item.id === itemId) {
-            return {
-              ...item,
-              isFavorite: value,
-            };
-          }
-
-          return item;
-        }),
-      };
-    });
+        toast.success(response.message, { duration: 5000, position: 'top-center' });
+      }
+    } catch (err) {
+      toast.error('Hubo un error al intentar eliminar PLE.', {
+        duration: 5000,
+        position: 'top-center',
+      });
+      console.error(err);
+    }
   }, []);
 
   return {
     handleDelete,
-    handleFavorite,
+    handleItemsGet,
     ...state,
   };
 };
@@ -144,19 +173,20 @@ const useCurrentItem = (items, itemId) => {
 };
 
 const Page = () => {
+  const user = useMockedUser();
   const settings = useSettings();
-  const itemsSearch = useItemsSearch();
+  const itemsSearch = useItemsSearch(user?.user_id);
   const itemsStore = useItemsStore(itemsSearch.state);
   const [view, setView] = useState('grid');
   const uploadDialog = useDialog();
   const detailsDialog = useDialog();
   const currentItem = useCurrentItem(itemsStore.items, detailsDialog.data);
+  const totals = useItemsTotals(user?.user_id);
 
   usePageView();
 
   const handleDelete = useCallback(
     (itemId) => {
-      // This can be triggered from multiple places, ensure drawer is closed.
       detailsDialog.handleClose();
       itemsStore.handleDelete(itemId);
     },
@@ -165,7 +195,7 @@ const Page = () => {
 
   return (
     <>
-      <Seo title="Dashboard: File Manager" />
+      <Seo title="Dashboard: Gestión PLEs" />
       <Box
         component="main"
         sx={{
@@ -188,7 +218,7 @@ const Page = () => {
                 spacing={4}
               >
                 <div>
-                  <Typography variant="h4">File Manager</Typography>
+                  <Typography variant="h4">Administrador de Archivos</Typography>
                 </div>
                 <Stack
                   alignItems="center"
@@ -204,14 +234,14 @@ const Page = () => {
                     }
                     variant="contained"
                   >
-                    Upload
+                    Subir
                   </Button>
                 </Stack>
               </Stack>
             </Grid>
             <Grid
               xs={12}
-              md={8}
+              md={12}
             >
               <Stack
                 spacing={{
@@ -219,6 +249,7 @@ const Page = () => {
                   lg: 4,
                 }}
               >
+                <StorageStats items={totals.items} />
                 <ItemSearch
                   onFiltersChange={itemsSearch.handleFiltersChange}
                   onSortChange={itemsSearch.handleSortChange}
@@ -241,12 +272,6 @@ const Page = () => {
                 />
               </Stack>
             </Grid>
-            <Grid
-              xs={12}
-              md={4}
-            >
-              <StorageStats />
-            </Grid>
           </Grid>
         </Container>
       </Box>
@@ -260,6 +285,8 @@ const Page = () => {
       <FileUploader
         onClose={uploadDialog.handleClose}
         open={uploadDialog.open}
+        handleItemsTotalsGet={totals.handleItemsTotalsGet}
+        handleItemsGet={itemsStore.handleItemsGet}
       />
     </>
   );

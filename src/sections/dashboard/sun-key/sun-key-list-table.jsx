@@ -34,7 +34,7 @@ export const SunKeyListTable = (props) => {
   const [currentClaveSol, setCurrentClaveSol] = useState(null);
   const [enableBulkActions, setEnableBulkActions] = useState(false);
   const rootMap = new Map();
-
+  console.log(items);
   useEffect(() => {
     setEnableBulkActions(selected.length > 0);
   }, [selected]);
@@ -119,7 +119,6 @@ export const SunKeyListTable = (props) => {
           );
 
           const resp = await claveSolAccountsApi.validateClaveSolAccount(account);
-
           if (resp.validated) {
             root.render(<CheckIcon color="success" />);
           } else {
@@ -129,6 +128,7 @@ export const SunKeyListTable = (props) => {
       }
 
       onDeselectAll();
+      handleClaveSolAccountsGet();
       toast.success('Las cuentas CLAVE SOL seleccionadas han sido procesadas correctamente.', {
         duration: 5000,
         position: 'top-center',

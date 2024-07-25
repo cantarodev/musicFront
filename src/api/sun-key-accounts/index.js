@@ -13,27 +13,31 @@ import {
 
 class ClaveSolAccountsApi {
   async getClaveSolAccounts(request = {}) {
-    const { filters, page, rowsPerPage, userId } = request;
-    let claveSolAccounts = deepCopy(await getClaveSolAccounts(userId));
+    const { filters, page, rowsPerPage, user_id } = request;
+
+    let claveSolAccounts = deepCopy(await getClaveSolAccounts(user_id));
     let data = claveSolAccounts;
     let count = data.length;
 
     if (typeof filters !== 'undefined') {
       data = data.filter((claveSol) => {
-        if (typeof filters.username !== 'undefined' && filters.username !== '') {
-          const usernameMatched = claveSol.username
-            .toLowerCase()
-            .includes(filters.username.toLowerCase());
+        if (typeof filters.query !== 'undefined' && filters.query !== '') {
+          let queryMatched = false;
+          const properties = ['name', 'ruc'];
 
-          if (!usernameMatched) {
+          properties.forEach((property) => {
+            if (claveSol[property].toLowerCase().includes(filters.query.toLowerCase())) {
+              queryMatched = true;
+            }
+          });
+
+          if (!queryMatched) {
             return false;
           }
         }
 
-        if (typeof filters.name !== 'undefined' && filters.name !== '') {
-          const nameMatched = claveSol.name.toLowerCase().includes(filters.name.toLowerCase());
-
-          if (!nameMatched) {
+        if (typeof filters.user_id !== 'undefined') {
+          if (claveSol.user_id !== filters.user_id) {
             return false;
           }
         }
@@ -63,8 +67,8 @@ class ClaveSolAccountsApi {
   }
 
   async createClaveSolAccount(request) {
-    const { account_id, userId, verified, name, ruc, username, password } = request;
-
+    const { account_id, user_id, verified, name, ruc, username, password } = request;
+    console.log(user_id);
     await wait(1000);
 
     return new Promise((resolve, reject) => {
@@ -82,7 +86,7 @@ class ClaveSolAccountsApi {
             }
           );
         } else {
-          createClaveSolAccount(userId, verified, name, ruc, username, password).then((data) => {
+          createClaveSolAccount(user_id, verified, name, ruc, username, password).then((data) => {
             if (data.status !== 'SUCCESS') {
               reject(new Error(data.message));
               return;
@@ -99,14 +103,14 @@ class ClaveSolAccountsApi {
   }
 
   async validateClaveSolAccount(request) {
-    const { account_id, ruc, username, password, mode } = request;
+    const { user_id, account_id, ruc, username, password, mode } = request;
 
     await wait(1000);
 
     return new Promise((resolve, reject) => {
       try {
         // Check if a user already exists
-        validateClaveSolAccount(account_id, ruc, username, password, mode).then((data) => {
+        validateClaveSolAccount(user_id, account_id, ruc, username, password, mode).then((data) => {
           resolve(data);
         });
       } catch (err) {

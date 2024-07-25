@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import SearchMdIcon from '@untitled-ui/icons-react/build/esm/SearchMd';
 import Box from '@mui/material/Box';
@@ -11,7 +11,9 @@ import Typography from '@mui/material/Typography';
 
 import { MultiSelect } from 'src/components/multi-select';
 import { useUpdateEffect } from 'src/hooks/use-update-effect';
-import ComboBox from './sun-key-combobox-users';
+import { Autocomplete, TextField } from '@mui/material';
+
+import { usersApi } from 'src/api/users';
 
 const statusOptions = [
   {
@@ -31,29 +33,38 @@ const statusOptions = [
 export const SunKeyListSearch = (props) => {
   const { onFiltersChange, ...other } = props;
   const queryRef = useRef(null);
+  const autocompleteRef = useRef(null);
   const [chips, setChips] = useState([]);
+  const [users, setUsers] = useState([]);
+  const [selectedUser, setSelectedUser] = useState(null);
+
+  const getUsers = async () => {
+    const response = await usersApi.getUsers();
+    const users = response.data.map((usuario) => ({
+      label: usuario.name + ' ' + usuario.lastname,
+      user_id: usuario._id,
+    }));
+    setUsers(users);
+    return users;
+  };
 
   const handleChipsUpdate = useCallback(() => {
     const filters = {
-      name: undefined,
-      username: undefined,
-      ruc: undefined,
+      query: undefined,
       status: [],
+      user_id: undefined,
     };
 
     chips.forEach((chip) => {
       switch (chip.field) {
-        case 'name':
-          filters.name = chip.value;
-          break;
-        case 'username':
-          filters.username = chip.value;
+        case 'query':
+          filters.query = chip.value;
           break;
         case 'status':
           filters.status.push(chip.value);
           break;
-        case 'ruc':
-          filters.ruc = chip.value;
+        case 'user_id':
+          filters.user_id = chip.value;
           break;
         default:
           break;
@@ -75,17 +86,57 @@ export const SunKeyListSearch = (props) => {
     });
   }, []);
 
+  const handleAutocompleteChange = (event, newValue) => {
+    event.preventDefault();
+
+    const { label, user_id } = newValue || { label: '', user_id: '' };
+    const value = user_id;
+
+    setChips((prevChips) => {
+      const foundNameChip = prevChips.find((chip) => chip.field === 'user_id');
+
+      if (foundNameChip && value) {
+        return prevChips.map((chip) => {
+          if (chip.field === 'user_id') {
+            return {
+              ...chip,
+              value: user_id || '',
+            };
+          }
+          return chip;
+        });
+      }
+
+      if (foundNameChip && !value) {
+        return prevChips.filter((chip) => chip.field !== 'user_id');
+      }
+
+      if (!foundNameChip && value) {
+        const chip = {
+          label: 'Usuario',
+          field: 'user_id',
+          value,
+          displayValue: label,
+        };
+
+        return [...prevChips, chip];
+      }
+
+      return prevChips;
+    });
+  };
+
   const handleQueryChange = useCallback((event) => {
     event.preventDefault();
 
     const value = queryRef.current?.value || '';
 
     setChips((prevChips) => {
-      const foundNameChip = prevChips.find((chip) => chip.field === 'name');
+      const foundNameChip = prevChips.find((chip) => chip.field === 'query');
 
       if (foundNameChip && value) {
         return prevChips.map((chip) => {
-          if (chip.field === 'name') {
+          if (chip.field === 'query') {
             return {
               ...chip,
               value: queryRef.current?.value || '',
@@ -96,13 +147,13 @@ export const SunKeyListSearch = (props) => {
       }
 
       if (foundNameChip && !value) {
-        return prevChips.filter((chip) => chip.field !== 'name');
+        return prevChips.filter((chip) => chip.field !== 'query');
       }
 
       if (!foundNameChip && value) {
         const chip = {
-          label: 'Bucar por nombre...',
-          field: 'name',
+          label: 'Nombre o Ruc',
+          field: 'query',
           value,
         };
 
@@ -120,7 +171,6 @@ export const SunKeyListSearch = (props) => {
   const handleStatusChange = useCallback((values) => {
     setChips((prevChips) => {
       const valuesFound = [];
-
       // First cleanup the previous chips
       const newChips = prevChips.filter((chip) => {
         if (chip.field !== 'status') {
@@ -165,6 +215,10 @@ export const SunKeyListSearch = (props) => {
 
   const showChips = chips.length > 0;
 
+  useEffect(() => {
+    getUsers();
+  }, []);
+
   return (
     <div {...other}>
       <Stack
@@ -191,11 +245,23 @@ export const SunKeyListSearch = (props) => {
             disableUnderline
             fullWidth
             inputProps={{ ref: queryRef }}
-            placeholder="Nombre..."
+            placeholder="Filtrar por nombre o ruc ..."
             sx={{ flexGrow: 1 }}
           />
         </Stack>
-        <ComboBox />
+        <Autocomplete
+          disablePortal
+          id="combo-box"
+          options={users}
+          sx={{ width: 300 }}
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              label="Usuarios"
+            />
+          )}
+          onChange={handleAutocompleteChange}
+        />
       </Stack>
       <Divider />
       {showChips ? (
