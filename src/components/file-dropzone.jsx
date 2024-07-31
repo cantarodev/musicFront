@@ -15,13 +15,15 @@ import SvgIcon from '@mui/material/SvgIcon';
 import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
 import toast from 'react-hot-toast';
-
 import { fileManagerApi } from 'src/api/file-manager/index';
-
 import { FileIcon } from 'src/components/file-icon';
 import { bytesToSize } from 'src/utils/bytes-to-size';
 import { useState } from 'react';
 import { useMockedUser } from 'src/hooks/use-mocked-user';
+import Select from '@mui/material/Select';
+import MenuItem from '@mui/material/MenuItem';
+import FormControl from '@mui/material/FormControl';
+import InputLabel from '@mui/material/InputLabel';
 
 export const FileDropzone = (props) => {
   const {
@@ -36,17 +38,38 @@ export const FileDropzone = (props) => {
   } = props;
   const { getRootProps, getInputProps, isDragActive } = useDropzone(other);
   const [uploading, setUploading] = useState(false);
-  const [errorMessage, setErrorMessage] = useState('');
 
   const user = useMockedUser();
-  console.log(user);
+  console.log('User:', user);
   const hasAnyFiles = files.length > 0;
 
+  // Estados para los desplegables
+  const [periodocpe, setPeriodocpe] = useState('');
+  const [type, setType] = useState('');
+  const [showConfirmation, setShowConfirmation] = useState(false);
+
+  const handlePeriodocpeChange = (e) => {
+    setPeriodocpe(e.target.value);
+    console.log('Periodocpe seleccionado:', e.target.value);
+  };
+
+  const handleTypeChange = (e) => {
+    setType(e.target.value);
+    console.log('Tipo seleccionado:', e.target.value);
+  };
+
   const handleUpload = async () => {
+    setShowConfirmation(true);
+  };
+
+  const confirmUpload = async () => {
     setUploading(true);
+    console.log('Enviando los siguientes valores:');
     try {
       const formData = new FormData();
       formData.append('user_id', user?.user_id);
+      formData.append('period', periodocpe.replace(/-/g, ''));
+      formData.append('type', type);
       files.forEach((file) => {
         formData.append('files', file);
       });
@@ -66,8 +89,53 @@ export const FileDropzone = (props) => {
     }
   };
 
+  const cancelUpload = () => {
+    setShowConfirmation(false);
+  };
+
+  const currentYear = new Date().getFullYear();
+  const currentMonth = new Date().getMonth() + 1;
+  const months = Array.from({ length: currentMonth }, (v, i) => {
+    const month = (i + 1).toString().padStart(2, '0');
+    return `${currentYear}-${month}`;
+  });
+
   return (
     <div>
+      {/* Desplegables */}
+      <Stack direction="row" spacing={2} sx={{ mb: 2 }}>
+        <FormControl sx={{ m: 1, minWidth: 120 }}>
+          <InputLabel id="periodocpe-label">Periodo CPE</InputLabel>
+          <Select
+            labelId="periodocpe-label"
+            id="periodocpe"
+            value={periodocpe}
+            onChange={handlePeriodocpeChange}
+            label="Periodo CPE"
+          >
+            {months.map((month) => (
+              <MenuItem key={month} value={month}>
+                {month}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+        <FormControl sx={{ m: 1, minWidth: 120 }}>
+          <InputLabel id="type-label">Tipo</InputLabel>
+          <Select
+            labelId="type-label"
+            id="type"
+            value={type}
+            onChange={handleTypeChange}
+            label="Tipo"
+          >
+            <MenuItem value="compras">compras</MenuItem>
+            <MenuItem value="ventas">ventas</MenuItem>
+            {/* Añade más opciones según sea necesario */}
+          </Select>
+        </FormControl>
+      </Stack>
+
       <Box
         sx={{
           alignItems: 'center',
@@ -93,17 +161,8 @@ export const FileDropzone = (props) => {
         {...getRootProps()}
       >
         <input {...getInputProps()} />
-        <Stack
-          alignItems="center"
-          direction="row"
-          spacing={2}
-        >
-          <Avatar
-            sx={{
-              height: 64,
-              width: 64,
-            }}
-          >
+        <Stack alignItems="center" direction="row" spacing={2}>
+          <Avatar sx={{ height: 64, width: 64 }}>
             <SvgIcon>
               <Upload01Icon />
             </SvgIcon>
@@ -120,10 +179,7 @@ export const FileDropzone = (props) => {
               <span>Haga clic para cargar</span> o arrastrar y soltar
             </Typography>
             {caption && (
-              <Typography
-                color="text.secondary"
-                variant="body2"
-              >
+              <Typography color="text.secondary" variant="body2">
                 {caption}
               </Typography>
             )}
@@ -133,10 +189,7 @@ export const FileDropzone = (props) => {
       {hasAnyFiles && (
         <Box sx={{ mt: 2 }}>
           {uploading && (
-            <Typography
-              variant="body2"
-              style={{ marginTop: '10px' }}
-            >
+            <Typography variant="body2" style={{ marginTop: '10px' }}>
               Subiendo archivos, por favor espera...
             </Typography>
           )}
@@ -165,10 +218,7 @@ export const FileDropzone = (props) => {
                     secondary={bytesToSize(file.size)}
                   />
                   <Tooltip title="Remove">
-                    <IconButton
-                      edge="end"
-                      onClick={() => onRemove?.(file)}
-                    >
+                    <IconButton edge="end" onClick={() => onRemove?.(file)}>
                       <SvgIcon>
                         <XIcon />
                       </SvgIcon>
@@ -185,12 +235,7 @@ export const FileDropzone = (props) => {
             spacing={2}
             sx={{ mt: 2 }}
           >
-            <Button
-              color="inherit"
-              onClick={onRemoveAll}
-              size="small"
-              type="button"
-            >
+            <Button color="inherit" onClick={onRemoveAll} size="small" type="button">
               Eliminar todo
             </Button>
             <Button
@@ -198,8 +243,35 @@ export const FileDropzone = (props) => {
               size="small"
               type="button"
               variant="contained"
+              disabled={!periodocpe || !type}
             >
               Subir
+            </Button>
+          </Stack>
+        </Box>
+      )}
+      {showConfirmation && (
+        <Box
+          sx={{
+            alignItems: 'center',
+            border: 1,
+            borderRadius: 1,
+            borderStyle: 'solid',
+            borderColor: 'primary.main',
+            p: 3,
+            mt: 2,
+            backgroundColor: 'background.paper',
+          }}
+        >
+          <Typography variant="h6">
+            ¿Estás seguro de subir PLE {type}, periodo {periodocpe}?
+          </Typography>
+          <Stack direction="row" spacing={2} sx={{ mt: 2 }}>
+            <Button variant="contained" color="primary" onClick={confirmUpload}>
+              Confirmar
+            </Button>
+            <Button variant="outlined" color="secondary" onClick={cancelUpload}>
+              Cancelar
             </Button>
           </Stack>
         </Box>
