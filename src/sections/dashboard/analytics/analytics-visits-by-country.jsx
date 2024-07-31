@@ -51,39 +51,40 @@ export const AnalyticsVisitsByCountry = (props) => {
   return (
     <Card>
       <CardHeader
-        title="Visits by Country"
-        action={
-          <Tooltip title="Refresh rate is 24h">
-            <SvgIcon color="action">
-              <InfoCircleIcon />
-            </SvgIcon>
-          </Tooltip>
-        }
+        title="Detalle"
+        // action={
+        //   <Tooltip title="Refresh rate is 24h">
+        //     <SvgIcon color="action">
+        //       <InfoCircleIcon />
+        //     </SvgIcon>
+        //   </Tooltip>
+        // }
       />
       <Table>
         <TableHead>
           <TableRow>
-            <TableCell>Country</TableCell>
+            <TableCell>Periodo</TableCell>
+            <TableCell>Serie</TableCell>
             <TableCell sortDirection={sort}>
-              <TableSortLabel
+              {/* <TableSortLabel
                 active
                 direction={sort}
                 onClick={handleSort}
               >
-                Value
-              </TableSortLabel>
+                Número
+              </TableSortLabel> */}
+              Número
             </TableCell>
-            <TableCell>SEO</TableCell>
+            <TableCell>Ple?</TableCell>
+            <TableCell>Base de datos?</TableCell>
+            <TableCell>Observación</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
-          {sortedVisits.map((visit) => {
-            const visits = numeral(visit.value).format('0,0');
-            const flag = flagMap[visit.id];
-
+          {sortedVisits.map((visit, index) => {
             return (
               <TableRow
-                key={visit.id}
+                key={index}
                 sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
               >
                 <TableCell>
@@ -93,31 +94,50 @@ export const AnalyticsVisitsByCountry = (props) => {
                       display: 'flex',
                     }}
                   >
-                    <Box
-                      sx={{
-                        height: 16,
-                        width: 16,
-                        '& img': {
-                          height: 16,
-                          width: 16,
-                        },
-                      }}
-                    >
-                      <img
-                        alt={visit.name}
-                        src={flag}
-                      />
-                    </Box>
                     <Typography
                       sx={{ ml: 1 }}
                       variant="subtitle2"
                     >
-                      {visit.name}
+                      {visit.period}
                     </Typography>
                   </Box>
                 </TableCell>
-                <TableCell>{visits}</TableCell>
-                <TableCell>{visit.seoPercentage}%</TableCell>
+                <TableCell>{visit.series}</TableCell>
+                <TableCell>{visit.number}</TableCell>
+                <TableCell>
+                  <Typography
+                    sx={visit.existsInPle ? { color: 'green' } : { color: 'red' }}
+                    variant="h5"
+                    padding={1}
+                  >
+                    •
+                  </Typography>
+                </TableCell>
+                <TableCell>
+                  <Typography
+                    sx={visit.existsInDb ? { color: 'green' } : { color: 'red' }}
+                    variant="h5"
+                    padding={1}
+                  >
+                    •
+                  </Typography>
+                </TableCell>
+                <TableCell>
+                  <Tooltip title={visit.observation}>
+                    <Typography
+                      sx={{ cursor: 'pointer' }}
+                      variant="subtitle2"
+                      style={{
+                        whiteSpace: 'nowrap',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        maxWidth: '200px',
+                      }}
+                    >
+                      {visit.observation}
+                    </Typography>
+                  </Tooltip>
+                </TableCell>
               </TableRow>
             );
           })}
@@ -134,7 +154,7 @@ export const AnalyticsVisitsByCountry = (props) => {
           }
           size="small"
         >
-          See more
+          Ver más
         </Button>
       </CardActions>
     </Card>

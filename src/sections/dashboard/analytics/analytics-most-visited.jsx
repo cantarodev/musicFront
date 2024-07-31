@@ -16,84 +16,152 @@ import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
 
 import { Scrollbar } from 'src/components/scrollbar';
+import { Box, Container, Paper, Tab, TableContainer, TableSortLabel, Tabs } from '@mui/material';
+import { useCallback, useMemo, useState } from 'react';
+
+import { applySort } from 'src/utils/apply-sort';
 
 export const AnalyticsMostVisited = (props) => {
-  const { pages } = props;
+  const { reports } = props;
+  const [selectedTab, setSelectedTab] = useState(0);
+
+  const handleChange = (event, newValue) => {
+    setSelectedTab(newValue);
+  };
 
   return (
     <Card>
       <CardHeader
-        title="PLEs"
+        title="Periodos"
         action={
-          <Tooltip title="Refresh rate is 24h">
-            <SvgIcon color="action">
-              <InfoCircleIcon />
-            </SvgIcon>
-          </Tooltip>
+          <Tabs
+            value={selectedTab}
+            onChange={handleChange}
+            centered
+          >
+            <Tab label="Compras" />
+            <Tab label="Ventas" />
+          </Tabs>
         }
       />
-      <Scrollbar>
-        <Table sx={{ minWidth: 600 }}>
-          <TableHead>
-            <TableRow>
-              <TableCell>Periodo</TableCell>
-              <TableCell>Nombre</TableCell>
-              <TableCell>PLE</TableCell>
-              <TableCell>Base de datos</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {pages.map((page) => {
-              const formatPle = numeral(page.ple).format('0,0');
-              const formatDb = numeral(page.db).format('0,0');
+      <Container>
+        <Box mt={2}>
+          {selectedTab === 0 && (
+            <Scrollbar>
+              <TableContainer component={Paper}>
+                <Table sx={{ minWidth: 600 }}>
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>Periodo</TableCell>
+                      <TableCell>PLE</TableCell>
+                      <TableCell>Base de datos</TableCell>
+                      <TableCell>Estado</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {reports?.purchases?.map((report) => {
+                      const formatPle = numeral(report.quantityS3).format('0,0');
+                      const formatDb = numeral(report.quantityDb).format('0,0');
 
-              return (
-                <TableRow
-                  key={page.url}
-                  sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
-                >
-                  <TableCell>
-                    <Link
-                      color="text.primary"
-                      href="#"
-                    >
-                      <Stack
-                        alignItems="center"
-                        direction="row"
-                        spacing={2}
-                      >
-                        <Typography variant="body2">{page.period}</Typography>
-                      </Stack>
-                    </Link>
-                  </TableCell>
-                  <TableCell>
-                    <Tooltip title={page.name}>
-                      <Typography
-                        sx={{ cursor: 'pointer' }}
-                        variant="subtitle2"
-                        style={{
-                          whiteSpace: 'nowrap',
-                          overflow: 'hidden',
-                          textOverflow: 'ellipsis',
-                          maxWidth: '200px',
-                        }}
-                      >
-                        {page.name}
-                      </Typography>
-                    </Tooltip>
-                  </TableCell>
-                  <TableCell>{formatPle}</TableCell>
-                  <TableCell>{formatDb}</TableCell>
-                </TableRow>
-              );
-            })}
-          </TableBody>
-        </Table>
-      </Scrollbar>
+                      return (
+                        <TableRow
+                          key={report.url}
+                          sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+                        >
+                          <TableCell>
+                            <Link
+                              color="text.primary"
+                              href="#"
+                            >
+                              <Stack
+                                alignItems="center"
+                                direction="row"
+                                spacing={2}
+                              >
+                                <Typography variant="body2">{report.period}</Typography>
+                              </Stack>
+                            </Link>
+                          </TableCell>
+                          <TableCell>{formatPle}</TableCell>
+                          <TableCell>{formatDb}</TableCell>
+                          <TableCell>
+                            <Typography
+                              sx={report.status ? { color: 'green' } : { color: 'red' }}
+                              variant="h5"
+                              padding={1}
+                            >
+                              •
+                            </Typography>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            </Scrollbar>
+          )}
+          {selectedTab === 1 && (
+            <Scrollbar>
+              <TableContainer component={Paper}>
+                <Table sx={{ minWidth: 600 }}>
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>Periodo</TableCell>
+                      <TableCell>PLE</TableCell>
+                      <TableCell>Base de datos</TableCell>
+                      <TableCell>Estado</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {reports?.sales?.map((report) => {
+                      const formatPle = numeral(report.quantityS3).format('0,0');
+                      const formatDb = numeral(report.quantityDb).format('0,0');
+
+                      return (
+                        <TableRow
+                          key={report.url}
+                          sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+                        >
+                          <TableCell>
+                            <Link
+                              color="text.primary"
+                              href="#"
+                            >
+                              <Stack
+                                alignItems="center"
+                                direction="row"
+                                spacing={2}
+                              >
+                                <Typography variant="body2">{report.period}</Typography>
+                              </Stack>
+                            </Link>
+                          </TableCell>
+                          <TableCell>{formatPle}</TableCell>
+                          <TableCell>{formatDb}</TableCell>
+                          <TableCell>
+                            <Typography
+                              sx={report.status ? { color: 'green' } : { color: 'red' }}
+                              variant="h5"
+                              padding={1}
+                            >
+                              •
+                            </Typography>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            </Scrollbar>
+          )}
+        </Box>
+      </Container>
     </Card>
   );
 };
 
 AnalyticsMostVisited.propTypes = {
-  pages: PropTypes.array.isRequired,
+  reports: PropTypes.object.isRequired,
 };
