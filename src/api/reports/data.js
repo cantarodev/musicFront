@@ -11,3 +11,16 @@ export const getReportStatus = async (user_id) => {
     return response.data;
   }
 };
+
+export const getReportDetails = async (user_id, period, type, page, pageSize) => {
+  try {
+    const { data } = await axios.get(
+      `http://localhost:5000/api/v1/report/details/${user_id}/${period}/${type}?page=${page}&pageSize=${pageSize}`
+    );
+    const { items, total } = data;
+    return { items, total };
+  } catch (error) {
+    console.log(error);
+    return { items: [], total: 0 };
+  }
+};
