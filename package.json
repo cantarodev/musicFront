@@ -6,6 +6,7 @@
   "private": true,
   "scripts": {
     "dev": "vite",
+    "test": "vite test",
     "build": "vite build",
     "start": "vite preview",
     "lint": "eslint ./src",

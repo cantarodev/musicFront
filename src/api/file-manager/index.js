@@ -6,6 +6,7 @@ import { wait } from 'src/utils/wait';
 import { createFile, getFiles, getTotals, deleteFile, downloadFile } from './data';
 
 class FileManagerApi {
+  
   async createFile(request) {
     const formData = request;
     await wait(1000);

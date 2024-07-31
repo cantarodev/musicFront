@@ -27,6 +27,7 @@ export const getTotals = async (user_id) => {
 
 export const createFile = async (formData) => {
   try {
+    console.log(formData);
     const { data } = await axios.post('http://localhost:5000/api/v1/file/upload', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
