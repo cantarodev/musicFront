@@ -15,6 +15,14 @@ import { AnalyticsVisitsByCountry } from 'src/sections/dashboard/analytics/analy
 const Page = () => {
   const settings = useSettings();
   const [reports, setReports] = useState({});
+  const [details, setDetails] = useState([]);
+
+  const [selectedParams, setSelectedParams] = useState({ period: '202405', type: 'compras' });
+
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [totalRecords, setTotalRecords] = useState(0);
+
   const user = useMockedUser();
 
   // usePageView();
@@ -29,9 +37,54 @@ const Page = () => {
     }
   }, [user]);
 
+  const handleDetails = useCallback(
+    async (period, type, page, pageSize) => {
+      const user_id = user?.user_id;
+      try {
+        const response = await reportApi.getReportDetails({
+          user_id,
+          period,
+          type,
+          page,
+          pageSize,
+        });
+        setDetails(response.items);
+        return response;
+      } catch (err) {
+        console.error(err);
+      }
+    },
+    [user]
+  );
+
   useEffect(() => {
     handleReports();
   }, [handleReports]);
+
+  useEffect(() => {
+    const loadData = async () => {
+      const paginatedData = await handleDetails(
+        selectedParams.period,
+        selectedParams.type,
+        page + 1,
+        rowsPerPage
+      );
+      setDetails(paginatedData.items);
+      setTotalRecords(paginatedData.total);
+    };
+    loadData();
+  }, [selectedParams, page, rowsPerPage]);
+
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
+
+  console.log(selectedParams);
 
   return (
     <>
@@ -66,79 +119,23 @@ const Page = () => {
               xs={12}
               lg={12}
             >
-              <AnalyticsMostVisited reports={reports} />
+              <AnalyticsMostVisited
+                selectedParams={selectedParams}
+                setSelectedParams={setSelectedParams}
+                reports={reports}
+              />
             </Grid>
             <Grid
               xs={12}
               lg={12}
             >
               <AnalyticsVisitsByCountry
-                visits={[
-                  {
-                    period: '202405',
-                    series: 'E001',
-                    number: 6907,
-                    existsInPle: true,
-                    existsInDb: true,
-                    observation: '',
-                  },
-                  {
-                    period: '202405',
-                    series: 'E001',
-                    number: 9386,
-                    existsInPle: true,
-                    existsInDb: true,
-                    observation: 'Discrepancia de montos entre valores de PLE y Base de datos',
-                  },
-                  {
-                    period: '202405',
-                    series: 'F001',
-                    number: 35495,
-                    existsInPle: true,
-                    existsInDb: true,
-                    observation: '',
-                  },
-                  {
-                    period: '202405',
-                    series: 'E001',
-                    number: 883,
-                    existsInPle: true,
-                    existsInDb: false,
-                    observation: 'Registro en PLE presente, Registro en la base de datos ausente.',
-                  },
-                  {
-                    period: '202405',
-                    series: 'F300',
-                    number: 476279,
-                    existsInPle: true,
-                    existsInDb: true,
-                    observation: '',
-                  },
-                  {
-                    period: '202405',
-                    series: 'F001',
-                    number: 2268,
-                    existsInPle: true,
-                    existsInDb: true,
-                    observation: '',
-                  },
-                  {
-                    period: '202405',
-                    series: 'F001',
-                    number: 6470,
-                    existsInPle: false,
-                    existsInDb: true,
-                    observation: 'Registro en la base de datos presente, Registro en PLE ausente.',
-                  },
-                  {
-                    period: '202405',
-                    series: 'F004',
-                    number: 516086,
-                    existsInPle: true,
-                    existsInDb: true,
-                    observation: '',
-                  },
-                ]}
+                details={details}
+                totalRecords={totalRecords}
+                rowsPerPage={rowsPerPage}
+                page={page}
+                handleChangePage={handleChangePage}
+                handleChangeRowsPerPage={handleChangeRowsPerPage}
               />
             </Grid>
           </Grid>
