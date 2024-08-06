@@ -14,28 +14,16 @@ import { AnalyticsVisitsByCountry } from 'src/sections/dashboard/analytics/analy
 
 const Page = () => {
   const settings = useSettings();
-  const [reports, setReports] = useState({});
+  const [generalDetail, setGeneralDetail] = useState({});
   const [details, setDetails] = useState([]);
 
-  const [selectedParams, setSelectedParams] = useState({ period: '202405', type: 'compras' });
+  const [selectedParams, setSelectedParams] = useState({ period: '', type: 'compras' });
 
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [totalRecords, setTotalRecords] = useState(0);
 
   const user = useMockedUser();
-
-  // usePageView();
-
-  const handleReports = useCallback(async () => {
-    const user_id = user?.user_id;
-    try {
-      const response = await reportApi.getReportStatus({ user_id });
-      setReports(response);
-    } catch (err) {
-      console.error(err);
-    }
-  }, [user]);
 
   const handleDetails = useCallback(
     async (period, type, page, pageSize) => {
@@ -49,6 +37,7 @@ const Page = () => {
           pageSize,
         });
         setDetails(response.items);
+        setGeneralDetail(response.generalDetail);
         return response;
       } catch (err) {
         console.error(err);
@@ -56,10 +45,6 @@ const Page = () => {
     },
     [user]
   );
-
-  useEffect(() => {
-    handleReports();
-  }, [handleReports]);
 
   useEffect(() => {
     const loadData = async () => {
@@ -71,6 +56,7 @@ const Page = () => {
       );
       setDetails(paginatedData.items);
       setTotalRecords(paginatedData.total);
+      setGeneralDetail(paginatedData.generalDetail);
     };
     loadData();
   }, [selectedParams, page, rowsPerPage]);
@@ -83,8 +69,6 @@ const Page = () => {
     setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0);
   };
-
-  console.log(selectedParams);
 
   return (
     <>
@@ -122,7 +106,6 @@ const Page = () => {
               <AnalyticsMostVisited
                 selectedParams={selectedParams}
                 setSelectedParams={setSelectedParams}
-                reports={reports}
               />
             </Grid>
             <Grid
@@ -130,7 +113,8 @@ const Page = () => {
               lg={12}
             >
               <AnalyticsVisitsByCountry
-                details={details}
+                details={details || []}
+                generalDetail={generalDetail}
                 totalRecords={totalRecords}
                 rowsPerPage={rowsPerPage}
                 page={page}

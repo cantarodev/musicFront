@@ -1,4 +1,4 @@
-import { useCallback, useRef } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import Grid01Icon from '@untitled-ui/icons-react/build/esm/Grid01';
 import ListIcon from '@untitled-ui/icons-react/build/esm/List';
@@ -10,10 +10,13 @@ import OutlinedInput from '@mui/material/OutlinedInput';
 import Stack from '@mui/material/Stack';
 import SvgIcon from '@mui/material/SvgIcon';
 import TextField from '@mui/material/TextField';
-import ToggleButton from '@mui/material/ToggleButton';
-import ToggleButtonGroup, { toggleButtonGroupClasses } from '@mui/material/ToggleButtonGroup';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { LocalizationProvider } from '@mui/x-date-pickers';
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
+import { startOfMonth, format } from 'date-fns';
+import { esES } from '@mui/x-date-pickers/locales';
 
-const searchOptions = [
+const searchTypeOptions = [
   {
     label: 'Compras',
     value: 'compras',
@@ -24,116 +27,85 @@ const searchOptions = [
   },
 ];
 
+const searchStatusOptions = [
+  {
+    label: 'Todo',
+    value: 'todo',
+  },
+  {
+    label: 'No existe en PLE',
+    value: 'no-ple',
+  },
+  {
+    label: 'Existe en PLE',
+    value: 'si-ple',
+  },
+  {
+    label: 'No existe en Base de Datos',
+    value: 'no-bd',
+  },
+  {
+    label: 'Existe en Base de Datos',
+    value: 'si-bd',
+  },
+];
+
 export const ItemSearch = (props) => {
-  const {
-    onFiltersChange,
-    onSortChange,
-    onViewChange,
-    view = 'grid',
-    // sortBy = 'createdAt',
-    selectedParams,
-    setSelectedParams,
-  } = props;
-  const queryRef = useRef(null);
+  const { selectedParams, setSelectedParams } = props;
 
-  const handleQueryChange = useCallback(
-    (event) => {
-      event.preventDefault();
-      const query = queryRef.current?.value || '';
-
-      onFiltersChange?.({
-        query,
-      });
-    },
-    [onFiltersChange]
-  );
-
-  const handleSearchChange = useCallback((event) => {
-    const value = event.target.value;
-    console.log(value);
-  }, []);
+  const currentDate = new Date();
+  const [selectedDate, setSelectedDate] = useState(startOfMonth(currentDate));
 
   const handleSelected = (event) => {
     const { value } = event.target;
-    console.log(value);
     setSelectedParams((state) => ({ ...state, type: value }));
   };
 
-  const handleViewChange = useCallback(
-    (event, value) => {
-      onViewChange?.(value);
+  const handleDateChange = useCallback(
+    (date) => {
+      const value = formatDate(date);
+      setSelectedDate(date);
+      setSelectedParams((state) => ({ ...state, period: value }));
     },
-    [onViewChange]
+    [setSelectedParams]
   );
+
+  const formatDate = (date) => {
+    if (!date) return '';
+    return format(date, 'yyyyMM');
+  };
+
+  useEffect(() => {
+    handleDateChange(selectedDate);
+  }, [selectedDate, handleDateChange]);
 
   return (
     <Card>
       <Stack
         alignItems="center"
         direction="row"
+        justifyContent="space-between"
         gap={2}
         sx={{ p: 2 }}
       >
-        <Box
-          component="form"
-          onSubmit={handleQueryChange}
-          sx={{ flexGrow: 1 }}
-        >
-          <OutlinedInput
-            defaultValue=""
-            fullWidth
-            inputProps={{ ref: queryRef }}
-            name="itemName"
-            placeholder="Buscar"
-            startAdornment={
-              <InputAdornment position="start">
-                <SvgIcon>
-                  <SearchMdIcon />
-                </SvgIcon>
-              </InputAdornment>
-            }
-          />
-        </Box>
-        <ToggleButtonGroup
-          exclusive
-          onChange={handleViewChange}
-          sx={{
-            borderWidth: 1,
-            borderColor: 'divider',
-            borderStyle: 'solid',
-            [`& .${toggleButtonGroupClasses.grouped}`]: {
-              margin: 0.5,
-              border: 0,
-              '&:not(:first-of-type)': {
-                borderRadius: 1,
-              },
-              '&:first-of-type': {
-                borderRadius: 1,
-              },
-            },
-          }}
-          value={view}
-        >
-          <ToggleButton value="grid">
-            <SvgIcon fontSize="small">
-              <Grid01Icon />
-            </SvgIcon>
-          </ToggleButton>
-          <ToggleButton value="list">
-            <SvgIcon fontSize="small">
-              <ListIcon />
-            </SvgIcon>
-          </ToggleButton>
-        </ToggleButtonGroup>
         <TextField
-          label="Tipo"
+          label="Serie"
+          name="serie"
+          placeholder="F001"
+        />
+        <TextField
+          label="Número"
+          name="numero"
+          placeholder="1234"
+        />
+        <TextField
+          label="Estado"
           name="search"
-          onChange={handleSelected}
           select
           SelectProps={{ native: true }}
           value={selectedParams.type}
         >
-          {searchOptions.map((option) => (
+          {searchStatusOptions.map((option) => (
             <option
               key={option.value}
               value={option.value}
@@ -142,18 +114,48 @@ export const ItemSearch = (props) => {
             </option>
           ))}
         </TextField>
+        <TextField
+          label="Tipo"
+          name="search"
+          onChange={handleSelected}
+          select
+          SelectProps={{ native: true }}
+          value={selectedParams.type}
+        >
+          {searchTypeOptions.map((option) => (
+            <option
+              key={option.value}
+              value={option.value}
+            >
+              {option.label}
+            </option>
+          ))}
+        </TextField>
+        <LocalizationProvider
+          dateAdapter={AdapterDateFns}
+          locale={esES}
+        >
+          <DatePicker
+            label="Periodo"
+            views={['year', 'month']}
+            value={selectedDate}
+            onChange={handleDateChange}
+            textField={(params) => (
+              <TextField
+                {...params}
+                fullWidth
+                margin="normal"
+              />
+            )}
+            format="MMMM yyyy" // Formato para la entrada
+          />
+        </LocalizationProvider>
       </Stack>
     </Card>
   );
 };
 
 ItemSearch.propTypes = {
-  onFiltersChange: PropTypes.func,
-  onSortChange: PropTypes.func,
-  onViewChange: PropTypes.func,
-  sortBy: PropTypes.string,
-  sortDir: PropTypes.oneOf(['asc', 'desc']),
-  view: PropTypes.oneOf(['grid', 'list']),
   selectedParams: PropTypes.object,
   setSelectedParams: PropTypes.func,
 };
