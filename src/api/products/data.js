@@ -134,7 +134,7 @@ const now = new Date();
 
 export const getSolKeyAccounts = async (userId) => {
   try {
-    const { data } = await axios.get(`http://localhost:5000/api/v1/solKeyAccount/${userId}`);
+    const { data } = await axios.get(`https://server-izitax.analytia.pe/api/v1/solKeyAccount/${userId}`);
     const solKeyAccounts = JSON.parse(data.solKeyAccounts);
     return solKeyAccounts;
   } catch (error) {
@@ -145,7 +145,7 @@ export const getSolKeyAccounts = async (userId) => {
 
 export const createSolKeyAccount = async (userId, ruc, username, password) => {
   try {
-    const { data } = await axios.post('http://localhost:5000/api/v1/solKeyAccount/', {
+    const { data } = await axios.post('https://server-izitax.analytia.pe/api/v1/solKeyAccount/', {
       userId,
       ruc,
       username,
@@ -160,7 +160,7 @@ export const createSolKeyAccount = async (userId, ruc, username, password) => {
 
 export const updateSolKeyAccount = async (id, ruc, username, password) => {
   try {
-    const { data } = await axios.put('http://localhost:5000/api/v1/solKeyAccount/', {
+    const { data } = await axios.put('https://server-izitax.analytia.pe/api/v1/solKeyAccount/', {
       id,
       ruc,
       username,

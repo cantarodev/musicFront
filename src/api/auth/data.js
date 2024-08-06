@@ -13,7 +13,7 @@ import axios from 'axios';
 
 export const getUser = async (email, password) => {
   try {
-    const { data } = await axios.post('http://localhost:5000/api/v1/user/info', {
+    const { data } = await axios.post('https://server-izitax.analytia.pe/api/v1/user/info', {
       email,
       password,
     });
@@ -35,7 +35,7 @@ export const createUser = async (
   password
 ) => {
   try {
-    const { data } = await axios.post('http://localhost:5000/api/v1/user/', {
+    const { data } = await axios.post('https://server-izitax.analytia.pe/api/v1/user/', {
       name,
       lastname,
       dni,
@@ -55,7 +55,7 @@ export const createUser = async (
 export const verifyAccount = async (user_id, token) => {
   try {
     const { data } = await axios.get(
-      `http://localhost:5000/api/v1/user/verify/${user_id}/${token}`
+      `https://server-izitax.analytia.pe/api/v1/user/verify/${user_id}/${token}`
     );
     return data;
   } catch (error) {
@@ -65,7 +65,7 @@ export const verifyAccount = async (user_id, token) => {
 
 export const forgotPassword = async (email, redirectUrl) => {
   try {
-    const { data } = await axios.post('http://localhost:5000/api/v1/user/requestPasswordReset', {
+    const { data } = await axios.post('https://server-izitax.analytia.pe/api/v1/user/requestPasswordReset', {
       email,
       redirectUrl,
     });
@@ -77,7 +77,7 @@ export const forgotPassword = async (email, redirectUrl) => {
 
 export const resetPassword = async (userId, resetString, newPassword) => {
   try {
-    const { data } = await axios.post('http://localhost:5000/api/v1/user/resetPassword', {
+    const { data } = await axios.post('https://server-izitax.analytia.pe/api/v1/user/resetPassword', {
       userId,
       resetString,
       newPassword,
@@ -91,7 +91,7 @@ export const resetPassword = async (userId, resetString, newPassword) => {
 export const verifyLink = async (userId, resetString) => {
   try {
     const { data } = await axios.get(
-      `http://localhost:5000/api/v1/user/verifyLink/${userId}/${resetString}`
+      `https://server-izitax.analytia.pe/api/v1/user/verifyLink/${userId}/${resetString}`
     );
     return data;
   } catch (error) {

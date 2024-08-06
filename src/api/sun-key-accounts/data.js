@@ -2,7 +2,7 @@ import axios from 'axios';
 
 export const getClaveSolAccounts = async (user_id) => {
   try {
-    const { data } = await axios.get(`http://localhost:5000/api/v1/claveSolAccount/${user_id}`);
+    const { data } = await axios.get(`https://server-izitax.analytia.pe/api/v1/claveSolAccount/${user_id}`);
     const claveSolAccounts = JSON.parse(data.claveSolAccounts);
 
     return claveSolAccounts;
@@ -15,7 +15,7 @@ export const getClaveSolAccounts = async (user_id) => {
 
 export const createClaveSolAccount = async (user_id, verified, name, ruc, username, password) => {
   try {
-    const { data } = await axios.post('http://localhost:5000/api/v1/claveSolAccount/', {
+    const { data } = await axios.post('https://server-izitax.analytia.pe/api/v1/claveSolAccount/', {
       user_id,
       verified,
       name,
@@ -39,7 +39,7 @@ export const validateClaveSolAccount = async (
   mode
 ) => {
   try {
-    const { data } = await axios.post('http://localhost:5000/api/v1/claveSolAccount/validate', {
+    const { data } = await axios.post('https://server-izitax.analytia.pe/api/v1/claveSolAccount/validate', {
       user_id,
       account_id,
       ruc,
@@ -58,7 +58,7 @@ export const validateClaveSolAccount = async (
 export const deleteClaveSolAccount = async (account_id) => {
   try {
     const response = await axios.delete(
-      `http://localhost:5000/api/v1/claveSolAccount/${account_id}`
+      `https://server-izitax.analytia.pe/api/v1/claveSolAccount/${account_id}`
     );
     const claveSol = response?.data;
     return claveSol;
@@ -76,7 +76,7 @@ export const updateClaveSolAccount = async (
   password
 ) => {
   try {
-    const { data } = await axios.put('http://localhost:5000/api/v1/claveSolAccount/', {
+    const { data } = await axios.put('https://server-izitax.analytia.pe/api/v1/claveSolAccount/', {
       account_id,
       verified,
       name,
@@ -94,7 +94,7 @@ export const updateClaveSolAccount = async (
 export const deleteClaveSolAccounts = async (accountIds) => {
   try {
     const response = await axios.delete(
-      `http://localhost:5000/api/v1/claveSolAccount/deleteAll/${accountIds}`
+      `https://server-izitax.analytia.pe/api/v1/claveSolAccount/deleteAll/${accountIds}`
     );
     const accounts = response?.data;
     return accounts;
