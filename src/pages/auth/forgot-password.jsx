@@ -36,7 +36,7 @@ const Page = () => {
     initialValues,
     validationSchema,
     onSubmit: async (values, helpers) => {
-      const redirectUrl = 'http://localhost:3000/auth/reset-password';
+      const redirectUrl = 'https://server-izitax.analytia.pe/auth/reset-password';
       const response = await forgotPassword(formik.values.email, redirectUrl);
 
       if (response.status != 'PENDING') {

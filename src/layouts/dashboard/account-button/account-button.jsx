@@ -9,32 +9,20 @@ import { usePopover } from 'src/hooks/use-popover';
 
 import { AccountPopover } from './account-popover';
 import { useEffect, useState } from 'react';
-import AWS from 'aws-sdk';
 
 export const AccountButton = () => {
   const [photo, setPhoto] = useState('');
   const user = useMockedUser();
   const popover = usePopover();
 
-  useEffect(() => {
-    const s3 = new AWS.S3({
-      region: 'us-east-2',
-      credentials: {
-        accessKeyId: 'AKIA4MTWJ6ITS7PRWPFS',
-        secretAccessKey: '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',
-      },
-      signatureVersion: 'v4',
-    });
-
-    if (user?.avatar) {
-      const params = {
-        Bucket: 'user-photo-taxes',
-        Key: user?.avatar,
-      };
-      const url = s3.getSignedUrl('getObject', params);
-      setPhoto(url);
-    }
-  }, [user]);
+  // useEffect(() => {
+  //   if (user?.avatar) {
+  //     // Aquí puedes configurar una URL fija o lógica para obtener la foto del usuario desde otra fuente.
+  //     // Por ejemplo, si tienes un servidor backend que sirve las imágenes, puedes construir la URL aquí.
+  //     const url = `/path/to/user/photos/${user.avatar}`;
+  //     setPhoto(url);
+  //   }
+  // }, [user]);
 
   return (
     <>

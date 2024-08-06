@@ -1,6 +1,6 @@
-import { format } from 'date-fns';
 import { useCallback } from 'react';
 import PropTypes from 'prop-types';
+import { subDays, subHours, subMinutes, format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import Star01Icon from '@untitled-ui/icons-react/build/esm/Star01';
 import DotsVerticalIcon from '@untitled-ui/icons-react/build/esm/DotsVertical';
@@ -22,7 +22,7 @@ import { ItemMenu } from './item-menu';
 import { convertToPeriodDate } from '../../../utils/date';
 import { Button } from '@mui/material';
 import toast from 'react-hot-toast';
-import { CostExplorer } from 'aws-sdk';
+// import { CostExplorer } from 'aws-sdk';
 
 export const ItemListCard = (props) => {
   const { item, onDelete, onOpen } = props;
@@ -70,12 +70,15 @@ export const ItemListCard = (props) => {
   size += ` • ${item.count} documentos`;
   const name = item.type == '08' ? 'Compras' : 'Ventas';
   console.log("###########################item", item);
+
   const createDate = new Date(item.createdAt);
   const createdAtFormat = createDate && format(createDate, 'MMMM dd, yyyy', { locale: es });
   console.log("createdAtFormat: ",createdAtFormat);
+
   const convertedPeriod = convertToPeriodDate(item.period);
   console.log("###########################convertperiod", convertedPeriod);
   const periodFormat = convertedPeriod && format(convertedPeriod, 'MMMM, yyyy', { locale: es });
+  
   console.log("periodFormat:",periodFormat);
   console.log("###########################periodFormat", periodFormat);
 

@@ -1,6 +1,7 @@
 /** @type {import('prettier').Config} */
 module.exports = {
   mode: 'development',
+  devtool: 'source-map',
   endOfLine: 'lf',
   semi: true,
   singleQuote: true,

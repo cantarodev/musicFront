@@ -10,7 +10,6 @@ import Grid from '@mui/material/Unstable_Grid2';
 import Stack from '@mui/material/Stack';
 import SvgIcon from '@mui/material/SvgIcon';
 import { useAuth } from 'src/hooks/use-auth';
-
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import { useRouter } from 'src/hooks/use-router';
@@ -20,8 +19,6 @@ import { useCallback, useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import { usersApi } from 'src/api/users';
 import 'src/toast.css';
-
-import AWS from 'aws-sdk';
 import { getInitials } from 'src/utils/get-initials';
 
 export const AccountGeneralSettings = (props) => {
@@ -133,11 +130,6 @@ export const AccountGeneralSettings = (props) => {
 
     setUploading(true);
 
-    const s3 = new AWS.S3({
-      accessKeyId: 'AKIA4MTWJ6ITS7PRWPFS',
-      secretAccessKey: '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',
-    });
-
     const binaryData = atob(selectedImage.dataURL.split(',')[1]);
     const arrayBuffer = new ArrayBuffer(binaryData.length);
     const byteArray = new Uint8Array(arrayBuffer);
@@ -154,12 +146,25 @@ export const AccountGeneralSettings = (props) => {
     };
 
     try {
-      await s3.upload(params).promise();
-      const resp = await usersApi.updateUser({ ...newData, ['avatar']: selectedImage.name });
-      if (resp?.status == 'SUCCESS') {
-        setNewData({ ...newData, ['avatar']: selectedImage.name });
-        await auth.initialize();
-        toast.success(resp.message, { duration: 3000, position: 'top-center' });
+      // Implementa la lógica de subida a tu servidor backend aquí.
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: JSON.stringify(params),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      const data = await response.json();
+
+      if (data.status === 'SUCCESS') {
+        const resp = await usersApi.updateUser({ ...newData, ['avatar']: selectedImage.name });
+        if (resp?.status == 'SUCCESS') {
+          setNewData({ ...newData, ['avatar']: selectedImage.name });
+          await auth.initialize();
+          toast.success(resp.message, { duration: 3000, position: 'top-center' });
+        }
+      } else {
+        throw new Error(data.message);
       }
     } catch (error) {
       console.error('Error al cargar imagen:', error);
@@ -170,53 +175,24 @@ export const AccountGeneralSettings = (props) => {
   };
 
   useEffect(() => {
-    const s3 = new AWS.S3({
-      region: 'us-east-2',
-      credentials: {
-        accessKeyId: 'AKIA4MTWJ6ITS7PRWPFS',
-        secretAccessKey: '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',
-      },
-      signatureVersion: 'v4',
-    });
-
     if (newData?.avatar) {
-      const params = {
-        Bucket: 'user-photo-taxes',
-        Key: newData.avatar,
-      };
-      const url = s3.getSignedUrl('getObject', params);
+      const url = `/path/to/user/photos/${newData.avatar}`;
       setPhoto(url);
       setSelectedImage({ name: '', dataURL: '' });
     }
   }, [newData]);
 
   return (
-    <Stack
-      spacing={4}
-      {...props}
-    >
+    <Stack spacing={4} {...props}>
       <Card>
         <CardContent>
-          <Grid
-            container
-            spacing={3}
-          >
-            <Grid
-              xs={12}
-              md={4}
-            >
+          <Grid container spacing={3}>
+            <Grid xs={12} md={4}>
               <Typography variant="h6">Detalles básicos</Typography>
             </Grid>
-            <Grid
-              xs={12}
-              md={8}
-            >
+            <Grid xs={12} md={8}>
               <Stack spacing={3}>
-                <Stack
-                  alignItems="center"
-                  direction="row"
-                  spacing={2}
-                >
+                <Stack alignItems="center" direction="row" spacing={2}>
                   <Box
                     sx={{
                       borderColor: changeColorBorder,
@@ -268,22 +244,11 @@ export const AccountGeneralSettings = (props) => {
                             cursor: 'pointer',
                           }}
                         />
-                        <Stack
-                          alignItems="center"
-                          direction="column"
-                          spacing={1}
-                        >
-                          <SvgIcon
-                            color="inherit"
-                            sx={{ fontSize: 48 }}
-                          >
+                        <Stack alignItems="center" direction="column" spacing={1}>
+                          <SvgIcon color="inherit" sx={{ fontSize: 48 }}>
                             <Camera01Icon />
                           </SvgIcon>
-                          <Typography
-                            color="inherit"
-                            variant="subtitle2"
-                            sx={{ fontWeight: 700, fontSize: 12 }}
-                          >
+                          <Typography color="inherit" variant="subtitle2" sx={{ fontWeight: 700, fontSize: 12 }}>
                             Seleccionar
                           </Typography>
                         </Stack>
@@ -297,27 +262,15 @@ export const AccountGeneralSettings = (props) => {
                         }}
                         name="avatar"
                       >
-                        {/* <SvgIcon>
-                          <User01Icon />
-                        </SvgIcon> */}
                         {getInitials(name + ' ' + lastname)}
                       </Avatar>
                     </Box>
                   </Box>
-                  <Button
-                    color="inherit"
-                    size="small"
-                    onClick={handleUpload}
-                    disabled={uploading}
-                  >
+                  <Button color="inherit" size="small" onClick={handleUpload} disabled={uploading}>
                     {uploading ? 'Subiendo...' : 'Subir'}
                   </Button>
                 </Stack>
-                <Stack
-                  alignItems="center"
-                  direction="row"
-                  spacing={2}
-                >
+                <Stack alignItems="center" direction="row" spacing={2}>
                   <TextField
                     fullWidth
                     value={newData?.name}
@@ -334,20 +287,11 @@ export const AccountGeneralSettings = (props) => {
                     label="Apellidos"
                     sx={{ flexGrow: 1 }}
                   />
-                  <Button
-                    disabled={disabled}
-                    color="inherit"
-                    size="small"
-                    onClick={handleUpdate}
-                  >
+                  <Button disabled={disabled} color="inherit" size="small" onClick={handleUpdate}>
                     Guardar
                   </Button>
                 </Stack>
-                <Stack
-                  alignItems="center"
-                  direction="row"
-                  spacing={2}
-                >
+                <Stack alignItems="center" direction="row" spacing={2}>
                   <TextField
                     fullWidth
                     value={newData?.email}
@@ -363,10 +307,7 @@ export const AccountGeneralSettings = (props) => {
                       },
                     }}
                   />
-                  <Button
-                    color="inherit"
-                    size="small"
-                  >
+                  <Button color="inherit" size="small">
                     Editar
                   </Button>
                 </Stack>
@@ -377,32 +318,16 @@ export const AccountGeneralSettings = (props) => {
       </Card>
       <Card>
         <CardContent>
-          <Grid
-            container
-            spacing={3}
-          >
-            <Grid
-              xs={12}
-              md={4}
-            >
+          <Grid container spacing={3}>
+            <Grid xs={12} md={4}>
               <Typography variant="h6">Eliminar cuenta</Typography>
             </Grid>
-            <Grid
-              xs={12}
-              md={8}
-            >
-              <Stack
-                alignItems="flex-start"
-                spacing={3}
-              >
+            <Grid xs={12} md={8}>
+              <Stack alignItems="flex-start" spacing={3}>
                 <Typography variant="subtitle1">
                   Elimina tu cuenta y todos tus datos de origen. Esto es irreversible.
                 </Typography>
-                <Button
-                  color="error"
-                  onClick={handleConfirm}
-                  variant="outlined"
-                >
+                <Button color="error" onClick={handleConfirm} variant="outlined">
                   Eliminar cuenta
                 </Button>
               </Stack>

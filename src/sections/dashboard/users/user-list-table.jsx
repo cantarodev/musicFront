@@ -18,17 +18,14 @@ import TablePagination from '@mui/material/TablePagination';
 import TableRow from '@mui/material/TableRow';
 import Typography from '@mui/material/Typography';
 import { toast } from 'react-hot-toast';
-
 import { RouterLink } from 'src/components/router-link';
 import { Scrollbar } from 'src/components/scrollbar';
 import { paths } from 'src/paths';
 import { getInitials } from 'src/utils/get-initials';
-import AWS from 'aws-sdk';
 import { SeverityPill } from 'src/components/severity-pill';
 import { UsersChangeStatus } from 'src/components/users-change-status';
 import { UsersMoreMenu } from 'src/components/users-more-menu';
 import { useCallback, useState } from 'react';
-
 import { usersApi } from 'src/api/users/index';
 
 export const UserListTable = (props) => {
@@ -155,7 +152,7 @@ export const UserListTable = (props) => {
                 />
               </TableCell>
               <TableCell>Nombre</TableCell>
-              <TableCell>Doc. Idendtidad</TableCell>
+              <TableCell>Doc. Identidad</TableCell>
               <TableCell>Tel/Celular</TableCell>
               <TableCell>Verificado</TableCell>
               <TableCell>Estado</TableCell>
@@ -180,21 +177,8 @@ export const UserListTable = (props) => {
                   : 'Pendiente';
               const verified = user.verified ? 'SI' : 'NO';
               let photoURL = '';
-              const s3 = new AWS.S3({
-                region: 'us-east-2',
-                credentials: {
-                  accessKeyId: 'AKIA4MTWJ6ITS7PRWPFS',
-                  secretAccessKey: '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',
-                },
-                signatureVersion: 'v4',
-              });
-
               if (user?.avatar) {
-                const params = {
-                  Bucket: 'user-photo-taxes',
-                  Key: user?.avatar,
-                };
-                photoURL = s3.getSignedUrl('getObject', params);
+                photoURL = `/path/to/user/photos/${user.avatar}`;
               }
 
               return (
