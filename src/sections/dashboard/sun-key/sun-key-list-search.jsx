@@ -13,7 +13,7 @@ import { MultiSelect } from 'src/components/multi-select';
 import { useUpdateEffect } from 'src/hooks/use-update-effect';
 import { Autocomplete, TextField } from '@mui/material';
 
-import { usersApi } from 'src/api/users';
+import { usersApi } from 'src/api/users/userService';
 
 const statusOptions = [
   {

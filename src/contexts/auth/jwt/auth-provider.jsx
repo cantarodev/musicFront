@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useReducer } from 'react';
 import PropTypes from 'prop-types';
 
-import { authApi } from 'src/api/auth';
+import { authApi } from 'src/api/auth/authService';
 import { Issuer } from 'src/utils/auth';
 import { AuthContext, initialState } from './auth-context';
 
@@ -104,6 +104,8 @@ export const AuthProvider = (props) => {
   const signIn = useCallback(
     async (email, password) => {
       const { accessToken } = await authApi.signIn({ email, password });
+      console.log(accessToken);
+
       const user = await authApi.me({ accessToken });
       sessionStorage.setItem(STORAGE_KEY, accessToken);
       dispatch({

@@ -11,7 +11,7 @@ import SvgIcon from '@mui/material/SvgIcon';
 import Typography from '@mui/material/Typography';
 import { BotsModal } from 'src/sections/dashboard/bots/bots-modal';
 
-import { botsApi } from 'src/api/bots';
+import { botsApi } from 'src/api/bots/botService';
 import { BreadcrumbsSeparator } from 'src/components/breadcrumbs-separator';
 import { RouterLink } from 'src/components/router-link';
 import { useMounted } from 'src/hooks/use-mounted';

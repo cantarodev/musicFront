@@ -6,7 +6,7 @@ import PropTypes from 'prop-types';
 import { toast } from 'react-hot-toast';
 
 import { usePopover } from 'src/hooks/use-popover';
-import { usersApi } from 'src/api/users/index';
+import { usersApi } from 'src/api/users/userService';
 import { Button, FormControlLabel, Radio, RadioGroup } from '@mui/material';
 import { SeverityPill } from './severity-pill';
 import { useEffect, useState } from 'react';
@@ -18,16 +18,16 @@ export const UsersChangeStatus = (props) => {
 
   const handleChangeStatus = async (newValue, toastId) => {
     try {
-      const response = await usersApi.changeStatusUser({
+      const { message } = await usersApi.changeStatusUser({
         email: user.email,
         status: newValue,
       });
       toast.dismiss(toastId);
       handleUsersGet();
-      toast.success(response.message, { duration: 3000, position: 'top-center' });
+      toast.success(message, { duration: 3000, position: 'top-center' });
     } catch (err) {
       console.error(err);
-      toast.error('Algo salió mal!', { duration: 3000, position: 'top-center' });
+      toast.error(err.message, { duration: 3000, position: 'top-center' });
     }
   };
 

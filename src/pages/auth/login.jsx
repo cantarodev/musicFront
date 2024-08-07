@@ -109,7 +109,6 @@ const Page = () => {
     }
   }, [searchValue.resp]);
 
-  usePageView();
   return (
     <>
       <Seo title="Acceso" />
@@ -159,7 +158,7 @@ const Page = () => {
                   name="email"
                   onBlur={formik.handleBlur}
                   type="email"
-                  value={formik.values.email}
+                  value={formik.values.email || searchValue.email}
                   onChange={formik.handleChange}
                 />
                 <TextField
@@ -171,7 +170,7 @@ const Page = () => {
                   onBlur={formik.handleBlur}
                   onChange={formik.handleChange}
                   type={showPassword ? 'text' : 'password'}
-                  value={formik.values.password}
+                  value={formik.values.password || ''}
                   InputProps={{
                     endAdornment: (
                       <InputAdornment position="end">

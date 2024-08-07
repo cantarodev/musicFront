@@ -13,7 +13,7 @@ import PropTypes from 'prop-types';
 import { toast } from 'react-hot-toast';
 
 import { usePopover } from 'src/hooks/use-popover';
-import { botsApi } from 'src/api/bots/index';
+import { botsApi } from 'src/api/bots/botService';
 import { Button } from '@mui/material';
 
 export const BotsMoreMenu = (props) => {
@@ -22,13 +22,13 @@ export const BotsMoreMenu = (props) => {
 
   const handleDelete = async (toastId) => {
     try {
-      const response = await botsApi.deleteBot({ botId: bot.bot_id });
+      const { message } = await botsApi.deleteBot({ botId: bot._id });
       toast.dismiss(toastId);
       handleBotsGet();
-      toast.success(response.message, { duration: 3000, position: 'top-center' });
+      toast.success(message, { duration: 3000, position: 'top-center' });
     } catch (err) {
       console.error(err);
-      toast.error(err, { duration: 3000, position: 'top-center' });
+      toast.error(err.message, { duration: 3000, position: 'top-center' });
     }
   };
 

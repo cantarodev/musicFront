@@ -17,9 +17,10 @@ import { paths } from 'src/paths';
 import { Issuer } from 'src/utils/auth';
 import { useCallback, useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
-import { usersApi } from 'src/api/users';
+import { usersApi } from 'src/api/users/userService';
 import 'src/toast.css';
 import { getInitials } from 'src/utils/get-initials';
+import axios from 'axios';
 
 export const AccountGeneralSettings = (props) => {
   const { avatar, email, name, lastname } = props;
@@ -92,18 +93,19 @@ export const AccountGeneralSettings = (props) => {
     try {
       switch (auth.issuer) {
         case Issuer.JWT: {
-          const resp = await usersApi.updateUser(newData);
-          if (resp?.status == 'SUCCESS') {
+          const { status, message } = await usersApi.updateUser(newData);
+          if (status === 'success') {
             await auth.initialize();
             setDisabled(false);
-            toast.success(resp.message, { duration: 3000, position: 'top-center' });
+            toast.success(message, { duration: 3000, position: 'top-center' });
           }
           break;
         }
       }
     } catch (err) {
       console.error(err);
-      toast.error('Algo salió mal!');
+      setDisabled(false);
+      toast.error(err.message, { duration: 3000, position: 'top-center' });
     }
   };
 
@@ -146,22 +148,24 @@ export const AccountGeneralSettings = (props) => {
     };
 
     try {
-      // Implementa la lógica de subida a tu servidor backend aquí.
-      const response = await fetch('/api/upload', {
-        method: 'POST',
-        body: JSON.stringify(params),
+      const response = await axios.post('/api/upload', params, {
         headers: {
           'Content-Type': 'application/json',
         },
       });
-      const data = await response.json();
+      console.log(response);
 
-      if (data.status === 'SUCCESS') {
-        const resp = await usersApi.updateUser({ ...newData, ['avatar']: selectedImage.name });
-        if (resp?.status == 'SUCCESS') {
+      const { status, data } = response;
+
+      if (status === 'success') {
+        const { status, message } = await usersApi.updateUser({
+          ...newData,
+          ['avatar']: selectedImage.name,
+        });
+        if (status == 'success') {
           setNewData({ ...newData, ['avatar']: selectedImage.name });
           await auth.initialize();
-          toast.success(resp.message, { duration: 3000, position: 'top-center' });
+          toast.success(message, { duration: 3000, position: 'top-center' });
         }
       } else {
         throw new Error(data.message);
@@ -183,16 +187,32 @@ export const AccountGeneralSettings = (props) => {
   }, [newData]);
 
   return (
-    <Stack spacing={4} {...props}>
+    <Stack
+      spacing={4}
+      {...props}
+    >
       <Card>
         <CardContent>
-          <Grid container spacing={3}>
-            <Grid xs={12} md={4}>
+          <Grid
+            container
+            spacing={3}
+          >
+            <Grid
+              xs={12}
+              md={4}
+            >
               <Typography variant="h6">Detalles básicos</Typography>
             </Grid>
-            <Grid xs={12} md={8}>
+            <Grid
+              xs={12}
+              md={8}
+            >
               <Stack spacing={3}>
-                <Stack alignItems="center" direction="row" spacing={2}>
+                <Stack
+                  alignItems="center"
+                  direction="row"
+                  spacing={2}
+                >
                   <Box
                     sx={{
                       borderColor: changeColorBorder,
@@ -244,11 +264,22 @@ export const AccountGeneralSettings = (props) => {
                             cursor: 'pointer',
                           }}
                         />
-                        <Stack alignItems="center" direction="column" spacing={1}>
-                          <SvgIcon color="inherit" sx={{ fontSize: 48 }}>
+                        <Stack
+                          alignItems="center"
+                          direction="column"
+                          spacing={1}
+                        >
+                          <SvgIcon
+                            color="inherit"
+                            sx={{ fontSize: 48 }}
+                          >
                             <Camera01Icon />
                           </SvgIcon>
-                          <Typography color="inherit" variant="subtitle2" sx={{ fontWeight: 700, fontSize: 12 }}>
+                          <Typography
+                            color="inherit"
+                            variant="subtitle2"
+                            sx={{ fontWeight: 700, fontSize: 12 }}
+                          >
                             Seleccionar
                           </Typography>
                         </Stack>
@@ -266,11 +297,20 @@ export const AccountGeneralSettings = (props) => {
                       </Avatar>
                     </Box>
                   </Box>
-                  <Button color="inherit" size="small" onClick={handleUpload} disabled={uploading}>
+                  <Button
+                    color="inherit"
+                    size="small"
+                    onClick={handleUpload}
+                    disabled={uploading}
+                  >
                     {uploading ? 'Subiendo...' : 'Subir'}
                   </Button>
                 </Stack>
-                <Stack alignItems="center" direction="row" spacing={2}>
+                <Stack
+                  alignItems="center"
+                  direction="row"
+                  spacing={2}
+                >
                   <TextField
                     fullWidth
                     value={newData?.name}
@@ -287,11 +327,20 @@ export const AccountGeneralSettings = (props) => {
                     label="Apellidos"
                     sx={{ flexGrow: 1 }}
                   />
-                  <Button disabled={disabled} color="inherit" size="small" onClick={handleUpdate}>
+                  <Button
+                    disabled={disabled}
+                    color="inherit"
+                    size="small"
+                    onClick={handleUpdate}
+                  >
                     Guardar
                   </Button>
                 </Stack>
-                <Stack alignItems="center" direction="row" spacing={2}>
+                <Stack
+                  alignItems="center"
+                  direction="row"
+                  spacing={2}
+                >
                   <TextField
                     fullWidth
                     value={newData?.email}
@@ -307,7 +356,10 @@ export const AccountGeneralSettings = (props) => {
                       },
                     }}
                   />
-                  <Button color="inherit" size="small">
+                  <Button
+                    color="inherit"
+                    size="small"
+                  >
                     Editar
                   </Button>
                 </Stack>
@@ -318,16 +370,32 @@ export const AccountGeneralSettings = (props) => {
       </Card>
       <Card>
         <CardContent>
-          <Grid container spacing={3}>
-            <Grid xs={12} md={4}>
+          <Grid
+            container
+            spacing={3}
+          >
+            <Grid
+              xs={12}
+              md={4}
+            >
               <Typography variant="h6">Eliminar cuenta</Typography>
             </Grid>
-            <Grid xs={12} md={8}>
-              <Stack alignItems="flex-start" spacing={3}>
+            <Grid
+              xs={12}
+              md={8}
+            >
+              <Stack
+                alignItems="flex-start"
+                spacing={3}
+              >
                 <Typography variant="subtitle1">
                   Elimina tu cuenta y todos tus datos de origen. Esto es irreversible.
                 </Typography>
-                <Button color="error" onClick={handleConfirm} variant="outlined">
+                <Button
+                  color="error"
+                  onClick={handleConfirm}
+                  variant="outlined"
+                >
                   Eliminar cuenta
                 </Button>
               </Stack>

@@ -12,7 +12,7 @@ import { Box, CircularProgress, Divider, IconButton, InputAdornment } from '@mui
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 
-import { claveSolAccountsApi } from 'src/api/sun-key-accounts/index';
+import { claveSolAccountsApi } from 'src/api/sun-key-accounts/sunKeyService';
 
 export const SunKeyCreateForm = (props) => {
   const { action, onClose, handleClaveSolAccountsGet, claveSol } = props;
@@ -61,19 +61,19 @@ export const SunKeyCreateForm = (props) => {
       try {
         if (btnSelected === 'test') {
           values = { ...values, mode: 'test' };
-          const response = await claveSolAccountsApi.validateClaveSolAccount(values);
-          console.log(response);
-          response.validated
-            ? toast.success(response.message, { duration: 3000, position: 'top-center' })
-            : toast.error(response.message, { duration: 3000, position: 'top-center' });
+          const { message, validated } = await claveSolAccountsApi.validateClaveSolAccount(values);
 
-          setAccountValidated(response.validated);
+          validated
+            ? toast.success(message, { duration: 3000, position: 'top-center' })
+            : toast.error(message, { duration: 3000, position: 'top-center' });
+
+          setAccountValidated(validated);
         }
         if (btnSelected === 'editCreate') {
           values = { ...values, verified: accountValidated };
-          const response = await claveSolAccountsApi.createClaveSolAccount(values);
+          const { message } = await claveSolAccountsApi.createClaveSolAccount(values);
           handleClaveSolAccountsGet();
-          toast.success(response.message, { duration: 3000, position: 'top-center' });
+          toast.success(message, { duration: 3000, position: 'top-center' });
           onClose();
         }
         setBtnSelected('');

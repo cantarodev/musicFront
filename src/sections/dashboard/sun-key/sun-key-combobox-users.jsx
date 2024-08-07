@@ -1,7 +1,7 @@
 import * as React from 'react';
 import TextField from '@mui/material/TextField';
 import Autocomplete from '@mui/material/Autocomplete';
-import { usersApi } from 'src/api/users';
+import { usersApi } from 'src/api/users/userService';
 import { useEffect, useState } from 'react';
 
 export default function ComboBox() {

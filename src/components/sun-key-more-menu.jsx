@@ -13,7 +13,7 @@ import PropTypes from 'prop-types';
 import { toast } from 'react-hot-toast';
 
 import { usePopover } from 'src/hooks/use-popover';
-import { claveSolAccountsApi } from 'src/api/sun-key-accounts/index';
+import { claveSolAccountsApi } from 'src/api/sun-key-accounts/sunKeyService';
 import { Button } from '@mui/material';
 
 export const SunKeyMoreMenu = (props) => {
@@ -22,15 +22,15 @@ export const SunKeyMoreMenu = (props) => {
 
   const handleDelete = async (toastId) => {
     try {
-      const response = await claveSolAccountsApi.deleteClaveSolAccount({
+      const { message } = await claveSolAccountsApi.deleteClaveSolAccount({
         account_id: claveSol.account_id,
       });
       toast.dismiss(toastId);
       handleClaveSolAccountsGet();
-      toast.success(response.message, { duration: 3000, position: 'top-center' });
+      toast.success(message, { duration: 3000, position: 'top-center' });
     } catch (err) {
       console.error(err);
-      toast.error('Algo salió mal!', { duration: 3000, position: 'top-center' });
+      toast.error(err.message, { duration: 3000, position: 'top-center' });
     }
   };
 
