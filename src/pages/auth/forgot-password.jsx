@@ -36,14 +36,9 @@ const Page = () => {
     initialValues,
     validationSchema,
     onSubmit: async (values, helpers) => {
-<<<<<<< HEAD
-      const redirectUrl = 'http://localhost:5000/auth/reset-password';
-      const response = await forgotPassword(formik.values.email, redirectUrl);
-=======
       const redirectUrl = `${import.meta.env.VITE_FRONT_URL}/auth/reset-password`;
       const email = formik.values.email;
       const { status, message } = await forgotPassword(email, redirectUrl);
->>>>>>> 70e2cb2b99af591be540696f51fd67e48816584a
 
       if (status != 'success') {
         helpers.setStatus({ success: false });

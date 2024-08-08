@@ -15,7 +15,7 @@ import Typography from '@mui/material/Typography';
 import Divider from '@mui/material/Divider';
 
 import { SunKeyModal } from 'src/sections/dashboard/sun-key/sun-key-modal';
-import { claveSolAccountsApi } from 'src/api/sun-key-accounts';
+import { claveSolAccountsApi } from 'src/api/sun-key-accounts/sunKeyService';
 import { BreadcrumbsSeparator } from 'src/components/breadcrumbs-separator';
 import { RouterLink } from 'src/components/router-link';
 import { Seo } from 'src/components/seo';

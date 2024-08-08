@@ -98,15 +98,15 @@ export const useSections = () => {
       {
         subheader: t(tokens.nav.concepts),
         items: [
-          {
-            title: t(tokens.nav.sunKey),
-            path: paths.dashboard.sunKey,
-            icon: (
-              <SvgIcon fontSize="small">
-                <Lock01Icon />
-              </SvgIcon>
-            ),
-          },
+          // {
+          //   title: t(tokens.nav.sunKey),
+          //   path: paths.dashboard.sunKey,
+          //   icon: (
+          //     <SvgIcon fontSize="small">
+          //       <Lock01Icon />
+          //     </SvgIcon>
+          //   ),
+          // },
           {
             title: t(tokens.nav.fileManager),
             path: paths.dashboard.fileManager,
