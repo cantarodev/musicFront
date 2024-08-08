@@ -68,19 +68,13 @@ export const ItemListCard = (props) => {
   let size = bytesToSize(item.size);
 
   size += ` • ${item.count} documentos`;
-  const name = item.type == '08' ? 'Compras' : 'Ventas';
-  console.log("###########################item", item);
+  const name = item.type == 'compras' ? 'Compras' : 'Ventas';
 
   const createDate = new Date(item.createdAt);
   const createdAtFormat = createDate && format(createDate, 'MMMM dd, yyyy', { locale: es });
-  console.log("createdAtFormat: ",createdAtFormat);
 
   const convertedPeriod = convertToPeriodDate(item.period);
-  console.log("###########################convertperiod", convertedPeriod);
   const periodFormat = convertedPeriod && format(convertedPeriod, 'MMMM, yyyy', { locale: es });
-  
-  console.log("periodFormat:",periodFormat);
-  console.log("###########################periodFormat", periodFormat);
 
   return (
     <>

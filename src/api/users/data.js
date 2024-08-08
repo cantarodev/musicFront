@@ -2,7 +2,7 @@ import axios from 'axios';
 
 export const getUsers = async () => {
   try {
-    const { data } = await axios.get(`https://server-izitax.analytia.pe/api/v1/user`);
+    const { data } = await axios.get(`http://localhost:5000/api/v1/user`);
     const users = JSON.parse(data.users);
     const newUsers = users
       .filter((user) => user.role_id != 1)
@@ -19,7 +19,7 @@ export const getUsers = async () => {
 
 export const deleteUser = async (email) => {
   try {
-    const response = await axios.delete(`https://server-izitax.analytia.pe/api/v1/user/${email}`);
+    const response = await axios.delete(`http://localhost:5000/api/v1/user/${email}`);
     const user = response?.data;
     return user;
   } catch (err) {
@@ -29,7 +29,7 @@ export const deleteUser = async (email) => {
 
 export const deletAllUsers = async (userIds) => {
   try {
-    const response = await axios.delete(`https://server-izitax.analytia.pe/api/v1/user/deleteAll/${userIds}`);
+    const response = await axios.delete(`http://localhost:5000/api/v1/user/deleteAll/${userIds}`);
     const user = response?.data;
     return user;
   } catch (err) {
@@ -40,7 +40,7 @@ export const deletAllUsers = async (userIds) => {
 export const changeStatusUser = async (email, status) => {
   try {
     const response = await axios.get(
-      `https://server-izitax.analytia.pe/api/v1/user/changeStatus/${email}/${status}`
+      `http://localhost:5000/api/v1/user/changeStatus/${email}/${status}`
     );
     const user = response?.data;
     return user;
@@ -51,7 +51,7 @@ export const changeStatusUser = async (email, status) => {
 
 export const downloadUsers = async () => {
   try {
-    const response = await axios.get(`https://server-izitax.analytia.pe/api/v1/user/downloadUsers`);
+    const response = await axios.get(`http://localhost:5000/api/v1/user/downloadUsers`);
     return response;
   } catch (err) {
     console.error('[Auth Api]: ', err);
@@ -60,7 +60,7 @@ export const downloadUsers = async () => {
 
 export const updateUser = async (avatar, email, name, lastname, password) => {
   try {
-    const { data } = await axios.put('https://server-izitax.analytia.pe/api/v1/user/', {
+    const { data } = await axios.put('http://localhost:5000/api/v1/user/', {
       avatar,
       email,
       name,

@@ -61,7 +61,7 @@ class AuthApi {
 
         // Find the user
         const { userId } = decodedToken;
-        axios.get(`https://server-izitax.analytia.pe/api/v1/user/me/${userId}`).then(({ data }) => {
+        axios.get(`http://localhost:5000/api/v1/user/me/${userId}`).then(({ data }) => {
           if (!data.user) {
             reject(new Error('Invalid authorization token'));
             return;

@@ -104,8 +104,8 @@ export const FileDropzone = (props) => {
     <div>
       {/* Desplegables */}
       <Stack direction="row" spacing={2} sx={{ mb: 2 }}>
-        <FormControl sx={{ m: 1, minWidth: 120 }}>
-          <InputLabel id="periodocpe-label">Periodo CPE</InputLabel>
+        <FormControl sx={{ m: 0, minWidth: 120 }}>
+          <InputLabel id="periodocpe-label">Periodo</InputLabel>
           <Select
             labelId="periodocpe-label"
             id="periodocpe"

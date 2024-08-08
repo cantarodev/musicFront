@@ -93,7 +93,7 @@ export const StorageStats = (props) => {
           </Grid>
           {items?.map((total, index) => {
             const size = bytesToSize(total.size);
-            const name = total.type == '08' ? 'Compras' : 'Ventas';
+            const name = total.type == 'compras' ? 'Compras' : 'Ventas';
             return (
               <Grid
                 xs={12}

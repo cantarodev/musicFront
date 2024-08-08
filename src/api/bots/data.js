@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { handleApiError } from '../apiHelpers';
 
-const BASE_URL = 'https://server-izitax.analytia.pe/api/v1/bot';
+const BASE_URL = 'http://localhost:5000/api/v1/bot';
 
 export const getBots = async () => {
   try {

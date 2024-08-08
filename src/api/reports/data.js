@@ -3,7 +3,7 @@ import axios from 'axios';
 export const getReportStatus = async (user_id) => {
   try {
     const { data } = await axios.get(
-      `https://server-izitax.analytia.pe/api/v1/report/status/${user_id}`
+      `http://localhost:5000/api/v1/report/status/${user_id}`
     );
     const result = JSON.parse(data.result);
     return result;
@@ -17,7 +17,7 @@ export const getReportStatus = async (user_id) => {
 export const getReportDetails = async (user_id, period, type, page, pageSize) => {
   try {
     const { data } = await axios.get(
-      `https://server-izitax.analytia.pe/api/v1/report/details/${user_id}/${period}/${type}?page=${page}&pageSize=${pageSize}`
+      `http://localhost:5000/api/v1/report/details/${user_id}/${period}/${type}?page=${page}&pageSize=${pageSize}`
     );
     const { items, total, generalDetail } = data;
     return { items, total, generalDetail };
