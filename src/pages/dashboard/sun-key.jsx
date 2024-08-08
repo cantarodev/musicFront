@@ -11,13 +11,12 @@ import SvgIcon from '@mui/material/SvgIcon';
 import Typography from '@mui/material/Typography';
 import { SunKeyModal } from 'src/sections/dashboard/sun-key/sun-key-modal';
 
-import { claveSolAccountsApi } from 'src/api/sun-key-accounts';
+import { claveSolAccountsApi } from 'src/api/sun-key-accounts/sunKeyService';
 import { BreadcrumbsSeparator } from 'src/components/breadcrumbs-separator';
 import { RouterLink } from 'src/components/router-link';
 import { Seo } from 'src/components/seo';
 import { useMounted } from 'src/hooks/use-mounted';
 import { useSelection } from 'src/hooks/use-selection';
-import { usePageView } from 'src/hooks/use-page-view';
 import { paths } from 'src/paths';
 import { SunKeyListSearch } from 'src/sections/dashboard/sun-key/sun-key-list-search';
 import { SunKeyListTable } from 'src/sections/dashboard/sun-key/sun-key-list-table';
@@ -25,6 +24,7 @@ import { useMockedUser } from 'src/hooks/use-mocked-user';
 
 const useClaveSolAccountsSearch = () => {
   const user = useMockedUser();
+
   const [state, setState] = useState({
     filters: {
       query: undefined,

@@ -14,7 +14,7 @@ import { Seo } from 'src/components/seo';
 import { paths } from 'src/paths';
 import { useParams } from 'react-router';
 import { useEffect, useState } from 'react';
-import { verifyAccount } from 'src/api/auth/data';
+import { verifyAccount } from 'src/api/auth/authApi';
 import { CircularProgress } from '@mui/material';
 
 const Page = () => {

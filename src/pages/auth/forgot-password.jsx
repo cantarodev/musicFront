@@ -15,7 +15,7 @@ import { useRouter } from 'src/hooks/use-router';
 import { RouterLink } from 'src/components/router-link';
 import { Seo } from 'src/components/seo';
 import { paths } from 'src/paths';
-import { forgotPassword } from 'src/api/auth/data';
+import { forgotPassword } from 'src/api/auth/authApi';
 import { FormHelperText } from '@mui/material';
 
 const initialValues = {
@@ -36,17 +36,23 @@ const Page = () => {
     initialValues,
     validationSchema,
     onSubmit: async (values, helpers) => {
+<<<<<<< HEAD
       const redirectUrl = 'http://localhost:5000/auth/reset-password';
       const response = await forgotPassword(formik.values.email, redirectUrl);
+=======
+      const redirectUrl = `${import.meta.env.VITE_FRONT_URL}/auth/reset-password`;
+      const email = formik.values.email;
+      const { status, message } = await forgotPassword(email, redirectUrl);
+>>>>>>> 70e2cb2b99af591be540696f51fd67e48816584a
 
-      if (response.status != 'PENDING') {
+      if (status != 'success') {
         helpers.setStatus({ success: false });
-        helpers.setErrors({ submit: response.message });
+        helpers.setErrors({ submit: message });
         helpers.setSubmitting(false);
         return;
       }
 
-      router.push(paths.index + `?error=${false}&resp=${response.message}`);
+      router.push(paths.index + `?email=${email}&error=${false}&resp=${message}`);
     },
   });
 

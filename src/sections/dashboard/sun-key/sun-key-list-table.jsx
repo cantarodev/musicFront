@@ -9,7 +9,7 @@ import CircularProgress from '@mui/material/CircularProgress';
 import CheckIcon from '@mui/icons-material/Check';
 import CloseIcon from '@mui/icons-material/Close';
 import toast from 'react-hot-toast';
-import { claveSolAccountsApi } from 'src/api/sun-key-accounts'; // Assuming the API file location
+import { claveSolAccountsApi } from 'src/api/sun-key-accounts/sunKeyService'; // Assuming the API file location
 import { Scrollbar } from 'src/components/scrollbar';
 
 export const SunKeyListTable = (props) => {

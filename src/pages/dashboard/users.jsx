@@ -7,7 +7,7 @@ import Typography from '@mui/material/Typography';
 import { paths } from 'src/paths';
 import { RouterLink } from 'src/components/router-link';
 
-import { usersApi } from 'src/api/users';
+import { usersApi } from 'src/api/users/userService';
 import { Seo } from 'src/components/seo';
 import { useMounted } from 'src/hooks/use-mounted';
 import { usePageView } from 'src/hooks/use-page-view';

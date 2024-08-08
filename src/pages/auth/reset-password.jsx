@@ -21,7 +21,7 @@ import { Seo } from 'src/components/seo';
 import { paths } from 'src/paths';
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router';
-import { resetPassword, verifyLink } from 'src/api/auth/data';
+import { resetPassword, verifyLink } from 'src/api/auth/authApi';
 
 const initialValues = {
   password: '',
@@ -60,7 +60,7 @@ const Page = () => {
     validationSchema,
     onSubmit: async (values, helpers) => {
       const response = await resetPassword(user_id, token, formik.values.passwordConfirm);
-      if (response.status != 'SUCCESS') {
+      if (response.status != 'success') {
         helpers.setStatus({ success: false });
         helpers.setErrors({ submit: response.message });
         helpers.setSubmitting(false);
@@ -82,7 +82,7 @@ const Page = () => {
     const verifyLinkReset = async (user_id, token) => {
       const response = await verifyLink(user_id, token);
       if (response) {
-        response.status != 'ACTIVE' &&
+        response.status != 'success' &&
           router.push(paths.index + `?error=${true}&resp=${response.message}`);
       }
       setRespVerifyLink(response);
@@ -93,7 +93,7 @@ const Page = () => {
   return (
     <>
       <Seo title="Restablecer Contraseña" />
-      {respVerifyLink.status == 'ACTIVE' ? (
+      {respVerifyLink.status == 'success' ? (
         <div>
           <Box sx={{ mb: 2 }}>
             <Link
@@ -118,7 +118,7 @@ const Page = () => {
               title="Restablecer la contraseña"
             />
             <CardContent>
-              {respVerifyLink.status == 'ACTIVE' ? (
+              {respVerifyLink.status == 'success' ? (
                 <form
                   noValidate
                   onSubmit={formik.handleSubmit}

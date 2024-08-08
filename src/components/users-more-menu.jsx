@@ -13,7 +13,7 @@ import PropTypes from 'prop-types';
 import { toast } from 'react-hot-toast';
 
 import { usePopover } from 'src/hooks/use-popover';
-import { usersApi } from 'src/api/users/index';
+import { usersApi } from 'src/api/users/userService';
 import { Button } from '@mui/material';
 
 export const UsersMoreMenu = (props) => {
@@ -22,13 +22,13 @@ export const UsersMoreMenu = (props) => {
 
   const handleDelete = async (toastId) => {
     try {
-      const response = await usersApi.deleteUser({ email: user.email });
+      const { message } = await usersApi.deleteUser({ email: user.email });
       toast.dismiss(toastId);
       handleUsersGet();
-      toast.success(response.message, { duration: 3000, position: 'top-center' });
+      toast.success(message, { duration: 3000, position: 'top-center' });
     } catch (err) {
       console.error(err);
-      toast.error(err, { duration: 3000, position: 'top-center' });
+      toast.error(err.message, { duration: 3000, position: 'top-center' });
     }
   };
 

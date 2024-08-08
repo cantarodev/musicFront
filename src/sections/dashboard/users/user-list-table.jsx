@@ -26,7 +26,7 @@ import { SeverityPill } from 'src/components/severity-pill';
 import { UsersChangeStatus } from 'src/components/users-change-status';
 import { UsersMoreMenu } from 'src/components/users-more-menu';
 import { useCallback, useState } from 'react';
-import { usersApi } from 'src/api/users/index';
+import { usersApi } from 'src/api/users/userService';
 
 export const UserListTable = (props) => {
   const {
@@ -59,13 +59,13 @@ export const UserListTable = (props) => {
 
   const deleteAllUsers = async (toastId) => {
     try {
-      const response = await usersApi.deletAllUsers({ userIds: selected });
+      const { message } = await usersApi.deletAllUsers({ userIds: selected });
       toast.dismiss(toastId);
       handleUsersGet();
-      toast.success(response.message, { duration: 3000, position: 'top-center' });
+      toast.success(message, { duration: 3000, position: 'top-center' });
     } catch (err) {
       console.error(err);
-      toast.error('Algo salió mal!', { duration: 3000, position: 'top-center' });
+      toast.error(err.message, { duration: 3000, position: 'top-center' });
     }
   };
 
@@ -184,7 +184,7 @@ export const UserListTable = (props) => {
               return (
                 <TableRow
                   hover
-                  key={user.user_id}
+                  key={user._id}
                   selected={isSelected}
                 >
                   <TableCell padding="checkbox">
@@ -219,7 +219,6 @@ export const UserListTable = (props) => {
                       <div>
                         <Link
                           color="inherit"
-                          component={RouterLink}
                           href={paths.dashboard.users.details}
                           variant="subtitle2"
                         >

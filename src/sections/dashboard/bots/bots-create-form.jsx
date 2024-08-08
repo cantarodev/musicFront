@@ -7,25 +7,15 @@ import Button from '@mui/material/Button';
 import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
-import { useRouter } from 'src/hooks/use-router';
-import { useMockedUser } from 'src/hooks/use-mocked-user';
-import {
-  Box,
-  Checkbox,
-  Divider,
-  FormHelperText,
-  IconButton,
-  InputAdornment,
-  TextareaAutosize,
-} from '@mui/material';
+import { Box, Checkbox, Divider } from '@mui/material';
 
-import { botsApi } from 'src/api/bots/index';
+import { botsApi } from 'src/api/bots/botService';
 
 export const BotsCreateForm = (props) => {
   const { action, onClose, handleBotsGet, bot } = props;
 
   const initialValues = {
-    bot_id: bot?.bot_id || '',
+    bot_id: bot?._id || '',
     identifier_tag: bot?.identifier_tag || '',
     name: bot?.name || '',
     description: bot?.description || '',
@@ -43,13 +33,12 @@ export const BotsCreateForm = (props) => {
     validationSchema,
     onSubmit: async (values, helpers) => {
       try {
-        console.log('hola', values);
-        const response = await botsApi.createBot(values);
-        if (response.status !== 'FAILED') {
+        const { status, message } = await botsApi.createBot(values);
+        if (status !== 'error') {
           handleBotsGet();
-          toast.success(response.message, { duration: 3000, position: 'top-center' });
+          toast.success(message, { duration: 3000, position: 'top-center' });
         } else {
-          toast.error(response.message, {
+          toast.error(message, {
             duration: 3000,
             position: 'top-center',
           });
@@ -57,7 +46,7 @@ export const BotsCreateForm = (props) => {
         onClose();
       } catch (err) {
         console.error(err);
-        toast.error('Hubo un problema al procesar la solicitud.', {
+        toast.error(err.message, {
           duration: 3000,
           position: 'top-center',
         });
