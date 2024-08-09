@@ -12,7 +12,9 @@ export const createComponents = ({ palette }) => {
       styleOverrides: {
         root: {
           backgroundColor: palette.neutral[200],
-          color: common.black,
+          border: '2px solid',
+          borderColor: palette.primary.main,
+          color: palette.primary.main,
         },
       },
     },

@@ -3,8 +3,9 @@ import useMediaQuery from '@mui/material/useMediaQuery';
 import { styled } from '@mui/material/styles';
 import { MobileNav } from '../mobile-nav';
 import { SideNav } from './side-nav';
-import { TopNav } from './top-nav';
 import { useMobileNav } from './use-mobile-nav';
+import { Box, IconButton, SvgIcon } from '@mui/material';
+import ChevronRightIcon from '@untitled-ui/icons-react/build/esm/ChevronRight';
 
 const SIDE_NAV_WIDTH = 280;
 
@@ -31,7 +32,24 @@ export const VerticalLayout = (props) => {
 
   return (
     <>
-      <TopNav onMobileNavOpen={mobileNav.handleOpen} />
+      <Box
+        sx={{
+          position: 'fixed',
+          top: '50%',
+          left: 0,
+          transform: 'translate(-50%)',
+          m: 1,
+          zIndex: 1200,
+        }}
+      >
+        {!lgUp && (
+          <IconButton onClick={mobileNav.handleOpen}>
+            <SvgIcon fontSize="large">
+              <ChevronRightIcon />
+            </SvgIcon>
+          </IconButton>
+        )}
+      </Box>
       {lgUp && (
         <SideNav
           color={navColor}

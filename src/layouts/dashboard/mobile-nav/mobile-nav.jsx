@@ -1,6 +1,6 @@
-import { useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import PropTypes from 'prop-types';
-import File04Icon from '@untitled-ui/icons-react/build/esm/File04';
+import LogOut03 from '@untitled-ui/icons-react/build/esm/LogOut03';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Drawer from '@mui/material/Drawer';
@@ -16,6 +16,13 @@ import { usePathname } from 'src/hooks/use-pathname';
 import { paths } from 'src/paths';
 import { TenantSwitch } from '../tenant-switch';
 import { MobileNavSection } from './mobile-nav-section';
+import { AccountButton } from '../account-button';
+import { Divider, Grid, Tooltip } from '@mui/material';
+import { useRouter } from 'src/hooks/use-router';
+import { useAuth } from 'src/hooks/use-auth';
+import { useMockedUser } from 'src/hooks/use-mocked-user';
+import { Issuer } from 'src/utils/auth';
+import toast from 'react-hot-toast';
 
 const MOBILE_NAV_WIDTH = 280;
 
@@ -111,6 +118,32 @@ export const MobileNav = (props) => {
   const { color = 'evident', open, onClose, sections = [] } = props;
   const pathname = usePathname();
   const cssVars = useCssVars(color);
+  const router = useRouter();
+  const auth = useAuth();
+  const user = useMockedUser();
+
+  const handleLogout = useCallback(async () => {
+    try {
+      switch (auth.issuer) {
+        case Issuer.JWT: {
+          await auth.signOut();
+          break;
+        }
+
+        default: {
+          console.warn('Using an unknown Auth Issuer, did not log out');
+        }
+      }
+
+      router.push(paths.index);
+    } catch (err) {
+      console.error(err);
+      toast.error(
+        'No pudimos cerrar la sesión. Intenta nuevamente o contacta con el soporte si el problema persiste.',
+        { duration: 5000, position: 'top-center' }
+      );
+    }
+  }, [auth, router]);
 
   return (
     <Drawer
@@ -180,33 +213,87 @@ export const MobileNav = (props) => {
               />
             ))}
           </Stack>
-          <Box sx={{ p: 3 }}>
-            <Typography
-              color="neutral.400"
-              variant="subtitle1"
+          <Box sx={{ p: 2 }}>
+            <Divider />
+            <Box
+              component="div"
+              sx={{
+                p: 2,
+                mx: 0,
+                my: 2,
+                borderRadius: 1,
+                boxShadow: 1,
+                display: 'flex',
+                alignItems: 'center',
+                cursor: 'pointer',
+                backgroundColor: 'background.paper',
+                transition: 'background-color 0.3s ease',
+                '&:hover': {
+                  backgroundColor: 'background.default',
+                },
+              }}
             >
-              Need help?
-            </Typography>
-            <Typography
-              color="neutral.400"
-              sx={{ mb: 2 }}
-              variant="body2"
-            >
-              Please check our docs.
-            </Typography>
+              <Grid
+                container
+                spacing={2}
+                alignItems="center"
+              >
+                <Grid
+                  item
+                  xs={10}
+                >
+                  <Tooltip title={user?.name + ' ' + user?.lastname}>
+                    <Typography
+                      sx={{ cursor: 'pointer' }}
+                      variant="body1"
+                      style={{
+                        whiteSpace: 'nowrap',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        maxWidth: '160px',
+                      }}
+                    >
+                      {user?.name + ' ' + user?.lastname}
+                    </Typography>
+                  </Tooltip>
+                  <Tooltip title={user?.email}>
+                    <Typography
+                      sx={{ cursor: 'pointer' }}
+                      variant="body2"
+                      color="text.secondary"
+                      style={{
+                        whiteSpace: 'nowrap',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        maxWidth: '160px',
+                      }}
+                    >
+                      {user?.email}
+                    </Typography>
+                  </Tooltip>
+                </Grid>
+                <Grid
+                  item
+                  xs={2}
+                  container
+                  justifyContent="flex-end"
+                >
+                  <AccountButton />
+                </Grid>
+              </Grid>
+            </Box>
             <Button
-              component="a"
               fullWidth
-              href={paths.docs}
               startIcon={
-                <SvgIcon>
-                  <File04Icon />
+                <SvgIcon fontSize="small">
+                  <LogOut03 />
                 </SvgIcon>
               }
+              onClick={handleLogout}
               target="_blank"
-              variant="contained"
+              variant="outlined"
             >
-              Documentation
+              Cerrar sesión
             </Button>
           </Box>
         </Stack>

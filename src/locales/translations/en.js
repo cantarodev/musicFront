@@ -26,7 +26,7 @@ export const en = {
   [tokens.nav.edit]: 'Edit',
   [tokens.nav.error]: 'Error',
   [tokens.nav.feed]: 'Feed',
-  [tokens.nav.fileManager]: 'File Manager',
+  [tokens.nav.fileManager]: 'My Files',
   [tokens.nav.finance]: 'Finance',
   [tokens.nav.fleet]: 'Fleet',
   [tokens.nav.forgotPassword]: 'Forgot Password',
@@ -51,4 +51,7 @@ export const en = {
   [tokens.nav.resetPassword]: 'Reset Password',
   [tokens.nav.socialMedia]: 'Social Media',
   [tokens.nav.verifyCode]: 'Verify Code',
+  [tokens.nav.summary]: 'Summary',
+  [tokens.nav.purchases]: 'Purchases',
+  [tokens.nav.sales]: 'Sales',
 };

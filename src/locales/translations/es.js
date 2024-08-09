@@ -26,7 +26,7 @@ export const es = {
   [tokens.nav.edit]: 'Editar',
   [tokens.nav.error]: 'Error',
   [tokens.nav.feed]: 'Fuente social',
-  [tokens.nav.fileManager]: 'Administrador de Archivos',
+  [tokens.nav.fileManager]: 'Mis archivos',
   [tokens.nav.finance]: 'Finanzas',
   [tokens.nav.fleet]: 'Parque',
   [tokens.nav.forgotPassword]: 'Recuperar Contraseña',
@@ -51,4 +51,7 @@ export const es = {
   [tokens.nav.resetPassword]: 'Restablecer Contraseña',
   [tokens.nav.socialMedia]: 'Redes Sociales',
   [tokens.nav.verifyCode]: 'Verificar Código',
+  [tokens.nav.summary]: 'Resumen',
+  [tokens.nav.purchases]: 'Compras',
+  [tokens.nav.sales]: 'Ventas',
 };

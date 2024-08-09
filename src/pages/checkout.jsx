@@ -53,8 +53,6 @@ const Page = () => {
   const [billing, setBilling] = useState(initialBilling);
   const [products, setProducts] = useState(initialProducts);
 
-  usePageView();
-
   const handleBillingChange = useCallback((event) => {
     setBilling((prevState) => ({
       ...prevState,

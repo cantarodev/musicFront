@@ -1,7 +1,4 @@
-import { createResourceId } from 'src/utils/create-resource-id';
-import axios from 'axios';
 import { decode, JWT_EXPIRES_IN, JWT_SECRET, sign } from 'src/utils/jwt';
-import { wait } from 'src/utils/wait';
 
 import { getUser, createUser, me } from './authApi';
 

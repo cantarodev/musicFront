@@ -47,9 +47,13 @@ const ProductCreatePage = lazy(() => import('src/pages/dashboard/products/create
 const SocialFeedPage = lazy(() => import('src/pages/dashboard/social/feed'));
 const SocialProfilePage = lazy(() => import('src/pages/dashboard/social/profile'));
 
+// Analytic
+const AnalyticsSummaryPage = lazy(() => import('src/pages/dashboard/analytics/summary'));
+const AnalyticsBuyPage = lazy(() => import('src/pages/dashboard/analytics/purchases'));
+const AnalyticsSellPage = lazy(() => import('src/pages/dashboard/analytics/sales'));
+
 // Other
 const AccountPage = lazy(() => import('src/pages/dashboard/account'));
-const AnalyticsPage = lazy(() => import('src/pages/dashboard/analytics'));
 const BlankPage = lazy(() => import('src/pages/dashboard/blank'));
 const CalendarPage = lazy(() => import('src/pages/dashboard/calendar'));
 const SunKeyPage = lazy(() => import('src/pages/dashboard/sun-key'));
@@ -225,7 +229,20 @@ export const dashboardRoutes = [
       },
       {
         path: 'analytics',
-        element: <AnalyticsPage />,
+        children: [
+          {
+            index: true,
+            element: <AnalyticsSummaryPage />,
+          },
+          {
+            path: 'purchases',
+            element: <AnalyticsBuyPage />,
+          },
+          {
+            path: 'sales',
+            element: <AnalyticsSellPage />,
+          },
+        ],
       },
       {
         path: 'blank',

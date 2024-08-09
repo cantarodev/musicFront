@@ -23,8 +23,7 @@ import { useAnalytics } from 'src/hooks/use-analytics';
 import { routes } from 'src/routes';
 import { store } from 'src/store';
 import { createTheme } from 'src/theme';
-import { useMockedUser } from 'src/hooks/use-mocked-user';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 export const App = () => {
   useAnalytics(gtmConfig);

@@ -53,5 +53,8 @@ export const tokens = {
     resetPassword: 'nav.resetPassword',
     socialMedia: 'nav.socialMedia',
     verifyCode: 'nav.verifyCode',
+    summary: 'nav.summary',
+    purchases: 'nav.purchases',
+    sales: 'nav.sales',
   },
 };

@@ -60,6 +60,8 @@ const Page = () => {
     validationSchema,
     onSubmit: async (values, helpers) => {
       const response = await resetPassword(user_id, token, formik.values.passwordConfirm);
+      console.log(response);
+
       if (response.status != 'success') {
         helpers.setStatus({ success: false });
         helpers.setErrors({ submit: response.message });
@@ -68,7 +70,7 @@ const Page = () => {
       }
 
       router.push(
-        paths.index + `?error=${false}&resp=${response.message}&email=${response.user.email}`
+        paths.index + `?error=${false}&resp=${response.message}&email=${response.data.email}`
       );
     },
   });
@@ -80,12 +82,12 @@ const Page = () => {
 
   useEffect(() => {
     const verifyLinkReset = async (user_id, token) => {
-      const response = await verifyLink(user_id, token);
-      if (response) {
-        response.status != 'success' &&
-          router.push(paths.index + `?error=${true}&resp=${response.message}`);
+      try {
+        const response = await verifyLink(user_id, token);
+        setRespVerifyLink(response);
+      } catch (error) {
+        router.push(paths.index + `?error=${true}&resp=${error.message}`);
       }
-      setRespVerifyLink(response);
     };
     verifyLinkReset(user_id, token);
   }, []);

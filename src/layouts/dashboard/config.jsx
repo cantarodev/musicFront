@@ -51,13 +51,36 @@ export const useSections = () => {
           //   ),
           // },
           {
+            title: t(tokens.nav.fileManager),
+            path: paths.dashboard.fileManager,
+            icon: (
+              <SvgIcon fontSize="small">
+                <Upload04Icon />
+              </SvgIcon>
+            ),
+          },
+          {
             title: t(tokens.nav.analytics),
-            path: paths.dashboard.analytics,
+            path: paths.dashboard.analytics.index,
             icon: (
               <SvgIcon fontSize="small">
                 <BarChartSquare02Icon />
               </SvgIcon>
             ),
+            items: [
+              {
+                title: t(tokens.nav.summary),
+                path: paths.dashboard.analytics.index,
+              },
+              {
+                title: t(tokens.nav.purchases),
+                path: paths.dashboard.analytics.purchases,
+              },
+              {
+                title: t(tokens.nav.sales),
+                path: paths.dashboard.analytics.sales,
+              },
+            ],
           },
           // {
           //   title: t(tokens.nav.ecommerce),
@@ -84,15 +107,6 @@ export const useSections = () => {
           //     />
           //   ),
           // },
-          {
-            title: t(tokens.nav.account),
-            path: paths.dashboard.account,
-            icon: (
-              <SvgIcon fontSize="small">
-                <HomeSmileIcon />
-              </SvgIcon>
-            ),
-          },
         ],
       },
       {
@@ -107,15 +121,15 @@ export const useSections = () => {
           //     </SvgIcon>
           //   ),
           // },
-          {
-            title: t(tokens.nav.fileManager),
-            path: paths.dashboard.fileManager,
-            icon: (
-              <SvgIcon fontSize="small">
-                <Upload04Icon />
-              </SvgIcon>
-            ),
-          },
+          // {
+          //   title: t(tokens.nav.fileManager),
+          //   path: paths.dashboard.fileManager,
+          //   icon: (
+          //     <SvgIcon fontSize="small">
+          //       <Upload04Icon />
+          //     </SvgIcon>
+          //   ),
+          // },
           // {
           //   title: t(tokens.nav.customers),
           //   path: paths.dashboard.customers.index,

@@ -1,6 +1,7 @@
 import { inputLabelClasses } from '@mui/material/InputLabel';
 import { tableCellClasses } from '@mui/material/TableCell';
 import { createTheme } from '@mui/material/styles';
+import { borderRadius } from '@mui/system';
 
 // Used only to create transitions
 const muiTheme = createTheme();
@@ -290,6 +291,7 @@ export const createComponents = () => {
     MuiPopover: {
       defaultProps: {
         elevation: 16,
+        backgroundColor: '#fff',
       },
     },
     MuiRadio: {

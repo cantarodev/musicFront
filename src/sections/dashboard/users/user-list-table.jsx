@@ -1,15 +1,10 @@
-import numeral from 'numeral';
 import PropTypes from 'prop-types';
-import ArrowRightIcon from '@untitled-ui/icons-react/build/esm/ArrowRight';
-import Edit02Icon from '@untitled-ui/icons-react/build/esm/Edit02';
 import Avatar from '@mui/material/Avatar';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Checkbox from '@mui/material/Checkbox';
-import IconButton from '@mui/material/IconButton';
 import Link from '@mui/material/Link';
 import Stack from '@mui/material/Stack';
-import SvgIcon from '@mui/material/SvgIcon';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
@@ -18,7 +13,6 @@ import TablePagination from '@mui/material/TablePagination';
 import TableRow from '@mui/material/TableRow';
 import Typography from '@mui/material/Typography';
 import { toast } from 'react-hot-toast';
-import { RouterLink } from 'src/components/router-link';
 import { Scrollbar } from 'src/components/scrollbar';
 import { paths } from 'src/paths';
 import { getInitials } from 'src/utils/get-initials';
@@ -161,7 +155,7 @@ export const UserListTable = (props) => {
           </TableHead>
           <TableBody>
             {items.map((user) => {
-              const isSelected = selected.includes(user.user_id);
+              const isSelected = selected.includes(user._id);
               const verifiedColor = user.verified ? 'success' : 'error';
               const statusColor =
                 user.status === 'active'
@@ -193,9 +187,9 @@ export const UserListTable = (props) => {
                       disabled={user.status === 'inactive'}
                       onChange={(event) => {
                         if (event.target.checked) {
-                          onSelectOne?.(user.user_id);
+                          onSelectOne?.(user._id);
                         } else {
-                          onDeselectOne?.(user.user_id);
+                          onDeselectOne?.(user._id);
                         }
                       }}
                       value={isSelected}

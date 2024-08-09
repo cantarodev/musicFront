@@ -14,13 +14,16 @@ import {
   TableCell as MuiTableCell,
   TableContainer,
   TablePagination,
+  CircularProgress,
+  Paper,
 } from '@mui/material';
 
 import format from 'date-fns/format';
 import { convertToPeriodDate } from 'src/utils/date';
 
-export const AnalyticsVisitsByCountry = (props) => {
+export const AnalyticsDetails = (props) => {
   const {
+    loading,
     details,
     generalDetail,
     totalRecords,
@@ -31,7 +34,7 @@ export const AnalyticsVisitsByCountry = (props) => {
   } = props;
 
   const isEmpty = details.length === 0;
-  console.log(generalDetail);
+
   const formatDate = (date) => {
     if (!date) return '';
     return format(date, 'MMMM yyyy');
@@ -39,7 +42,7 @@ export const AnalyticsVisitsByCountry = (props) => {
 
   return (
     <Card>
-      <TableContainer>
+      <TableContainer component={Paper}>
         <Table>
           <TableHead>
             <TableRow>
@@ -65,7 +68,7 @@ export const AnalyticsVisitsByCountry = (props) => {
                 </MuiTableCell>
               </MuiTableRow>
             ) : (
-              <>
+              <TableRow>
                 <TableCell>{formatDate(convertToPeriodDate(generalDetail.periodo))}</TableCell>
                 <TableCell>{generalDetail?.totalInPle}</TableCell>
                 <TableCell>{generalDetail?.totalInDb}</TableCell>
@@ -78,11 +81,22 @@ export const AnalyticsVisitsByCountry = (props) => {
                     •
                   </Typography>
                 </TableCell>
-              </>
+              </TableRow>
             )}
           </TableBody>
         </Table>
       </TableContainer>
+      <TablePagination
+        rowsPerPageOptions={[10, 25, 50]}
+        component="div"
+        count={totalRecords || 0}
+        rowsPerPage={rowsPerPage}
+        page={page}
+        onPageChange={handleChangePage}
+        onRowsPerPageChange={handleChangeRowsPerPage}
+        labelRowsPerPage="Mostrar"
+        labelDisplayedRows={({ from, to, count }) => `${from}-${to} de ${count}`}
+      />
       <TableContainer>
         <Table>
           <TableHead>
@@ -96,7 +110,16 @@ export const AnalyticsVisitsByCountry = (props) => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {isEmpty ? (
+            {loading ? (
+              <MuiTableRow>
+                <MuiTableCell
+                  colSpan={6}
+                  align="center"
+                >
+                  <CircularProgress />
+                </MuiTableCell>
+              </MuiTableRow>
+            ) : isEmpty ? (
               <MuiTableRow>
                 <MuiTableCell
                   colSpan={6}
@@ -106,7 +129,7 @@ export const AnalyticsVisitsByCountry = (props) => {
                     variant="h6"
                     color="textSecondary"
                   >
-                    No hay documentos para mostrar
+                    No hay datos para mostrar
                   </Typography>
                 </MuiTableCell>
               </MuiTableRow>
@@ -175,22 +198,12 @@ export const AnalyticsVisitsByCountry = (props) => {
           </TableBody>
         </Table>
       </TableContainer>
-      <TablePagination
-        rowsPerPageOptions={[10, 25, 50]}
-        component="div"
-        count={totalRecords || 0}
-        rowsPerPage={rowsPerPage}
-        page={page}
-        onPageChange={handleChangePage}
-        onRowsPerPageChange={handleChangeRowsPerPage}
-        labelRowsPerPage="Filas por página"
-        labelDisplayedRows={({ from, to, count }) => `${from}-${to} de ${count}`}
-      />
     </Card>
   );
 };
 
-AnalyticsVisitsByCountry.propTypes = {
+AnalyticsDetails.propTypes = {
+  loading: PropTypes.bool,
   details: PropTypes.array.isRequired,
   generalDetail: PropTypes.object,
   totalRecords: PropTypes.number,

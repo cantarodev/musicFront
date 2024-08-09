@@ -6,11 +6,11 @@ import Typography from '@mui/material/Typography';
 
 import { Seo } from 'src/components/seo';
 import { useSettings } from 'src/hooks/use-settings';
-import { AnalyticsMostVisited } from 'src/sections/dashboard/analytics/analytics-most-visited';
 import { useCallback, useEffect, useState } from 'react';
-import { reportApi } from 'src/api/reports/';
+import { reportApi } from 'src/api/reports/reportService';
 import { useMockedUser } from 'src/hooks/use-mocked-user';
 import { AnalyticsVisitsByCountry } from 'src/sections/dashboard/analytics/analytics-visits-by-country';
+import { ItemSearch } from 'src/sections/dashboard/analytics/filter-purchases';
 
 const Page = () => {
   const settings = useSettings();
@@ -77,7 +77,8 @@ const Page = () => {
         component="main"
         sx={{
           flexGrow: 1,
-          py: 8,
+          pt: 2,
+          pb: 8,
         }}
       >
         <Container maxWidth={settings.stretch ? false : 'xl'}>
@@ -88,25 +89,29 @@ const Page = () => {
               lg: 4,
             }}
           >
-            <Grid xs={12}>
+            <Grid
+              xs={12}
+              sx={{
+                borderBottomWidth: 2,
+                borderBottomStyle: 'solid',
+                borderBottomColor: 'primary.main',
+                marginRight: '-10px',
+              }}
+            >
               <Stack
                 direction="row"
                 justifyContent="space-between"
+                alignItems="center"
                 spacing={4}
               >
                 <Stack spacing={1}>
-                  <Typography variant="h4">Reportes</Typography>
+                  <Typography variant="h4">Resumen</Typography>
                 </Stack>
+                <ItemSearch
+                  selectedParams={selectedParams}
+                  setSelectedParams={setSelectedParams}
+                />
               </Stack>
-            </Grid>
-            <Grid
-              xs={12}
-              lg={12}
-            >
-              <AnalyticsMostVisited
-                selectedParams={selectedParams}
-                setSelectedParams={setSelectedParams}
-              />
             </Grid>
             <Grid
               xs={12}

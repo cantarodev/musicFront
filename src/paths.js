@@ -40,7 +40,11 @@ export const paths = {
       courseDetails: '/dashboard/academy/courses/:courseId',
     },
     account: '/dashboard/account',
-    analytics: '/dashboard/analytics',
+    analytics: {
+      index: '/dashboard/analytics',
+      purchases: '/dashboard/analytics/purchases',
+      sales: '/dashboard/analytics/sales',
+    },
     blank: '/dashboard/blank',
     blog: {
       index: '/dashboard/blog',

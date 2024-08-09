@@ -50,7 +50,7 @@ const searchStatusOptions = [
   },
 ];
 
-export const ItemSearch = (props) => {
+export const PurchasesFilter = (props) => {
   const { selectedParams, setSelectedParams } = props;
 
   const currentDate = new Date();
@@ -80,82 +80,36 @@ export const ItemSearch = (props) => {
   }, [selectedDate, handleDateChange]);
 
   return (
-    <Card>
-      <Stack
-        alignItems="center"
-        direction="row"
-        justifyContent="space-between"
-        gap={2}
-        sx={{ p: 2 }}
+    <Stack
+      alignItems="center"
+      direction="row"
+      justifyContent="space-between"
+      gap={2}
+    >
+      <LocalizationProvider
+        dateAdapter={AdapterDateFns}
+        locale={esES}
       >
-        <TextField
-          label="Serie"
-          name="serie"
-          placeholder="F001"
+        <DatePicker
+          label="Periodo"
+          views={['year', 'month']}
+          value={selectedDate}
+          onChange={handleDateChange}
+          textField={(params) => (
+            <TextField
+              {...params}
+              fullWidth
+              margin="normal"
+            />
+          )}
+          format="MMMM, yyyy" // Formato para la entrada
         />
-        <TextField
-          label="Número"
-          name="numero"
-          placeholder="1234"
-        />
-        <TextField
-          label="Estado"
-          name="search"
-          select
-          SelectProps={{ native: true }}
-          value={selectedParams.type}
-        >
-          {searchStatusOptions.map((option) => (
-            <option
-              key={option.value}
-              value={option.value}
-            >
-              {option.label}
-            </option>
-          ))}
-        </TextField>
-        <TextField
-          label="Tipo"
-          name="search"
-          onChange={handleSelected}
-          select
-          SelectProps={{ native: true }}
-          value={selectedParams.type}
-        >
-          {searchTypeOptions.map((option) => (
-            <option
-              key={option.value}
-              value={option.value}
-            >
-              {option.label}
-            </option>
-          ))}
-        </TextField>
-        <LocalizationProvider
-          dateAdapter={AdapterDateFns}
-          locale={esES}
-        >
-          <DatePicker
-            label="Periodo"
-            views={['year', 'month']}
-            value={selectedDate}
-            onChange={handleDateChange}
-            textField={(params) => (
-              <TextField
-                {...params}
-                fullWidth
-                margin="normal"
-              />
-            )}
-            format="MMMM yyyy" // Formato para la entrada
-          />
-        </LocalizationProvider>
-      </Stack>
-    </Card>
+      </LocalizationProvider>
+    </Stack>
   );
 };
 
-ItemSearch.propTypes = {
+PurchasesFilter.propTypes = {
   selectedParams: PropTypes.object,
   setSelectedParams: PropTypes.func,
 };

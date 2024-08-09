@@ -33,11 +33,7 @@ export const AccountButton = () => {
         sx={{
           alignItems: 'center',
           display: 'flex',
-          borderWidth: 2,
           borderStyle: 'solid',
-          borderColor: 'divider',
-          height: 40,
-          width: 40,
           borderRadius: '50%',
         }}
       >
@@ -45,6 +41,10 @@ export const AccountButton = () => {
           sx={{
             height: 32,
             width: 32,
+            '&:hover': {
+              height: 34,
+              width: 34,
+            },
           }}
           src={photo}
         >

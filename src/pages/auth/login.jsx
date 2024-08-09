@@ -61,7 +61,7 @@ const Page = () => {
         await signIn(values.email, values.password);
 
         if (isMounted()) {
-          router.push(returnTo || paths.dashboard.index);
+          router.push(returnTo || paths.dashboard.fileManager);
         }
       } catch (err) {
         console.error(err);
