@@ -27,7 +27,7 @@ jobs:
     - name: Deploy to FTP
       uses: SamKirkland/FTP-Deploy-Action@v4.3.5
       with:
-        server: 'ftp://89.116.147.90'
+        server: '89.116.147.90'
         username: 'u569254146.luisizitax'
         password: ${{ secrets.FTP_PASSWORD }}
         local-dir: 'dist/' 
