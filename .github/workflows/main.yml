@@ -25,7 +25,7 @@ jobs:
       run: npm run build
 
     - name: Deploy to FTP
-      uses: SamKirkland/FTP-Deploy-Action@v4
+      uses: SamKirkland/FTP-Deploy-Action@v4.3.5
       with:
         ftp-server: 'ftp://89.116.147.90'
         ftp-username: 'u569254146.luisizitax'
