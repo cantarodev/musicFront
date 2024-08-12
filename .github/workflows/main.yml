@@ -31,5 +31,4 @@ jobs:
         username: 'u569254146.luisizitax'
         password: ${{ secrets.FTP_PASSWORD }}
         local-dir: 'dist' 
-        server-dir: '/'
 
