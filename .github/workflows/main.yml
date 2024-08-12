@@ -1,0 +1,35 @@
+name: Deploy to FTP
+
+on:
+  push:
+    branches:
+      - develop
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Install Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '22' 
+
+    - name: Install dependencies
+      run: npm install
+
+    - name: Build the project
+      run: npm run build
+
+    - name: Deploy to FTP
+      uses: SamKirkland/FTP-Deploy-Action@v4
+      with:
+        ftp-server: 'ftp://89.116.147.90'
+        ftp-username: 'u569254146.luisizitax'
+        ftp-password: ${{ secrets.FTP_PASSWORD }}
+        local-dir: 'dist' 
+        server-dir: '/public_html'
+
