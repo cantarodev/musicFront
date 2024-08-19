@@ -3,7 +3,7 @@ import { applySort } from 'src/utils/apply-sort';
 import { deepCopy } from 'src/utils/deep-copy';
 import { wait } from 'src/utils/wait';
 
-import { createFile, getFiles, getTotals, deleteFile, downloadFile } from './data';
+import { createFile, getFiles, getTotals, deleteFile, downloadFile, searchComprobante } from './data';
 
 class FileManagerApi {
   
@@ -114,6 +114,28 @@ class FileManagerApi {
       }
     });
   }
+
+  
+  async searchComprobante(request = {}) {
+    const { user_id, file_id, comprobante } = request;
+    console.log("REQUEST IN INDEX: ", request);  // Verifica el request recibido
+    await wait(500);
+    return new Promise((resolve, reject) => {
+      try {
+        searchComprobante(user_id, file_id, comprobante).then((data) => {
+          if (!data?.status) {
+            reject(new Error('Por favor, inténtalo más tarde.'));
+            return;
+          }
+
+          resolve(data);
+        });
+      } catch (err) {
+        reject(new Error('Internal server error'));
+      }
+    });
+  }
+
 }
 
 export const fileManagerApi = new FileManagerApi();

@@ -30,7 +30,6 @@ export const ItemSearch = (props) => {
     onSortChange,
     onViewChange,
     view = 'grid',
-    // sortBy = 'createdAt',
     sortDir = 'asc',
   } = props;
   const queryRef = useRef(null);
@@ -65,9 +64,7 @@ export const ItemSearch = (props) => {
   return (
     <Card>
       <Stack
-        alignItems="center"
-        direction="row"
-        gap={2}
+        spacing={2}
         sx={{ p: 2 }}
       >
         <Box
@@ -80,7 +77,7 @@ export const ItemSearch = (props) => {
             fullWidth
             inputProps={{ ref: queryRef }}
             name="itemName"
-            placeholder="Buscar"
+            placeholder="Buscar PLE"
             startAdornment={
               <InputAdornment position="start">
                 <SvgIcon>
@@ -90,54 +87,59 @@ export const ItemSearch = (props) => {
             }
           />
         </Box>
-        <ToggleButtonGroup
-          exclusive
-          onChange={handleViewChange}
-          sx={{
-            borderWidth: 1,
-            borderColor: 'divider',
-            borderStyle: 'solid',
-            [`& .${toggleButtonGroupClasses.grouped}`]: {
-              margin: 0.5,
-              border: 0,
-              '&:not(:first-of-type)': {
-                borderRadius: 1,
-              },
-              '&:first-of-type': {
-                borderRadius: 1,
-              },
-            },
-          }}
-          value={view}
+        <Stack
+          direction="row"
+          gap={2}
         >
-          <ToggleButton value="grid">
-            <SvgIcon fontSize="small">
-              <Grid01Icon />
-            </SvgIcon>
-          </ToggleButton>
-          <ToggleButton value="list">
-            <SvgIcon fontSize="small">
-              <ListIcon />
-            </SvgIcon>
-          </ToggleButton>
-        </ToggleButtonGroup>
-        <TextField
-          label="Ordenar por"
-          name="sort"
-          onChange={handleSortChange}
-          select
-          SelectProps={{ native: true }}
-          value={sortDir}
-        >
-          {sortOptions.map((option) => (
-            <option
-              key={option.value}
-              value={option.value}
-            >
-              {option.label}
-            </option>
-          ))}
-        </TextField>
+          <ToggleButtonGroup
+            exclusive
+            onChange={handleViewChange}
+            sx={{
+              borderWidth: 1,
+              borderColor: 'divider',
+              borderStyle: 'solid',
+              [`& .${toggleButtonGroupClasses.grouped}`]: {
+                margin: 0.5,
+                border: 0,
+                '&:not(:first-of-type)': {
+                  borderRadius: 1,
+                },
+                '&:first-of-type': {
+                  borderRadius: 1,
+                },
+              },
+            }}
+            value={view}
+          >
+            <ToggleButton value="grid">
+              <SvgIcon fontSize="small">
+                <Grid01Icon />
+              </SvgIcon>
+            </ToggleButton>
+            <ToggleButton value="list">
+              <SvgIcon fontSize="small">
+                <ListIcon />
+              </SvgIcon>
+            </ToggleButton>
+          </ToggleButtonGroup>
+          <TextField
+            label="Ordenar por"
+            name="sort"
+            onChange={handleSortChange}
+            select
+            SelectProps={{ native: true }}
+            value={sortDir}
+          >
+            {sortOptions.map((option) => (
+              <option
+                key={option.value}
+                value={option.value}
+              >
+                {option.label}
+              </option>
+            ))}
+          </TextField>
+        </Stack>
       </Stack>
     </Card>
   );

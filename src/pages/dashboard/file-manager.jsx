@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import Upload01Icon from '@untitled-ui/icons-react/build/esm/Upload01';
+// import SearchIcon from '@untitled-ui/icons-react/build/esm/Search'; // Asegúrate de que esta ruta sea correcta
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Container from '@mui/material/Container';
@@ -20,6 +21,7 @@ import { ItemList } from 'src/sections/dashboard/file-manager/item-list';
 import { ItemSearch } from 'src/sections/dashboard/file-manager/item-search';
 import { StorageStats } from 'src/sections/dashboard/file-manager/storage-stats';
 import { useMockedUser } from 'src/hooks/use-mocked-user';
+import { PLESearchDialog } from 'src/sections/dashboard/file-manager/search-ple'; // Asegúrate de que la ruta sea correcta
 import { set } from 'nprogress';
 import toast from 'react-hot-toast';
 
@@ -148,8 +150,7 @@ const useItemsStore = (searchState) => {
       }
     } catch (err) {
       toast.error('Hubo un error al intentar eliminar PLE.', {
-        duration: 5000,
-        position: 'top-center',
+        duration: 5000, position: 'top-center',
       });
       console.error(err);
     }
@@ -180,6 +181,7 @@ const Page = () => {
   const [view, setView] = useState('grid');
   const uploadDialog = useDialog();
   const detailsDialog = useDialog();
+  const pleSearchDialog = useDialog(); // Dialog state for PLE search
   const currentItem = useCurrentItem(itemsStore.items, detailsDialog.data);
   const totals = useItemsTotals(user?.user_id);
 
@@ -288,6 +290,10 @@ const Page = () => {
         open={uploadDialog.open}
         handleItemsTotalsGet={totals.handleItemsTotalsGet}
         handleItemsGet={itemsStore.handleItemsGet}
+      />
+      <PLESearchDialog
+        onClose={pleSearchDialog.handleClose}
+        open={pleSearchDialog.open}
       />
     </>
   );

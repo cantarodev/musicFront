@@ -34,7 +34,7 @@ export const StorageStats1 = (props) => {
     <Card>
       <CardHeader
         title="Almacenamiento"
-        subheader="Tus archivos PLEs de compras y ventas"
+        subheader="PLEs compras y ventas"
       />
       <CardContent>
         <Stack alignItems="center">

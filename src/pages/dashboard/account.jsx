@@ -35,7 +35,6 @@ const now = new Date();
 
 const tabs = [
   { label: 'General', value: 'general' },
-  { label: 'Clave Sol', value: 'clavesol' },
   { label: 'Facturación', value: 'facturacion' },
   { label: 'Notificaciones', value: 'notificaciones' },
   { label: 'Seguridad', value: 'seguridad' },
@@ -190,82 +189,6 @@ const Page = () => {
               name={user?.name || ''}
               lastname={user?.lastname || ''}
             />
-          )}
-          {currentTab === 'clavesol' && (
-            <>
-              <Stack spacing={4}>
-                <Stack
-                  direction="row"
-                  justifyContent="space-between"
-                  spacing={4}
-                >
-                  <Stack spacing={1}>
-                    <Typography variant="h4">Clave SOL</Typography>
-                    <Breadcrumbs separator={<BreadcrumbsSeparator />}>
-                      <Link
-                        color="text.primary"
-                        component={RouterLink}
-                        href={paths.dashboard.index}
-                        variant="subtitle2"
-                      >
-                        Dashboard
-                      </Link>
-                      <Typography
-                        color="text.secondary"
-                        variant="subtitle2"
-                      >
-                        Clave SOL
-                      </Typography>
-                    </Breadcrumbs>
-                  </Stack>
-                  <Stack
-                    alignItems="center"
-                    direction="row"
-                    spacing={3}
-                  >
-                    <Button
-                      onClick={() => handleOpen('create')}
-                      startIcon={
-                        <SvgIcon>
-                          <PlusIcon />
-                        </SvgIcon>
-                      }
-                      variant="contained"
-                    >
-                      Agregar
-                    </Button>
-                  </Stack>
-                </Stack>
-                <Card>
-                  <SunKeyListSearch onFiltersChange={claveSolAccountsSearch.handleFiltersChange} />
-                  <SunKeyListTable
-                    onPageChange={claveSolAccountsSearch.handlePageChange}
-                    onRowsPerPageChange={claveSolAccountsSearch.handleRowsPerPageChange}
-                    page={claveSolAccountsSearch.state.page}
-                    count={claveSolAccountsStore.claveSolAccountsCount}
-                    items={claveSolAccountsStore.claveSolAccounts}
-                    onDeselectAll={claveSolAccountsSelection.handleDeselectAll}
-                    onDeselectOne={claveSolAccountsSelection.handleDeselectOne}
-                    onSelectAll={claveSolAccountsSelection.handleSelectAll}
-                    onSelectOne={claveSolAccountsSelection.handleSelectOne}
-                    rowsPerPage={claveSolAccountsSearch.state.rowsPerPage}
-                    selected={claveSolAccountsSelection.selected}
-                    handleClaveSolAccountsGet={claveSolAccountsStore.handleClaveSolAccountsGet}
-                    open={open}
-                    handleOpen={handleOpen}
-                    onClose={handleClose}
-                    action={action}
-                  />
-                </Card>
-              </Stack>
-              <SunKeyModal
-                action={action}
-                onClose={handleClose}
-                open={action === 'create' && open}
-                handleClaveSolAccountsGet={claveSolAccountsStore.handleClaveSolAccountsGet}
-                claveSol={{}}
-              />
-            </>
           )}
           {currentTab === 'facturacion' && (
             <AccountBillingSettings

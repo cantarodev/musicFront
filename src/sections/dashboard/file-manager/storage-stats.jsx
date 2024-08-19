@@ -36,7 +36,7 @@ export const StorageStats = (props) => {
   return (
     <Card>
       <CardHeader
-        title="Tus archivos PLEs de compras y ventas"
+        title="PLEs compras y ventas"
         sx={{ pb: 0 }}
       />
       <CardContent>

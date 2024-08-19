@@ -1,3 +1,4 @@
+import { User } from '@auth0/auth0-spa-js';
 import apiClient from '../apiClient';
 
 export const items = [];
@@ -53,6 +54,17 @@ export const deleteFile = async (user_id, file_id) => {
 export const downloadFile = async (user_id, file_id) => {
   try {
     const response = await apiClient.get(`/file/download/${user_id}/${file_id}`);
+    const file = response?.data;
+    return file;
+  } catch (err) {
+    console.error('[Auth Api]: ', err);
+  }
+};
+
+export const searchComprobante = async (user_id, file_id, comprobante) => {
+  try {
+    const response = await apiClient.get(`/file/search/${user_id}/${file_id}/${comprobante}`);
+    console.log("REQUEST PAST DATA: ", user_id, "-",file_id,"-", comprobante);
     const file = response?.data;
     return file;
   } catch (err) {
