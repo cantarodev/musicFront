@@ -81,8 +81,8 @@ export const ItemListCard = (props) => {
       <Card
         key={item._id}
         sx={{
-          backgroundColor: 'transparent',
-          boxShadow: 0,
+          backgroundColor: 'background.paper',
+          boxShadow: 16,
           transition: (theme) =>
             theme.transitions.create(['background-color, box-shadow'], {
               easing: theme.transitions.easing.easeInOut,
