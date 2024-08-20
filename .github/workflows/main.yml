@@ -25,7 +25,7 @@ jobs:
       run: npm run build
 
     - name: Copy .htaccess to build directory
-      run: cp .htaccess build/.htaccess
+      run: cp htaccess build/htaccess
 
     - name: Deploy to FTP
       uses: SamKirkland/FTP-Deploy-Action@v4.3.5
