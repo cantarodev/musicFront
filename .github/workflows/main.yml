@@ -39,4 +39,4 @@ jobs:
         server: '89.116.147.90'
         username: 'u569254146.luisizitax'
         password: ${{ secrets.FTP_PASSWORD }}
-        local-dir: 'build/'  # Asegúrate de que 'build/' es tu directorio de salida
+        local-dir: 'dist/'
