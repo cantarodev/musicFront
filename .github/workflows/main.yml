@@ -16,7 +16,7 @@ jobs:
     - name: Install Node.js
       uses: actions/setup-node@v3
       with:
-        node-version: '22' 
+        node-version: '22'
 
     - name: Install dependencies
       run: npm install
@@ -24,11 +24,13 @@ jobs:
     - name: Build the project
       run: npm run build
 
+    - name: Copy .htaccess to build directory
+      run: cp .htaccess build/.htaccess
+
     - name: Deploy to FTP
       uses: SamKirkland/FTP-Deploy-Action@v4.3.5
       with:
         server: '89.116.147.90'
         username: 'u569254146.luisizitax'
         password: ${{ secrets.FTP_PASSWORD }}
-        local-dir: 'dist/' 
-
+        local-dir: 'build/'  # Asegúrate de que esto apunte al directorio correcto
