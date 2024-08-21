@@ -42,7 +42,7 @@ export const StorageStats = (props) => {
       <CardContent>
         <Grid
           container
-          spacing={3}
+          spacing={2} // Reduje el espacio entre los elementos
         >
           <Grid
             xs={12}
@@ -51,20 +51,20 @@ export const StorageStats = (props) => {
             <Stack
               alignItems="center"
               direction="row"
-              spacing={2}
+              spacing={1.5} // Reduje el espacio entre los íconos y el texto
               sx={{
                 backgroundColor: (theme) =>
                   theme.palette.mode === 'dark' ? 'neutral.800' : 'error.lightest',
-                borderRadius: 2.5,
-                px: 3,
-                py: 4,
+                borderRadius: 1.5, // Reduje el radio de los bordes
+                px: 2, // Reduje el padding horizontal
+                py: 2.5, // Reduje el padding vertical
               }}
             >
               <Box
                 sx={{
                   flexShrink: 0,
-                  height: 48,
-                  width: 48,
+                  height: 36, // Reduje la altura del ícono
+                  width: 36, // Reduje el ancho del ícono
                 }}
               >
                 <ListItemIcon>
@@ -80,7 +80,7 @@ export const StorageStats = (props) => {
                 >
                   Todos
                 </Typography>
-                <Typography variant="h5">{bytesToSize(totalStorage)}</Typography>
+                <Typography variant="h6">{bytesToSize(totalStorage)}</Typography>
                 <Typography
                   color="text.secondary"
                   variant="body2"
@@ -103,20 +103,20 @@ export const StorageStats = (props) => {
                 <Stack
                   alignItems="center"
                   direction="row"
-                  spacing={2}
+                  spacing={1.5} // Reduje el espacio entre los íconos y el texto
                   sx={{
                     backgroundColor: (theme) =>
                       theme.palette.mode === 'dark' ? 'neutral.800' : 'error.lightest',
-                    borderRadius: 2.5,
-                    px: 3,
-                    py: 4,
+                    borderRadius: 1.5, // Reduje el radio de los bordes
+                    px: 2, // Reduje el padding horizontal
+                    py: 2.5, // Reduje el padding vertical
                   }}
                 >
                   <Box
                     sx={{
                       flexShrink: 0,
-                      height: 48,
-                      width: 48,
+                      height: 36, // Reduje la altura del ícono
+                      width: 36, // Reduje el ancho del ícono
                     }}
                   >
                     <ListItemIcon>
@@ -132,7 +132,7 @@ export const StorageStats = (props) => {
                     >
                       {name}
                     </Typography>
-                    <Typography variant="h5">{size}</Typography>
+                    <Typography variant="h6">{size}</Typography>
                     <Typography
                       color="text.secondary"
                       variant="body2"

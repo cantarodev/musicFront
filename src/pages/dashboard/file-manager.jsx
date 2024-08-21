@@ -228,17 +228,6 @@ const Page = () => {
                   direction="row"
                   spacing={2}
                 >
-                  <Button
-                    onClick={uploadDialog.handleOpen}
-                    startIcon={
-                      <SvgIcon>
-                        <Upload01Icon />
-                      </SvgIcon>
-                    }
-                    variant="contained"
-                  >
-                    Subir
-                  </Button>
                 </Stack>
               </Stack>
             </Grid>

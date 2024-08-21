@@ -1,9 +1,11 @@
-import { useCallback, useRef } from 'react';
+import { useCallback, useRef, useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import Grid01Icon from '@untitled-ui/icons-react/build/esm/Grid01';
 import ListIcon from '@untitled-ui/icons-react/build/esm/List';
 import SearchMdIcon from '@untitled-ui/icons-react/build/esm/SearchMd';
+import Upload01Icon from '@untitled-ui/icons-react/build/esm/Upload01'; // Importa el icono de subir
 import Box from '@mui/material/Box';
+import Button from '@mui/material/Button'; // Importa el componente Button
 import Card from '@mui/material/Card';
 import InputAdornment from '@mui/material/InputAdornment';
 import OutlinedInput from '@mui/material/OutlinedInput';
@@ -12,6 +14,11 @@ import SvgIcon from '@mui/material/SvgIcon';
 import TextField from '@mui/material/TextField';
 import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup, { toggleButtonGroupClasses } from '@mui/material/ToggleButtonGroup';
+import { useDialog } from 'src/hooks/use-dialog'; // Importa el hook useDialog
+import { FileUploader } from 'src/sections/dashboard/file-manager/file-uploader'; // Importa el componente FileUploader
+
+import { fileManagerApi } from 'src/api/file-manager'; // Importa la API de gestión de archivos
+import toast from 'react-hot-toast'; // Para notificaciones
 
 const sortOptions = [
   {
@@ -31,27 +38,70 @@ export const ItemSearch = (props) => {
     onViewChange,
     view = 'grid',
     sortDir = 'asc',
+    user_id,
   } = props;
+
   const queryRef = useRef(null);
+  const uploadDialog = useDialog(); // Hook para manejar el estado del diálogo de subida de archivos
+
+  const [state, setState] = useState({
+    items: [],
+    itemsCount: 0,
+  });
+
+  // Función para obtener los ítems
+  const handleItemsGet = useCallback(async () => {
+    try {
+      const response = await fileManagerApi.getFiles({
+        filters: {
+          query: queryRef.current?.value || '',
+        },
+        page: 0,
+        rowsPerPage: 9,
+        sortBy: 'createdAt',
+        sortDir: sortDir,
+        user_id: user_id,
+      });
+      setState({
+        items: response.data,
+        itemsCount: response.count,
+      });
+    } catch (err) {
+      console.error(err);
+    }
+  }, [sortDir, user_id]);
+
+  // Función para actualizar los totales de los ítems
+  const handleItemsTotalsGet = useCallback(async () => {
+    try {
+      const response = await fileManagerApi.getTotals({ user_id });
+      setState((prevState) => ({
+        ...prevState,
+        items: response,
+      }));
+    } catch (err) {
+      console.error(err);
+    }
+  }, [user_id]);
 
   const handleQueryChange = useCallback(
     (event) => {
       event.preventDefault();
-      const query = queryRef.current?.value || '';
-
       onFiltersChange?.({
-        query,
+        query: queryRef.current?.value || '',
       });
+      handleItemsGet(); // Actualiza los ítems al cambiar la consulta
     },
-    [onFiltersChange]
+    [onFiltersChange, handleItemsGet]
   );
 
   const handleSortChange = useCallback(
     (event) => {
       const sortDir = event.target.value;
       onSortChange?.(sortDir);
+      handleItemsGet(); // Actualiza los ítems al cambiar el orden
     },
-    [onSortChange]
+    [onSortChange, handleItemsGet]
   );
 
   const handleViewChange = useCallback(
@@ -60,6 +110,10 @@ export const ItemSearch = (props) => {
     },
     [onViewChange]
   );
+
+  useEffect(() => {
+    handleItemsGet();
+  }, [handleItemsGet]);
 
   return (
     <Card>
@@ -90,7 +144,19 @@ export const ItemSearch = (props) => {
         <Stack
           direction="row"
           gap={2}
+          alignItems="center"
         >
+          <Button
+            onClick={uploadDialog.handleOpen} // Abre el diálogo de subida de archivos
+            startIcon={
+              <SvgIcon>
+                <Upload01Icon />
+              </SvgIcon>
+            }
+            variant="contained"
+          >
+            Subir
+          </Button>
           <ToggleButtonGroup
             exclusive
             onChange={handleViewChange}
@@ -141,6 +207,12 @@ export const ItemSearch = (props) => {
           </TextField>
         </Stack>
       </Stack>
+      <FileUploader
+        onClose={uploadDialog.handleClose} // Maneja el cierre del diálogo
+        open={uploadDialog.open} // Estado del diálogo (abierto o cerrado)
+        handleItemsTotalsGet={handleItemsTotalsGet} // Pasa la función para actualizar los totales
+        handleItemsGet={handleItemsGet} // Pasa la función para obtener los ítems
+      />
     </Card>
   );
 };
@@ -152,4 +224,7 @@ ItemSearch.propTypes = {
   sortBy: PropTypes.string,
   sortDir: PropTypes.oneOf(['asc', 'desc']),
   view: PropTypes.oneOf(['grid', 'list']),
+  user_id: PropTypes.string.isRequired,
 };
+
+export default ItemSearch;
