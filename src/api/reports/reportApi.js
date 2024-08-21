@@ -1,12 +1,14 @@
 import apiClient from '../apiClient';
 import { handleResponse } from 'src/utils/api-utils';
 
-export const getReportStatus = (user_id) => {
-  return handleResponse(apiClient.get(`/report/status/${user_id}`));
+export const getReportObservations = (user_id, period, queryType, docType, currency) => {
+  return handleResponse(
+    apiClient.get(`/report/observations/${user_id}/${period}/${queryType}/${docType}/${currency}`)
+  );
 };
 
-export const getReportDetails = (user_id, period, type, page, pageSize) => {
+export const getReportMissings = (user_id, period, queryType, docType, currency) => {
   return handleResponse(
-    apiClient.get(`/report/details/${user_id}/${period}/${type}?page=${page}&pageSize=${pageSize}`)
+    apiClient.get(`/report/missings/${user_id}/${period}/${queryType}/${docType}/${currency}`)
   );
 };

@@ -4,6 +4,6 @@ export const handleResponse = async (promise) => {
     return response.data || response;
   } catch (error) {
     console.error('API Error:', error);
-    throw new Error(error.response?.data?.message || 'Error processing request');
+    throw new Error(error.message || 'Error processing request');
   }
 };
