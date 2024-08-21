@@ -121,7 +121,7 @@ export const OverviewSubscriptionUsage = (props) => {
           height={300}
           options={chartOptions}
           series={chartSeries}
-          type="bar"
+          type="histogram"
         />
       </Box>
     </Card>

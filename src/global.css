@@ -28,3 +28,7 @@
 
 /* Remove if mapbox is not used */
 @import '~mapbox-gl/dist/mapbox-gl.css';
+
+.customTableCell {
+  padding: 6px 16px !important;
+}

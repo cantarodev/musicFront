@@ -1,16 +1,16 @@
-import { wait } from 'src/utils/wait';
-
-import { getReportStatus, getReportDetails } from './reportApi';
+import { getReportObservations, getReportMissings } from './reportApi';
 
 class ReportApi {
-  async getReportStatus(request) {
-    const { user_id } = request;
-    return await getReportStatus(user_id);
+  async getReportObservations(request) {
+    const { user_id, period, queryType, docType, currency } = request;
+
+    return await getReportObservations(user_id, period, queryType, docType, currency);
   }
 
-  async getReportDetails(request) {
-    const { user_id, period, type, page, pageSize } = request;
-    return await getReportDetails(user_id, period, type, page, pageSize);
+  async getReportMissings(request) {
+    const { user_id, period, queryType, docType, currency } = request;
+
+    return await getReportMissings(user_id, period, queryType, docType, currency);
   }
 }
 

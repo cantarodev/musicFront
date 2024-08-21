@@ -11,6 +11,8 @@ import { reportApi } from 'src/api/reports/reportService';
 import { useMockedUser } from 'src/hooks/use-mocked-user';
 import { AnalyticsDetails } from 'src/sections/dashboard/analytics/analytics-details';
 import { SummaryFilter } from 'src/sections/dashboard/analytics/summary-filter';
+import { OverviewSubscriptionUsage } from 'src/sections/dashboard/overview/overview-subscription-usage';
+import { Card, CardContent } from '@mui/material';
 
 const Page = () => {
   const settings = useSettings();
@@ -117,15 +119,11 @@ const Page = () => {
               xs={12}
               lg={12}
             >
-              <AnalyticsDetails
-                details={details || []}
-                generalDetail={generalDetail}
-                totalRecords={totalRecords}
-                rowsPerPage={rowsPerPage}
-                page={page}
-                handleChangePage={handleChangePage}
-                handleChangeRowsPerPage={handleChangeRowsPerPage}
-              />
+              <Card>
+                <CardContent sx={{ textAlign: 'center', fontSize: 24 }}>
+                  Mantenimiento KPIs
+                </CardContent>
+              </Card>
             </Grid>
           </Grid>
         </Container>

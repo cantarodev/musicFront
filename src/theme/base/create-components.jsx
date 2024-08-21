@@ -320,6 +320,40 @@ export const createComponents = () => {
         },
       },
     },
+    MuiTooltip: {
+      styleOverrides: {
+        tooltip: {
+          backdropFilter: 'blur(6px)',
+          backgroundColor: 'primary.main',
+          color: '#ffffff',
+          fontSize: '0.875rem',
+        },
+        arrow: {
+          color: 'primary.main',
+        },
+      },
+    },
+    MuiTableContainer: {
+      styleOverrides: {
+        root: {
+          overflow: 'auto',
+          '&::-webkit-scrollbar': {
+            width: '12px',
+            height: '8px',
+          },
+          '&::-webkit-scrollbar-track': {
+            backgroundColor: '#f1f1f1',
+          },
+          '&::-webkit-scrollbar-thumb': {
+            backgroundColor: 'primary.main',
+            borderRadius: '10px',
+          },
+          '&::-webkit-scrollbar-thumb:hover': {
+            backgroundColor: 'primary.dark',
+          },
+        },
+      },
+    },
     MuiTableCell: {
       styleOverrides: {
         root: {

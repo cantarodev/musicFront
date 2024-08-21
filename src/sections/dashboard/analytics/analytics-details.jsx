@@ -1,5 +1,4 @@
 import PropTypes from 'prop-types';
-import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -8,196 +7,387 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
+import RefreshCcw01Icon from '@untitled-ui/icons-react/build/esm/RefreshCcw01';
 
 import {
-  TableRow as MuiTableRow,
-  TableCell as MuiTableCell,
   TableContainer,
-  TablePagination,
-  CircularProgress,
+  CardHeader,
+  Box,
+  LinearProgress,
+  IconButton,
+  SvgIcon,
   Paper,
 } from '@mui/material';
 
-import format from 'date-fns/format';
-import { convertToPeriodDate } from 'src/utils/date';
+import { ModalDetail } from './modal-detail';
+import { useState } from 'react';
 
 export const AnalyticsDetails = (props) => {
-  const {
-    loading,
-    details,
-    generalDetail,
-    totalRecords,
-    rowsPerPage,
-    page,
-    handleChangePage,
-    handleChangeRowsPerPage,
-  } = props;
+  const { loading, details, onLoadData } = props;
+
+  const [modalOpen, setModalOpen] = useState(false);
+  const [selectedDetail, setSelectedDetail] = useState(null);
 
   const isEmpty = details.length === 0;
 
-  const formatDate = (date) => {
-    if (!date) return '';
-    return format(date, 'MMMM yyyy');
+  const handleOpen = (detail) => {
+    setModalOpen(true);
+    setSelectedDetail(detail);
   };
+
+  const handleClose = () => setModalOpen(false);
 
   return (
     <Card>
-      <TableContainer component={Paper}>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell>Periodo</TableCell>
-              <TableCell>Cant. Ple</TableCell>
-              <TableCell>Cant. Base de Datos</TableCell>
-              <TableCell>Estado</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {isEmpty ? (
-              <MuiTableRow>
-                <MuiTableCell
-                  colSpan={6}
-                  align="center"
-                >
-                  <Typography
-                    variant="h6"
-                    color="textSecondary"
-                  >
-                    No hay detalle general para mostrar
-                  </Typography>
-                </MuiTableCell>
-              </MuiTableRow>
-            ) : (
+      <CardHeader
+        title="Inconsistencias"
+        sx={{ p: 2, pb: 0 }}
+        action={
+          <IconButton
+            color="inherit"
+            onClick={onLoadData}
+          >
+            <SvgIcon fontSize="small">
+              <RefreshCcw01Icon />
+            </SvgIcon>
+          </IconButton>
+        }
+      />
+      <Box
+        display="flex"
+        flexDirection="column"
+        maxHeight="500px"
+        p={2}
+      >
+        <TableContainer
+          sx={{ flex: 1, overflowY: 'auto', position: 'relative' }}
+          component={Paper}
+        >
+          <Table stickyHeader>
+            <TableHead>
               <TableRow>
-                <TableCell>{formatDate(convertToPeriodDate(generalDetail.periodo))}</TableCell>
-                <TableCell>{generalDetail?.totalInPle}</TableCell>
-                <TableCell>{generalDetail?.totalInDb}</TableCell>
+                <TableCell>
+                  <Typography sx={{ fontSize: 12, fontWeight: 'bold' }}>Período</Typography>
+                </TableCell>
+                <TableCell>
+                  <Typography sx={{ fontSize: 12, fontWeight: 'bold' }}>RUC</Typography>
+                </TableCell>
                 <TableCell>
                   <Typography
-                    sx={generalDetail?.estado ? { color: 'green' } : { color: 'red' }}
-                    variant="h5"
-                    padding={1}
+                    sx={{
+                      fontSize: 12,
+                      fontWeight: 'bold',
+                    }}
                   >
-                    •
+                    Razón Social
+                  </Typography>
+                </TableCell>
+                <TableCell>
+                  <Tooltip
+                    title="Fecha Emisión"
+                    arrow
+                  >
+                    <Typography
+                      sx={{
+                        cursor: 'pointer',
+                        fontSize: 12,
+                        fontWeight: 'bold',
+                        whiteSpace: 'nowrap',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        maxWidth: '80px',
+                      }}
+                    >
+                      Fecha Emisión
+                    </Typography>
+                  </Tooltip>
+                </TableCell>
+                <TableCell>
+                  <Tooltip
+                    title="Tipo Comprobante"
+                    arrow
+                  >
+                    <Typography
+                      sx={{
+                        cursor: 'pointer',
+                        fontSize: 12,
+                        fontWeight: 'bold',
+                        whiteSpace: 'nowrap',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        maxWidth: '100px',
+                      }}
+                    >
+                      Tipo Comprobante
+                    </Typography>
+                  </Tooltip>
+                </TableCell>
+                <TableCell>
+                  <Tooltip
+                    title="Número Comprobante"
+                    arrow
+                  >
+                    <Typography
+                      sx={{
+                        cursor: 'pointer',
+                        fontSize: 12,
+                        fontWeight: 'bold',
+                        whiteSpace: 'nowrap',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        maxWidth: '100px',
+                      }}
+                    >
+                      Número Comprobante
+                    </Typography>
+                  </Tooltip>
+                </TableCell>
+                <TableCell>
+                  <Tooltip
+                    title="Moneda"
+                    arrow
+                  >
+                    <Typography
+                      sx={{
+                        cursor: 'pointer',
+                        fontSize: 12,
+                        fontWeight: 'bold',
+                        whiteSpace: 'nowrap',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        maxWidth: '40px',
+                      }}
+                    >
+                      Moneda
+                    </Typography>
+                  </Tooltip>
+                </TableCell>
+                <TableCell sx={{ textAlign: 'right' }}>
+                  <Typography sx={{ fontSize: 12, fontWeight: 'bold' }}>IGV</Typography>
+                </TableCell>
+                <TableCell sx={{ textAlign: 'right' }}>
+                  <Tooltip
+                    title="IGV Sunat"
+                    arrow
+                  >
+                    <Typography
+                      sx={{
+                        cursor: 'pointer',
+                        fontSize: 12,
+                        fontWeight: 'bold',
+                        whiteSpace: 'nowrap',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        maxWidth: '70px',
+                        textAlign: 'right',
+                      }}
+                    >
+                      IGV Sunat
+                    </Typography>
+                  </Tooltip>
+                </TableCell>
+                <TableCell sx={{ textAlign: 'right' }}>
+                  <Typography sx={{ fontSize: 12, fontWeight: 'bold' }}>Importe</Typography>
+                </TableCell>
+                <TableCell sx={{ textAlign: 'right' }}>
+                  <Tooltip
+                    title="Importe Sunat"
+                    arrow
+                  >
+                    <Typography
+                      sx={{
+                        cursor: 'pointer',
+                        fontSize: 12,
+                        fontWeight: 'bold',
+                        whiteSpace: 'nowrap',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        maxWidth: '80px',
+                      }}
+                    >
+                      Importe Sunat
+                    </Typography>
+                  </Tooltip>
+                </TableCell>
+                <TableCell>
+                  <Typography
+                    sx={{
+                      fontSize: 12,
+                      fontWeight: 'bold',
+                    }}
+                  >
+                    Resumen
                   </Typography>
                 </TableCell>
               </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </TableContainer>
-      <TablePagination
-        rowsPerPageOptions={[10, 25, 50]}
-        component="div"
-        count={totalRecords || 0}
-        rowsPerPage={rowsPerPage}
-        page={page}
-        onPageChange={handleChangePage}
-        onRowsPerPageChange={handleChangeRowsPerPage}
-        labelRowsPerPage="Mostrar"
-        labelDisplayedRows={({ from, to, count }) => `${from}-${to} de ${count}`}
-      />
-      <TableContainer>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell>Periodo</TableCell>
-              <TableCell>Serie</TableCell>
-              <TableCell>Número</TableCell>
-              <TableCell>Ple?</TableCell>
-              <TableCell>Base de datos?</TableCell>
-              <TableCell>Observación</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {loading ? (
-              <MuiTableRow>
-                <MuiTableCell
-                  colSpan={6}
-                  align="center"
-                >
-                  <CircularProgress />
-                </MuiTableCell>
-              </MuiTableRow>
-            ) : isEmpty ? (
-              <MuiTableRow>
-                <MuiTableCell
-                  colSpan={6}
-                  align="center"
-                >
-                  <Typography
-                    variant="h6"
-                    color="textSecondary"
+            </TableHead>
+            <TableBody>
+              {loading ? (
+                <TableRow>
+                  <TableCell
+                    colSpan={12}
+                    align="center"
+                    style={{ height: 200 }}
                   >
-                    No hay datos para mostrar
-                  </Typography>
-                </MuiTableCell>
-              </MuiTableRow>
-            ) : (
-              details?.map((detail, index) => {
-                return (
-                  <TableRow
-                    key={index}
-                    sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+                    <Typography
+                      variant="body1"
+                      color="textSecondary"
+                    >
+                      <LinearProgress />
+                    </Typography>
+                  </TableCell>
+                </TableRow>
+              ) : isEmpty ? (
+                <TableRow>
+                  <TableCell
+                    colSpan={12}
+                    align="center"
+                    style={{ height: 200 }}
                   >
-                    <TableCell>
-                      <Box
-                        sx={{
-                          alignItems: 'center',
-                          display: 'flex',
-                        }}
-                      >
-                        <Typography
-                          sx={{ ml: 1 }}
-                          variant="subtitle2"
+                    <Typography
+                      variant="body1"
+                      color="textSecondary"
+                    >
+                      No hay datos disponibles
+                    </Typography>
+                  </TableCell>
+                </TableRow>
+              ) : (
+                details?.map((detail, index) => {
+                  return (
+                    <TableRow
+                      key={index}
+                      sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+                    >
+                      <TableCell className="customTableCell">
+                        <Typography sx={{ fontSize: 14 }}>{detail.periodo}</Typography>
+                      </TableCell>
+                      <TableCell className="customTableCell">
+                        <Typography sx={{ fontSize: 14 }}>{detail.ruc}</Typography>
+                      </TableCell>
+                      <TableCell className="customTableCell">
+                        <Tooltip
+                          title={detail.razonSocial}
+                          arrow
                         >
-                          {formatDate(convertToPeriodDate(detail.periodo))}
+                          <Typography
+                            sx={{
+                              cursor: 'pointer',
+                              fontSize: 14,
+                              fontWeight: 'normal',
+                              whiteSpace: 'nowrap',
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                              maxWidth: '150px',
+                            }}
+                          >
+                            {detail.razonSocial}
+                          </Typography>
+                        </Tooltip>
+                      </TableCell>
+                      <TableCell className="customTableCell">
+                        <Typography sx={{ fontSize: 14 }}>{detail.fechaEmision}</Typography>
+                      </TableCell>
+                      <TableCell className="customTableCell">
+                        <Tooltip title={detail.tipoComprobante}>
+                          <Typography
+                            sx={{
+                              cursor: 'pointer',
+                              fontSize: 14,
+                              fontWeight: 'normal',
+                              whiteSpace: 'nowrap',
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                              maxWidth: '100px',
+                            }}
+                          >
+                            {detail.tipoComprobante}
+                          </Typography>
+                        </Tooltip>
+                      </TableCell>
+                      <TableCell className="customTableCell">
+                        <Typography sx={{ fontSize: 14 }}>
+                          {detail.numSerie}-{detail.numCpe}
                         </Typography>
-                      </Box>
-                    </TableCell>
-                    <TableCell>{detail.serie}</TableCell>
-                    <TableCell>{detail.numero}</TableCell>
-                    <TableCell>
-                      <Typography
-                        sx={detail.existsPle ? { color: 'green' } : { color: 'red' }}
-                        variant="h5"
-                        padding={1}
+                      </TableCell>
+                      <TableCell className="customTableCell">
+                        <Typography sx={{ fontSize: 14 }}>{detail.codMoneda}</Typography>
+                      </TableCell>
+                      <TableCell
+                        className="customTableCell"
+                        sx={{ textAlign: 'right' }}
                       >
-                        •
-                      </Typography>
-                    </TableCell>
-                    <TableCell>
-                      <Typography
-                        sx={detail.existsDb ? { color: 'green' } : { color: 'red' }}
-                        variant="h5"
-                        padding={1}
-                      >
-                        •
-                      </Typography>
-                    </TableCell>
-                    <TableCell>
-                      <Tooltip title={detail.observacion}>
                         <Typography
-                          sx={{ cursor: 'pointer' }}
-                          variant="subtitle2"
-                          style={{
+                          sx={
+                            String(detail.observacion).includes('IGV', 'igv')
+                              ? { color: 'red' }
+                              : { color: 'inherit' }
+                          }
+                          style={{ fontSize: 14 }}
+                        >
+                          {detail.mtoIGV}
+                        </Typography>
+                      </TableCell>
+                      <TableCell
+                        className="customTableCell"
+                        sx={{ textAlign: 'right' }}
+                      >
+                        <Typography sx={{ fontSize: 14 }}>{detail.mtoIGVSunat}</Typography>
+                      </TableCell>
+                      <TableCell
+                        className="customTableCell"
+                        sx={{ textAlign: 'right' }}
+                      >
+                        <Typography
+                          sx={
+                            String(detail.observacion).includes('Importe')
+                              ? { color: 'red' }
+                              : { color: 'inherit' }
+                          }
+                          style={{ fontSize: 14 }}
+                        >
+                          {detail.mtoImporteTotal}
+                        </Typography>
+                      </TableCell>
+                      <TableCell
+                        className="customTableCell"
+                        sx={{ textAlign: 'right' }}
+                      >
+                        <Typography sx={{ fontSize: 14 }}>{detail.mtoImporteTotalSunat}</Typography>
+                      </TableCell>
+                      <TableCell className="customTableCell">
+                        <Typography
+                          sx={{
+                            cursor: 'pointer',
+                            fontSize: 14,
+                            fontWeight: 'normal',
                             whiteSpace: 'nowrap',
                             overflow: 'hidden',
                             textOverflow: 'ellipsis',
-                            maxWidth: '200px',
+                            '&:hover': {
+                              color: 'primary.main',
+                              cursor: 'pointer',
+                            },
                           }}
+                          onClick={() => handleOpen(detail)}
                         >
                           {detail.observacion}
                         </Typography>
-                      </Tooltip>
-                    </TableCell>
-                  </TableRow>
-                );
-              })
-            )}
-          </TableBody>
-        </Table>
-      </TableContainer>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })
+              )}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </Box>
+
+      <ModalDetail
+        open={modalOpen}
+        handleClose={handleClose}
+        data={selectedDetail}
+      />
     </Card>
   );
 };
@@ -205,10 +395,5 @@ export const AnalyticsDetails = (props) => {
 AnalyticsDetails.propTypes = {
   loading: PropTypes.bool,
   details: PropTypes.array.isRequired,
-  generalDetail: PropTypes.object,
-  totalRecords: PropTypes.number,
-  rowsPerPage: PropTypes.number.isRequired,
-  page: PropTypes.number.isRequired,
-  handleChangePage: PropTypes.func.isRequired,
-  handleChangeRowsPerPage: PropTypes.func.isRequired,
+  onLoadData: PropTypes.func,
 };

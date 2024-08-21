@@ -134,6 +134,27 @@ export const createComponents = ({ palette }) => {
         },
       },
     },
+    MuiTableContainer: {
+      styleOverrides: {
+        root: {
+          overflow: 'auto',
+          '&::-webkit-scrollbar': {
+            width: '12px',
+            height: '8px',
+          },
+          '&::-webkit-scrollbar-track': {
+            backgroundColor: '#f1f1f1',
+          },
+          '&::-webkit-scrollbar-thumb': {
+            backgroundColor: palette.primary.main,
+            borderRadius: '10px',
+          },
+          '&::-webkit-scrollbar-thumb:hover': {
+            backgroundColor: palette.primary.dark,
+          },
+        },
+      },
+    },
     MuiTableCell: {
       styleOverrides: {
         root: {
@@ -162,7 +183,12 @@ export const createComponents = ({ palette }) => {
       styleOverrides: {
         tooltip: {
           backdropFilter: 'blur(6px)',
-          background: alpha(palette.neutral[900], 0.8),
+          backgroundColor: palette.primary.main,
+          color: '#ffffff',
+          fontSize: '0.875rem',
+        },
+        arrow: {
+          color: palette.primary.main,
         },
       },
     },
