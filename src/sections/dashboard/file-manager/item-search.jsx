@@ -118,13 +118,16 @@ export const ItemSearch = (props) => {
   return (
     <Card>
       <Stack
+        direction="row"
         spacing={2}
+        alignItems="center"
+        justifyContent="space-between"
         sx={{ p: 2 }}
       >
         <Box
           component="form"
           onSubmit={handleQueryChange}
-          sx={{ flexGrow: 1 }}
+          sx={{ flexGrow: 1, maxWidth: 600 }}
         >
           <OutlinedInput
             defaultValue=""
@@ -141,71 +144,66 @@ export const ItemSearch = (props) => {
             }
           />
         </Box>
-        <Stack
-          direction="row"
-          gap={2}
-          alignItems="center"
-        >
-          <Button
-            onClick={uploadDialog.handleOpen} // Abre el diálogo de subida de archivos
-            startIcon={
-              <SvgIcon>
-                <Upload01Icon />
-              </SvgIcon>
-            }
-            variant="contained"
-          >
-            Subir
-          </Button>
-          <ToggleButtonGroup
-            exclusive
-            onChange={handleViewChange}
-            sx={{
-              borderWidth: 1,
-              borderColor: 'divider',
-              borderStyle: 'solid',
-              [`& .${toggleButtonGroupClasses.grouped}`]: {
-                margin: 0.5,
-                border: 0,
-                '&:not(:first-of-type)': {
-                  borderRadius: 1,
-                },
-                '&:first-of-type': {
-                  borderRadius: 1,
-                },
+        <ToggleButtonGroup
+          exclusive
+          onChange={handleViewChange}
+          sx={{
+            borderWidth: 1,
+            borderColor: 'divider',
+            borderStyle: 'solid',
+            [`& .${toggleButtonGroupClasses.grouped}`]: {
+              margin: 0.5,
+              border: 0,
+              '&:not(:first-of-type)': {
+                borderRadius: 1,
               },
-            }}
-            value={view}
-          >
-            <ToggleButton value="grid">
-              <SvgIcon fontSize="small">
-                <Grid01Icon />
-              </SvgIcon>
-            </ToggleButton>
-            <ToggleButton value="list">
-              <SvgIcon fontSize="small">
-                <ListIcon />
-              </SvgIcon>
-            </ToggleButton>
-          </ToggleButtonGroup>
-          <TextField
-            label="Ordenar por"
-            name="sort"
-            onChange={handleSortChange}
-            select
-            SelectProps={{ native: true }}
-            value={sortDir}
-          >
-            {sortOptions.map((option) => (
-              <option
-                key={option.value}
-                value={option.value}
-              >
-                {option.label}
-              </option>
-            ))}
-          </TextField>
-        </Stack>
+              '&:first-of-type': {
+                borderRadius: 1,
+              },
+            },
+          }}
+          value={view}
+        >
+          <ToggleButton value="grid">
+            <SvgIcon fontSize="small">
+              <Grid01Icon />
+            </SvgIcon>
+          </ToggleButton>
+          <ToggleButton value="list">
+            <SvgIcon fontSize="small">
+              <ListIcon />
+            </SvgIcon>
+          </ToggleButton>
+        </ToggleButtonGroup>
+        <TextField
+          label="Ordenar por"
+          name="sort"
+          onChange={handleSortChange}
+          select
+          SelectProps={{ native: true }}
+          value={sortDir}
+          sx={{ minWidth: 120 }} // Asegúrate de que el campo de selección sea compacto
+        >
+          {sortOptions.map((option) => (
+            <option
+              key={option.value}
+              value={option.value}
+            >
+              {option.label}
+            </option>
+          ))}
+        </TextField>
+        <Button
+          onClick={uploadDialog.handleOpen} // Abre el diálogo de subida de archivos
+          startIcon={
+            <SvgIcon>
+              <Upload01Icon />
+            </SvgIcon>
+          }
+          variant="contained"
+        >
+          Subir
+        </Button>
       </Stack>
       <FileUploader
         onClose={uploadDialog.handleClose} // Maneja el cierre del diálogo
