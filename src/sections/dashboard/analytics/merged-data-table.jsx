@@ -7,6 +7,7 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Typography from '@mui/material/Typography';
 import RefreshCcw01Icon from '@untitled-ui/icons-react/build/esm/RefreshCcw01';
+import DownloadIcon from '@untitled-ui/icons-react/build/esm/Download01';
 
 import {
   TableRow as MuiTableRow,
@@ -45,14 +46,21 @@ export const MergeDataTable = (props) => {
         title="Comprobantes faltantes"
         sx={{ p: 2, pb: 0 }}
         action={
-          <IconButton
-            color="inherit"
-            onClick={onLoadData}
-          >
-            <SvgIcon fontSize="small">
-              <RefreshCcw01Icon />
-            </SvgIcon>
-          </IconButton>
+          <>
+            <IconButton color="inherit">
+              <SvgIcon fontSize="small">
+                <DownloadIcon />
+              </SvgIcon>
+            </IconButton>
+            <IconButton
+              color="inherit"
+              onClick={onLoadData}
+            >
+              <SvgIcon fontSize="small">
+                <RefreshCcw01Icon />
+              </SvgIcon>
+            </IconButton>
+          </>
         }
       />
       <Box
