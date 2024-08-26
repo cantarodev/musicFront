@@ -1,14 +1,9 @@
-import { useCallback, useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
-import { LocalizationProvider } from '@mui/x-date-pickers';
-import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
-import { startOfMonth, format, parse } from 'date-fns';
-import { esES } from '@mui/x-date-pickers/locales';
+import { format, parse } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { Button } from '@mui/material';
+import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 
 function convertirFecha(fechaStr) {
   if (!/^\d{6}$/.test(fechaStr)) {

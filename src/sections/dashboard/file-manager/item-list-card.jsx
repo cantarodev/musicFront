@@ -1,8 +1,7 @@
 import { useCallback } from 'react';
 import PropTypes from 'prop-types';
-import { subDays, subHours, subMinutes, format } from 'date-fns';
+import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
-import Star01Icon from '@untitled-ui/icons-react/build/esm/Star01';
 import DotsVerticalIcon from '@untitled-ui/icons-react/build/esm/DotsVertical';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
@@ -22,7 +21,6 @@ import { ItemMenu } from './item-menu';
 import { convertToPeriodDate } from '../../../utils/date';
 import { Button } from '@mui/material';
 import toast from 'react-hot-toast';
-// import { CostExplorer } from 'aws-sdk';
 
 export const ItemListCard = (props) => {
   const { item, onDelete, onOpen } = props;

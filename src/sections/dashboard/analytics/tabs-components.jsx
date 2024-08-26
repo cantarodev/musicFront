@@ -1,15 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import {
-  Tabs,
-  Tab,
-  Box,
-  Typography,
-  IconButton,
-  MenuItem,
-  Menu,
-  useTheme,
-  useMediaQuery,
-} from '@mui/material';
+import { Tabs, Tab, Box, IconButton, MenuItem, Menu, useTheme, useMediaQuery } from '@mui/material';
 import { AnalyticsDetails } from './analytics-details';
 import { PurchasesFilter } from './purchases-filter';
 import { useMockedUser } from 'src/hooks/use-mocked-user';
@@ -17,6 +7,8 @@ import { reportApi } from 'src/api/reports/reportService';
 
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import { MergeDataTable } from './merged-data-table';
+
+import axios from 'axios';
 
 const TabsComponent = ({ queryType }) => {
   const [value, setValue] = useState(0);
@@ -36,6 +28,7 @@ const TabsComponent = ({ queryType }) => {
   ];
 
   const [detailsMain, setDetailsMain] = useState([]);
+  const [downloadPath, setDownloadPath] = useState('');
   const [detailsMerge, setDetailsMerge] = useState([]);
 
   const [loadingObservations, setLoadingObservations] = useState(false);
@@ -49,8 +42,6 @@ const TabsComponent = ({ queryType }) => {
     docType: 'all',
     currency: 'all',
   });
-
-  console.log(selectedParams);
 
   const handleApplyFilters = async () => {
     const user_id = user?.user_id;
@@ -68,14 +59,38 @@ const TabsComponent = ({ queryType }) => {
         docType,
         currency,
       });
-      console.log(response);
 
       const data = response?.data;
+      console.log(data);
       setDetailsMain(data?.all_results);
+      setDownloadPath(data?.download_path);
       setLoadingObservations(false);
     } catch (err) {
       console.error(err);
       setLoadingObservations(false);
+    }
+  };
+
+  const handleDownloadObservations = async () => {
+    try {
+      const response = await reportApi.downloadObservations({
+        downloadPath,
+      });
+
+      const fileResponse = await axios.get(response.data, {
+        responseType: 'blob',
+      });
+
+      const blob = new Blob([fileResponse.data], { type: fileResponse.data.type });
+
+      const link = document.createElement('a');
+      link.href = window.URL.createObjectURL(blob);
+      link.setAttribute('download', 'obs.xlsx');
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (err) {
+      console.error(err);
     }
   };
 
@@ -123,15 +138,6 @@ const TabsComponent = ({ queryType }) => {
     if (index !== undefined) {
       setValue(index);
     }
-  };
-
-  const handleChangePageMain = (event, newPage) => {
-    setPageMain(newPage + 1);
-  };
-
-  const handleChangeRowsPerPageMain = (event) => {
-    setRowsPerPageMain(parseInt(event.target.value, 10));
-    setPageMain(1);
   };
 
   const sourceCounts = detailsMerge.reduce((counts, item) => {
@@ -198,7 +204,9 @@ const TabsComponent = ({ queryType }) => {
           <AnalyticsDetails
             loading={loadingObservations}
             details={detailsMain || []}
+            downloadPath={downloadPath}
             onLoadData={handleApplyFilters}
+            onDownload={handleDownloadObservations}
           />
           <MergeDataTable
             loading={loadingMissings}

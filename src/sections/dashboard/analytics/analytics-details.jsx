@@ -24,7 +24,7 @@ import { ModalDetail } from './modal-detail';
 import { useState } from 'react';
 
 export const AnalyticsDetails = (props) => {
-  const { loading, details, onLoadData } = props;
+  const { loading, details, onLoadData, downloadPath, onDownload } = props;
 
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedDetail, setSelectedDetail] = useState(null);
@@ -45,11 +45,16 @@ export const AnalyticsDetails = (props) => {
         sx={{ p: 2, pb: 0 }}
         action={
           <>
-            <IconButton color="inherit">
-              <SvgIcon fontSize="small">
-                <DownloadIcon />
-              </SvgIcon>
-            </IconButton>
+            {downloadPath && (
+              <IconButton
+                color="inherit"
+                onClick={onDownload}
+              >
+                <SvgIcon fontSize="small">
+                  <DownloadIcon />
+                </SvgIcon>
+              </IconButton>
+            )}
             <IconButton
               color="inherit"
               onClick={onLoadData}
@@ -403,5 +408,7 @@ export const AnalyticsDetails = (props) => {
 AnalyticsDetails.propTypes = {
   loading: PropTypes.bool,
   details: PropTypes.array.isRequired,
+  downloadPath: PropTypes.string,
+  onDownload: PropTypes.func,
   onLoadData: PropTypes.func,
 };

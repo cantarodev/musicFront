@@ -46,21 +46,14 @@ export const MergeDataTable = (props) => {
         title="Comprobantes faltantes"
         sx={{ p: 2, pb: 0 }}
         action={
-          <>
-            <IconButton color="inherit">
-              <SvgIcon fontSize="small">
-                <DownloadIcon />
-              </SvgIcon>
-            </IconButton>
-            <IconButton
-              color="inherit"
-              onClick={onLoadData}
-            >
-              <SvgIcon fontSize="small">
-                <RefreshCcw01Icon />
-              </SvgIcon>
-            </IconButton>
-          </>
+          <IconButton
+            color="inherit"
+            onClick={onLoadData}
+          >
+            <SvgIcon fontSize="small">
+              <RefreshCcw01Icon />
+            </SvgIcon>
+          </IconButton>
         }
       />
       <Box
