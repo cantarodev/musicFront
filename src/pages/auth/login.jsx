@@ -64,7 +64,7 @@ const Page = () => {
           router.push(returnTo || paths.dashboard.fileManager);
         }
       } catch (err) {
-        console.error(err);
+        console.error(err.message);
 
         if (isMounted()) {
           helpers.setStatus({ success: false });
