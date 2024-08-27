@@ -61,7 +61,7 @@ const TabsComponent = ({ queryType }) => {
       });
 
       const data = response?.data;
-      console.log(data);
+
       setDetailsMain(data?.all_results);
       setDownloadPath(data?.download_path);
       setLoadingObservations(false);
@@ -83,9 +83,14 @@ const TabsComponent = ({ queryType }) => {
 
       const blob = new Blob([fileResponse.data], { type: fileResponse.data.type });
 
+      const fileName = downloadPath.split('/').pop();
+      const today = new Date();
+      const formattedDate = today.toISOString().slice(0, 10).replace(/-/g, '');
+      const newFileName = fileName.replace('.xlsx', `_${formattedDate}.xlsx`);
+
       const link = document.createElement('a');
       link.href = window.URL.createObjectURL(blob);
-      link.setAttribute('download', 'obs.xlsx');
+      link.setAttribute('download', newFileName);
       document.body.appendChild(link);
       link.click();
       link.remove();

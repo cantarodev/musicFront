@@ -28,12 +28,14 @@ export const AnalyticsDetails = (props) => {
 
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedDetail, setSelectedDetail] = useState(null);
+  const [selectedOption, setSelectedOption] = useState('');
 
   const isEmpty = details.length === 0;
 
-  const handleOpen = (detail) => {
+  const handleOpen = (detail, option = '') => {
     setModalOpen(true);
     setSelectedDetail(detail);
+    setSelectedOption(option);
   };
 
   const handleClose = () => setModalOpen(false);
@@ -222,6 +224,26 @@ export const AnalyticsDetails = (props) => {
                     </Typography>
                   </Tooltip>
                 </TableCell>
+                <TableCell sx={{ textAlign: 'right' }}>
+                  <Tooltip
+                    title="Tipo de Cambio"
+                    arrow
+                  >
+                    <Typography
+                      sx={{
+                        cursor: 'pointer',
+                        fontSize: 12,
+                        fontWeight: 'bold',
+                        whiteSpace: 'nowrap',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        maxWidth: '80px',
+                      }}
+                    >
+                      Tipo de cambio
+                    </Typography>
+                  </Tooltip>
+                </TableCell>
                 <TableCell>
                   <Typography
                     sx={{
@@ -232,13 +254,33 @@ export const AnalyticsDetails = (props) => {
                     Resumen
                   </Typography>
                 </TableCell>
+                <TableCell>
+                  <Typography
+                    sx={{
+                      fontSize: 12,
+                      fontWeight: 'bold',
+                    }}
+                  >
+                    Resumen Tipo de Cambio
+                  </Typography>
+                </TableCell>
+                <TableCell>
+                  <Typography
+                    sx={{
+                      fontSize: 12,
+                      fontWeight: 'bold',
+                    }}
+                  >
+                    Resumen Factoring
+                  </Typography>
+                </TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {loading ? (
                 <TableRow>
                   <TableCell
-                    colSpan={12}
+                    colSpan={15}
                     align="center"
                     style={{ height: 200 }}
                   >
@@ -253,7 +295,7 @@ export const AnalyticsDetails = (props) => {
               ) : isEmpty ? (
                 <TableRow>
                   <TableCell
-                    colSpan={12}
+                    colSpan={15}
                     align="center"
                     style={{ height: 200 }}
                   >
@@ -368,6 +410,22 @@ export const AnalyticsDetails = (props) => {
                       >
                         <Typography sx={{ fontSize: 14 }}>{detail.mtoImporteTotalSunat}</Typography>
                       </TableCell>
+                      <TableCell
+                        className="customTableCell"
+                        sx={{ textAlign: 'right' }}
+                      >
+                        {/* 17863 */}
+                        <Typography
+                          style={{ fontSize: 14 }}
+                          sx={
+                            String(detail.observacion).includes('TC')
+                              ? { color: 'red' }
+                              : { color: 'inherit' }
+                          }
+                        >
+                          {detail.mtoTipoCambio}
+                        </Typography>
+                      </TableCell>
                       <TableCell className="customTableCell">
                         <Typography
                           sx={{
@@ -384,8 +442,49 @@ export const AnalyticsDetails = (props) => {
                           }}
                           onClick={() => handleOpen(detail)}
                         >
-                          {detail.observacion}
+                          {String(detail.observacion)
+                            .replace(/Valor TC: [\d.]+ \(debería ser [\d.]+\)\.?/, '')
+                            .trim()
+                            .replace(/\.$/, '')}
                         </Typography>
+                      </TableCell>
+                      <TableCell className="customTableCell">
+                        <Typography
+                          sx={{
+                            cursor: 'pointer',
+                            fontSize: 14,
+                            fontWeight: 'normal',
+                            whiteSpace: 'nowrap',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            '&:hover': {
+                              color: 'primary.main',
+                              cursor: 'pointer',
+                            },
+                          }}
+                          onClick={() => handleOpen(detail, 'TC')}
+                        >
+                          {String(detail.observacion).includes('TC') &&
+                            String(detail.observacion).match(
+                              /Valor TC: [\d.]+ \(debería ser [\d.]+\)/
+                            )[0]}
+                        </Typography>
+                      </TableCell>
+                      <TableCell className="customTableCell">
+                        <Typography
+                          sx={{
+                            cursor: 'pointer',
+                            fontSize: 14,
+                            fontWeight: 'normal',
+                            whiteSpace: 'nowrap',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            '&:hover': {
+                              color: 'primary.main',
+                              cursor: 'pointer',
+                            },
+                          }}
+                        ></Typography>
                       </TableCell>
                     </TableRow>
                   );
@@ -400,6 +499,7 @@ export const AnalyticsDetails = (props) => {
         open={modalOpen}
         handleClose={handleClose}
         data={selectedDetail}
+        option={selectedOption}
       />
     </Card>
   );

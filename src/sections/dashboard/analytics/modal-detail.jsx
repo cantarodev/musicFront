@@ -15,7 +15,16 @@ import {
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 
-const armarTabla = (texto) => {
+const armarTabla = (texto, option) => {
+  if (option === 'TC') {
+    texto = String(texto).match(/Valor TC: [\d.]+ \(debería ser [\d.]+\)/)[0];
+  } else {
+    texto = String(texto)
+      .replace(/Valor TC: [\d.]+ \(debería ser [\d.]+\)\.?/, '')
+      .trim()
+      .replace(/\.$/, '');
+  }
+
   const regex = /(\w+)\s(\w+):\s([\d.]+)\s\(debería\sser\s([\d.]+)\)/g;
   const filas = [];
 
@@ -37,7 +46,7 @@ const armarTabla = (texto) => {
   return filas;
 };
 
-export const ModalDetail = ({ open, handleClose, data }) => {
+export const ModalDetail = ({ open, handleClose, data, option }) => {
   return (
     <Modal
       open={open}
@@ -81,7 +90,7 @@ export const ModalDetail = ({ open, handleClose, data }) => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {armarTabla(data?.observacion)?.map((detail, index) => {
+              {armarTabla(data?.observacion, option)?.map((detail, index) => {
                 return (
                   <TableRow key={index}>
                     <TableCell>{detail.nombre}</TableCell>
@@ -108,4 +117,5 @@ ModalDetail.propTypes = {
   open: PropTypes.bool,
   handleClose: PropTypes.func,
   data: PropTypes.object,
+  option: PropTypes.string,
 };
