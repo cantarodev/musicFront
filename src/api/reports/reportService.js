@@ -1,10 +1,10 @@
-import { getReportObservations, getReportMissings, downloadObservations } from './reportApi';
+import { reportObservations, getReportMissings, downloadObservations } from './reportApi';
 
 class ReportApi {
-  async getReportObservations(request) {
-    const { user_id, period, queryType, docType, currency } = request;
+  async reportObservations(request) {
+    const { user_id, period, queryType, docType, currency, filters } = request;
 
-    return await getReportObservations(user_id, period, queryType, docType, currency);
+    return await reportObservations(user_id, period, queryType, docType, currency, filters);
   }
 
   async getReportMissings(request) {

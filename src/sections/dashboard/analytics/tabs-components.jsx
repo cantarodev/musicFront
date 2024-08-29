@@ -50,6 +50,7 @@ const TabsComponent = ({ queryType }) => {
     const docType = selectedParams.docType;
     const currency = selectedParams.currency;
 
+    setDetailsMain([]);
     setLoadingObservations(true);
     try {
       const response = await reportApi.getReportObservations({

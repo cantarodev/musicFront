@@ -20,6 +20,7 @@ import {
   LinearProgress,
   IconButton,
   SvgIcon,
+  Stack,
 } from '@mui/material';
 
 import { ModalDetail } from './modal-detail';
@@ -46,14 +47,32 @@ export const MergeDataTable = (props) => {
         title="Comprobantes faltantes"
         sx={{ p: 2, pb: 0 }}
         action={
-          <IconButton
-            color="inherit"
-            onClick={onLoadData}
+          <Stack
+            direction="row"
+            alignItems="center"
+            spacing={2}
           >
-            <SvgIcon fontSize="small">
-              <RefreshCcw01Icon />
-            </SvgIcon>
-          </IconButton>
+            <Typography
+              variant="subtitle2"
+              sx={{ display: 'flex', alignItems: 'center' }}
+            >
+              <span style={{ color: 'green', fontSize: 24, marginRight: 4 }}>•</span> Existe
+            </Typography>{' '}
+            <Typography
+              variant="subtitle2"
+              sx={{ display: 'flex', alignItems: 'center' }}
+            >
+              <span style={{ color: 'red', fontSize: 24, marginRight: 4 }}>•</span> No existe
+            </Typography>{' '}
+            <IconButton
+              color="inherit"
+              onClick={onLoadData}
+            >
+              <SvgIcon fontSize="small">
+                <RefreshCcw01Icon />
+              </SvgIcon>
+            </IconButton>
+          </Stack>
         }
       />
       <Box
@@ -176,15 +195,17 @@ export const MergeDataTable = (props) => {
                   backgroundColor: 'background.paper',
                 }}
               >
-                <TableCell></TableCell>
-                <TableCell></TableCell>
-                <TableCell></TableCell>
-                <TableCell sx={{ textAlign: 'center', fontSize: 16, fontWeight: 600 }}>
-                  {sourceCounts?.ple}
-                </TableCell>
-                <TableCell sx={{ textAlign: 'center', fontSize: 16, fontWeight: 600 }}>
-                  {sourceCounts?.sunat}
-                </TableCell>
+                <TableRow>
+                  <TableCell></TableCell>
+                  <TableCell></TableCell>
+                  <TableCell></TableCell>
+                  <TableCell sx={{ textAlign: 'center', fontSize: 16, fontWeight: 600 }}>
+                    {sourceCounts?.ple}
+                  </TableCell>
+                  <TableCell sx={{ textAlign: 'center', fontSize: 16, fontWeight: 600 }}>
+                    {sourceCounts?.sunat}
+                  </TableCell>
+                </TableRow>
               </TableFooter>
             )}
           </Table>

@@ -3,7 +3,8 @@ import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
 import { format, parse } from 'date-fns';
 import { es } from 'date-fns/locale';
-import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
+import { Checkbox, ListItemText, MenuItem } from '@mui/material';
+import { useEffect, useState } from 'react';
 
 function convertirFecha(fechaStr) {
   if (!/^\d{6}$/.test(fechaStr)) {
@@ -91,17 +92,81 @@ const searchCurrencyOptions = [
   },
 ];
 
+const filterOptions = [
+  {
+    label: 'Todos',
+    value: 'all',
+  },
+  {
+    label: 'General',
+    value: 'general',
+  },
+  {
+    label: 'Tipo de Cambio',
+    value: 'tc',
+  },
+  {
+    label: 'Factoring',
+    value: 'facto',
+  },
+];
+
 export const PurchasesFilter = (props) => {
-  const { selectedParams, setSelectedParams, onApplyFilters } = props;
+  const { selectedParams, setSelectedParams } = props;
+  const [selectedOptions, setSelectedOptions] = useState(['general']);
 
   const handleSelected = (event) => {
     const { name, value } = event.target;
     setSelectedParams((state) => ({ ...state, [name]: value }));
   };
 
-  const handleApplyFilters = () => {
-    onApplyFilters();
+  const handleSelectedOptions = (option) => {
+    let updatedSelection = [];
+
+    if (option.value === 'all') {
+      if (selectedOptions.includes('all')) {
+        updatedSelection = [];
+      } else {
+        updatedSelection = [
+          'all',
+          ...filterOptions.filter((opt) => opt.value !== 'all').map((opt) => opt.value),
+        ];
+      }
+    } else {
+      updatedSelection = selectedOptions.includes(option.value)
+        ? selectedOptions.filter((item) => item !== option.value && item !== 'all')
+        : [...selectedOptions.filter((item) => item !== 'all'), option.value];
+
+      if (updatedSelection.length === filterOptions.length - 1) {
+        updatedSelection.push('all');
+      }
+    }
+
+    setSelectedOptions(updatedSelection);
+
+    setSelectedParams((state) => ({ ...state, ['filters']: updatedSelection }));
   };
+
+  console.log(selectedParams);
+
+  const renderValue = (selected) => {
+    if (selected.includes('all')) {
+      return 'Todos seleccionados';
+    }
+    if (selected.length > 2) {
+      return `${selected.length} seleccionados`;
+    }
+    return selected
+      .map((value) => filterOptions.find((opt) => opt.value === value)?.label)
+      .join(', ');
+  };
+
+  useEffect(() => {
+    setSelectedParams((state) => ({
+      ...state,
+      filters: selectedOptions,
+    }));
+  }, [selectedOptions, setSelectedParams]);
 
   return (
     <Stack
@@ -163,6 +228,38 @@ export const PurchasesFilter = (props) => {
             >
               {option.label}
             </option>
+          ))}
+        </TextField>
+      </Stack>
+      <Stack>
+        <TextField
+          label="Filtros"
+          name="filter"
+          select
+          SelectProps={{
+            multiple: true,
+            renderValue: renderValue,
+            MenuProps: {
+              PaperProps: {
+                style: {
+                  width: '200px',
+                },
+              },
+            },
+          }}
+          value={selectedOptions}
+          onChange={() => {}}
+          sx={{ width: '200px' }}
+        >
+          {filterOptions.map((option) => (
+            <MenuItem
+              key={option.value}
+              value={option.value}
+              onClick={() => handleSelectedOptions(option)}
+            >
+              <Checkbox checked={selectedOptions.includes(option.value)} />
+              <ListItemText primary={option.label} />
+            </MenuItem>
           ))}
         </TextField>
       </Stack>
