@@ -24,8 +24,9 @@ import { useMockedUser } from 'src/hooks/use-mocked-user';
 import { PLESearchDialog } from 'src/sections/dashboard/file-manager/search-ple'; // Asegúrate de que la ruta sea correcta
 import { set } from 'nprogress';
 import toast from 'react-hot-toast';
+import { useSelector } from 'react-redux';
 
-const useItemsSearch = (user_id) => {
+const useItemsSearch = (user_id, rucAccount) => {
   const [state, setState] = useState({
     filters: {
       query: undefined,
@@ -35,6 +36,7 @@ const useItemsSearch = (user_id) => {
     sortBy: 'createdAt',
     sortDir: 'desc',
     user_id: user_id,
+    rucAccount,
   });
 
   const handleFiltersChange = useCallback((filters) => {
@@ -74,28 +76,25 @@ const useItemsSearch = (user_id) => {
   };
 };
 
-const useItemsTotals = (user_id) => {
+const useItemsTotals = (user_id, rucAccount) => {
   const [state, setState] = useState({
     items: [],
   });
+
   const handleItemsTotalsGet = useCallback(async () => {
     try {
-      const response = await fileManagerApi.getTotals({ user_id });
+      const response = await fileManagerApi.getTotals({ user_id, rucAccount });
       setState({
         items: response,
       });
     } catch (err) {
       console.error(err);
     }
-  }, [user_id]);
+  }, [user_id, rucAccount]);
 
-  useEffect(
-    () => {
-      handleItemsTotalsGet();
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [user_id]
-  );
+  useEffect(() => {
+    handleItemsTotalsGet();
+  }, [rucAccount]);
 
   return {
     handleItemsTotalsGet,
@@ -103,16 +102,17 @@ const useItemsTotals = (user_id) => {
   };
 };
 
-const useItemsStore = (searchState) => {
+const useItemsStore = (searchState, rucAccount) => {
   const isMounted = useMounted();
   const [state, setState] = useState({
     items: [],
     itemsCount: 0,
   });
+  const [params, setParams] = useState(searchState);
 
   const handleItemsGet = useCallback(async () => {
     try {
-      const response = await fileManagerApi.getFiles(searchState);
+      const response = await fileManagerApi.getFiles(params);
       if (isMounted()) {
         setState({
           items: response.data,
@@ -122,15 +122,7 @@ const useItemsStore = (searchState) => {
     } catch (err) {
       console.error(err);
     }
-  }, [searchState, isMounted]);
-
-  useEffect(
-    () => {
-      handleItemsGet();
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [searchState]
-  );
+  }, [params, isMounted]);
 
   const handleDelete = useCallback(async (itemId) => {
     try {
@@ -150,11 +142,20 @@ const useItemsStore = (searchState) => {
       }
     } catch (err) {
       toast.error('Hubo un error al intentar eliminar PLE.', {
-        duration: 5000, position: 'top-center',
+        duration: 5000,
+        position: 'top-center',
       });
       console.error(err);
     }
   }, []);
+
+  useEffect(() => {
+    handleItemsGet();
+  }, [params]);
+
+  useEffect(() => {
+    setParams((prev) => ({ ...prev, rucAccount: rucAccount }));
+  }, [rucAccount]);
 
   return {
     handleDelete,
@@ -175,17 +176,16 @@ const useCurrentItem = (items, itemId) => {
 
 const Page = () => {
   const user = useMockedUser();
+  const selectedAccount = useSelector((state) => state.account);
   const settings = useSettings();
-  const itemsSearch = useItemsSearch(user?.user_id);
-  const itemsStore = useItemsStore(itemsSearch.state);
+  const itemsSearch = useItemsSearch(user?.user_id, selectedAccount);
+  const itemsStore = useItemsStore(itemsSearch.state, selectedAccount);
   const [view, setView] = useState('grid');
   const uploadDialog = useDialog();
   const detailsDialog = useDialog();
   const pleSearchDialog = useDialog(); // Dialog state for PLE search
   const currentItem = useCurrentItem(itemsStore.items, detailsDialog.data);
-  const totals = useItemsTotals(user?.user_id);
-
-  usePageView();
+  const totals = useItemsTotals(user?.user_id, selectedAccount);
 
   const handleDelete = useCallback(
     (itemId) => {
@@ -227,8 +227,7 @@ const Page = () => {
                   alignItems="center"
                   direction="row"
                   spacing={2}
-                >
-                </Stack>
+                ></Stack>
               </Stack>
             </Grid>
             <Grid

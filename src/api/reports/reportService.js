@@ -2,9 +2,17 @@ import { reportObservations, getReportMissings, downloadObservations } from './r
 
 class ReportApi {
   async reportObservations(request) {
-    const { user_id, period, queryType, docType, currency, filters } = request;
+    const { user_id, period, queryType, docType, currency, filters, account } = request;
 
-    return await reportObservations(user_id, period, queryType, docType, currency, filters);
+    return await reportObservations(
+      user_id,
+      period,
+      queryType,
+      docType,
+      currency,
+      filters,
+      account
+    );
   }
 
   async getReportMissings(request) {

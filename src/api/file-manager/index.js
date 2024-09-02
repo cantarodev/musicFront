@@ -3,10 +3,16 @@ import { applySort } from 'src/utils/apply-sort';
 import { deepCopy } from 'src/utils/deep-copy';
 import { wait } from 'src/utils/wait';
 
-import { createFile, getFiles, getTotals, deleteFile, downloadFile, searchComprobante } from './data';
+import {
+  createFile,
+  getFiles,
+  getTotals,
+  deleteFile,
+  downloadFile,
+  searchComprobante,
+} from './data';
 
 class FileManagerApi {
-  
   async createFile(request) {
     const formData = request;
     await wait(1000);
@@ -29,11 +35,11 @@ class FileManagerApi {
   }
 
   async getTotals(request) {
-    const { user_id } = request;
+    const { user_id, rucAccount } = request;
     await wait(1000);
     return new Promise((resolve, reject) => {
       try {
-        getTotals(user_id).then((data) => {
+        getTotals(user_id, rucAccount).then((data) => {
           resolve(data);
         });
       } catch (err) {
@@ -44,8 +50,9 @@ class FileManagerApi {
   }
 
   async getFiles(request = {}) {
-    const { filters, page, rowsPerPage, sortBy, sortDir, user_id } = request;
-    let data = deepCopy(await getFiles(user_id));
+    const { filters, page, rowsPerPage, sortBy, sortDir, user_id, rucAccount } = request;
+
+    let data = deepCopy(await getFiles(user_id, rucAccount));
     let count = data.length;
 
     if (typeof filters !== 'undefined') {
@@ -115,10 +122,9 @@ class FileManagerApi {
     });
   }
 
-  
   async searchComprobante(request = {}) {
     const { user_id, file_id, comprobante } = request;
-    console.log("REQUEST IN INDEX: ", request);  // Verifica el request recibido
+    console.log('REQUEST IN INDEX: ', request); // Verifica el request recibido
     await wait(500);
     return new Promise((resolve, reject) => {
       try {
@@ -135,7 +141,6 @@ class FileManagerApi {
       }
     });
   }
-
 }
 
 export const fileManagerApi = new FileManagerApi();

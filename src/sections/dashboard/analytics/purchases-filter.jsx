@@ -147,8 +147,6 @@ export const PurchasesFilter = (props) => {
     setSelectedParams((state) => ({ ...state, ['filters']: updatedSelection }));
   };
 
-  console.log(selectedParams);
-
   const renderValue = (selected) => {
     if (selected.includes('all')) {
       return 'Todos seleccionados';

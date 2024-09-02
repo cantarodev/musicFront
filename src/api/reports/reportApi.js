@@ -1,7 +1,17 @@
 import apiClient from '../apiClient';
 import { handleResponse } from 'src/utils/api-utils';
 
-export const reportObservations = (user_id, period, queryType, docType, currency, filters) => {
+export const reportObservations = (
+  user_id,
+  period,
+  queryType,
+  docType,
+  currency,
+  filters,
+  account
+) => {
+  console.log(account);
+
   return handleResponse(
     apiClient.post('/report/observations/show/', {
       user_id,
@@ -10,13 +20,16 @@ export const reportObservations = (user_id, period, queryType, docType, currency
       docType,
       currency,
       filters,
+      account,
     })
   );
 };
 
-export const getReportMissings = (user_id, period, queryType, docType, currency) => {
+export const getReportMissings = (user_id, period, queryType, docType, currency, account) => {
   return handleResponse(
-    apiClient.get(`/report/missings/${user_id}/${period}/${queryType}/${docType}/${currency}`)
+    apiClient.get(
+      `/report/missings/${user_id}/${period}/${queryType}/${docType}/${currency}/${account}`
+    )
   );
 };
 

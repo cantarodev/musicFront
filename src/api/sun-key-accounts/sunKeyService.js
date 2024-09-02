@@ -13,8 +13,6 @@ class ClaveSolAccountsApi {
   async getClaveSolAccounts(request = {}) {
     const { filters, page, rowsPerPage, user_id } = request;
 
-    console.log('ID:', user_id);
-
     let { data } = await getClaveSolAccounts(user_id);
     let count = data.length;
 

@@ -1,11 +1,11 @@
-import { User } from '@auth0/auth0-spa-js';
 import apiClient from '../apiClient';
 
 export const items = [];
-export const getFiles = async (user_id) => {
+export const getFiles = async (user_id, rucAccount) => {
   try {
-    const { data } = await apiClient.get(`/file/${user_id}`);
+    const { data } = await apiClient.get(`/file/${user_id}/${rucAccount}`);
     const files = JSON.parse(data.files);
+
     return files;
   } catch (error) {
     console.log(error);
@@ -14,9 +14,9 @@ export const getFiles = async (user_id) => {
   }
 };
 
-export const getTotals = async (user_id) => {
+export const getTotals = async (user_id, rucAccount) => {
   try {
-    const { data } = await apiClient.get(`/file/totals/${user_id}`);
+    const { data } = await apiClient.get(`/file/totals/${user_id}/${rucAccount}`);
     const totals = JSON.parse(data.totals);
     return totals;
   } catch (error) {
@@ -28,7 +28,6 @@ export const getTotals = async (user_id) => {
 
 export const createFile = async (formData) => {
   try {
-    console.log(formData);
     const { data } = await apiClient.post('/file/upload', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
@@ -64,7 +63,6 @@ export const downloadFile = async (user_id, file_id) => {
 export const searchComprobante = async (user_id, file_id, comprobante) => {
   try {
     const response = await apiClient.get(`/file/search/${user_id}/${file_id}/${comprobante}`);
-    console.log("REQUEST PAST DATA: ", user_id, "-",file_id,"-", comprobante);
     const file = response?.data;
     return file;
   } catch (err) {

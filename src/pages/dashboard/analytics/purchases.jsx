@@ -12,10 +12,12 @@ import { PurchasesFilter } from 'src/sections/dashboard/analytics/purchases-filt
 import { reportApi } from 'src/api/reports/reportService';
 
 import axios from 'axios';
+import { useSelector } from 'react-redux';
 
 const Page = () => {
   const settings = useSettings();
 
+  const selectedAccount = useSelector((state) => state.account);
   const [detailsMain, setDetailsMain] = useState([]);
   const [downloadPath, setDownloadPath] = useState('');
   const [detailsMerge, setDetailsMerge] = useState([]);
@@ -27,6 +29,7 @@ const Page = () => {
 
   const [selectedParams, setSelectedParams] = useState({
     period: '202408',
+    account: selectedAccount,
     queryType: 'compras',
     docType: 'all',
     currency: 'all',
@@ -35,22 +38,13 @@ const Page = () => {
 
   const handleApplyFilters = async () => {
     const user_id = user?.user_id;
-    const period = selectedParams.period;
-    const queryType = selectedParams.queryType;
-    const docType = selectedParams.docType;
-    const currency = selectedParams.currency;
-    const filters = selectedParams.filters;
 
     setDetailsMain([]);
     setLoadingObservations(true);
     try {
       const response = await reportApi.reportObservations({
+        ...selectedParams,
         user_id,
-        period,
-        queryType,
-        docType,
-        currency,
-        filters,
       });
 
       const data = response?.data;
@@ -122,6 +116,10 @@ const Page = () => {
   useEffect(() => {
     loadData();
   }, []);
+
+  useEffect(() => {
+    setSelectedParams((state) => ({ ...state, account: selectedAccount }));
+  }, [selectedAccount]);
 
   const sourceCounts = detailsMerge.reduce((counts, item) => {
     counts[item.source] = (counts[item.source] || 0) + 1;

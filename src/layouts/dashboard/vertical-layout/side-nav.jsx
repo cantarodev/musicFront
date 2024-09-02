@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import PropTypes from 'prop-types';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
@@ -22,9 +22,14 @@ import { useAuth } from 'src/hooks/use-auth';
 import { Issuer } from 'src/utils/auth';
 import { useMockedUser } from 'src/hooks/use-mocked-user';
 import { AccountButton } from '../account-button';
-import { Divider, Grid, IconButton, Tooltip } from '@mui/material';
+import { Divider, Grid, IconButton, Menu, MenuItem, Tooltip } from '@mui/material';
 import { NotificationsButton } from '../notifications-button';
 import XCloseIcon from '@untitled-ui/icons-react/build/esm/XClose';
+import ChevronDownIcon from '@untitled-ui/icons-react/build/esm/ChevronDown';
+import { claveSolAccountsApi } from 'src/api/sun-key-accounts/sunKeyService';
+import { useDispatch } from 'react-redux';
+import { useSelector } from 'react-redux';
+import { setAccount } from '../../../slices/account';
 
 const SIDE_NAV_WIDTH = 280;
 
@@ -158,11 +163,32 @@ const useCssVars = (color) => {
 
 export const SideNav = (props) => {
   const { color = 'evident', sections = [] } = props;
+  const dispatch = useDispatch();
   const pathname = usePathname();
   const cssVars = useCssVars(color);
   const router = useRouter();
   const auth = useAuth();
   const user = useMockedUser();
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [menuItems, setMenuItems] = useState([]);
+  const [selectedIndex, setSelectedIndex] = useState(0);
+  const [selectedName, setSelectedName] = useState('');
+  const open = Boolean(anchorEl);
+
+  const handleClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
+  const handleMenuItemClick = (event, index, value, name) => {
+    setSelectedIndex(index);
+    setSelectedName(name);
+    dispatch(setAccount(value));
+    setAnchorEl(null);
+  };
 
   const handleLogout = useCallback(async () => {
     try {
@@ -186,6 +212,21 @@ export const SideNav = (props) => {
       );
     }
   }, [auth, router]);
+
+  useEffect(() => {
+    const accounts = async () => {
+      try {
+        const response = await claveSolAccountsApi.getClaveSolAccounts({ user_id: user.user_id });
+        setMenuItems(response.data);
+        setSelectedName(response.data[0].name);
+        dispatch(setAccount(response.data[0].ruc));
+      } catch (err) {
+        console.error(err.message);
+      }
+    };
+
+    accounts();
+  }, [user.user_id, dispatch]);
 
   return (
     <Drawer
@@ -248,6 +289,7 @@ export const SideNav = (props) => {
               </IconButton>
             </Box>
           </Stack>
+
           <Stack
             component="nav"
             spacing={2}
@@ -256,6 +298,56 @@ export const SideNav = (props) => {
               px: 2,
             }}
           >
+            <Box sx={{ px: 2 }}>
+              <Typography sx={{ color: 'primary.main' }}>
+                {selectedName ? `${selectedName}` : 'Ninguno'}
+                <IconButton
+                  aria-controls={open ? 'simple-menu' : undefined}
+                  aria-haspopup="true"
+                  aria-expanded={open ? 'true' : undefined}
+                  onClick={handleClick}
+                >
+                  <SvgIcon sx={{ fontSize: 16 }}>
+                    <ChevronDownIcon />
+                  </SvgIcon>
+                </IconButton>
+              </Typography>
+              <Menu
+                id="simple-menu"
+                anchorEl={anchorEl}
+                open={open}
+                onClose={handleClose}
+                style={{
+                  boxShadow: '0px 0px 10px rgba(0, 0, 0, 0.1)',
+                  borderRadius: '10px',
+                }}
+              >
+                {menuItems.map((item, index) => (
+                  <Box key={index}>
+                    <MenuItem
+                      selected={index === selectedIndex}
+                      onClick={(event) => handleMenuItemClick(event, index, item.ruc, item.name)}
+                      sx={{
+                        color: index === selectedIndex ? 'primary.main' : 'inherit',
+                        '&:hover': {
+                          color: 'primary.main',
+                        },
+                      }}
+                    >
+                      <Box
+                        display="flex"
+                        flexDirection="column"
+                      >
+                        <Typography variant="h6">{item.name}</Typography>
+                        <Typography variant="body2">RUC: {item.ruc}</Typography>
+                        <Typography variant="body2">Usuario: {item.username}</Typography>
+                      </Box>
+                    </MenuItem>
+                    {index < menuItems.length - 1 && <Divider />}
+                  </Box>
+                ))}
+              </Menu>
+            </Box>
             {sections.map((section, index) => (
               <SideNavSection
                 items={section.items}

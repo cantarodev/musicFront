@@ -18,7 +18,6 @@ import { Divider } from '@mui/material';
 export const AccountPopover = (props) => {
   const { anchorEl, onClose, open, ...other } = props;
   const settings = useSettings();
-  console.log(settings);
 
   return (
     <Popover

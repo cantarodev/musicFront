@@ -20,7 +20,6 @@ function getComparator(sortDir, sortBy) {
 }
 
 export function applySort(documents, sortBy, sortDir) {
-  console.log(documents);
   const comparator = getComparator(sortDir, sortBy);
   const stabilizedThis = documents.map((el, index) => [el, index]);
 
