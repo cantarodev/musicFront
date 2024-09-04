@@ -81,7 +81,7 @@ export const AnalyticsDetails = (props) => {
     tipoCambio: true,
     resumen: true,
     resumenTC: true,
-    resumenFactoring: false,
+    resumenFactoring: true,
   });
 
   const [open, setOpen] = useState(false);
@@ -112,6 +112,7 @@ export const AnalyticsDetails = (props) => {
   const handleClose = () => setModalOpen(false);
 
   useEffect(() => {
+    console.log('Details data:', details);
     const tcRegex = /Valor TC: [\d.]+ \(debería ser [\d.]+\)/;
     const importeRegex = /Valor Importe: [\d.]+ \(debería ser [\d.]+\)/;
     const igvRegex = /Valor IGV: [\d.]+ \(debería ser [\d.]+\)/;
@@ -692,7 +693,9 @@ export const AnalyticsDetails = (props) => {
                                 cursor: 'pointer',
                               },
                             }}
-                          ></Typography>
+                          >
+                            {detail.observacion_factoring ? detail.observacion_factoring : 'Sin observaciones'}
+                          </Typography>
                         </TableCell>
                       )}
                     </TableRow>
