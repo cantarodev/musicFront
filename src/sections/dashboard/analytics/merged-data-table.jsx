@@ -10,8 +10,6 @@ import RefreshCcw01Icon from '@untitled-ui/icons-react/build/esm/RefreshCcw01';
 import DownloadIcon from '@untitled-ui/icons-react/build/esm/Download01';
 
 import {
-  TableRow as MuiTableRow,
-  TableCell as MuiTableCell,
   TableContainer,
   TablePagination,
   TableFooter,
@@ -23,23 +21,10 @@ import {
   Stack,
 } from '@mui/material';
 
-import { ModalDetail } from './modal-detail';
-import { useState } from 'react';
-
 export const MergeDataTable = (props) => {
   const { loading, details, sourceCounts, onLoadData } = props;
 
-  const [modalOpen, setModalOpen] = useState(false);
-  const [selectedDetail, setSelectedDetail] = useState(null);
-
   const isEmpty = details.length === 0;
-
-  const handleOpen = (detail) => {
-    setModalOpen(true);
-    setSelectedDetail(detail);
-  };
-
-  const handleClose = () => setModalOpen(false);
 
   return (
     <Card>
@@ -211,11 +196,6 @@ export const MergeDataTable = (props) => {
           </Table>
         </TableContainer>
       </Box>
-      <ModalDetail
-        open={modalOpen}
-        handleClose={handleClose}
-        data={selectedDetail}
-      />
     </Card>
   );
 };

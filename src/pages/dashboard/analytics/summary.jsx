@@ -1,6 +1,6 @@
 import Box from '@mui/material/Box';
 import Container from '@mui/material/Container';
-import Grid from '@mui/material/Unstable_Grid2';
+import Grid from '@mui/material/Grid2';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 
@@ -48,20 +48,20 @@ const Page = () => {
     [user]
   );
 
-  useEffect(() => {
-    const loadData = async () => {
-      const paginatedData = await handleDetails(
-        selectedParams.period,
-        selectedParams.type,
-        page + 1,
-        rowsPerPage
-      );
-      setDetails(paginatedData?.items);
-      setTotalRecords(paginatedData?.total);
-      setGeneralDetail(paginatedData?.generalDetail);
-    };
-    loadData();
-  }, [selectedParams, page, rowsPerPage]);
+  // useEffect(() => {
+  //   const loadData = async () => {
+  //     const paginatedData = await handleDetails(
+  //       selectedParams.period,
+  //       selectedParams.type,
+  //       page + 1,
+  //       rowsPerPage
+  //     );
+  //     setDetails(paginatedData?.items);
+  //     setTotalRecords(paginatedData?.total);
+  //     setGeneralDetail(paginatedData?.generalDetail);
+  //   };
+  //   loadData();
+  // }, [selectedParams, page, rowsPerPage]);
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
@@ -92,7 +92,7 @@ const Page = () => {
             }}
           >
             <Grid
-              xs={12}
+              size={{ xs: 12 }}
               sx={{
                 borderBottomWidth: 2,
                 borderBottomStyle: 'solid',
@@ -115,10 +115,7 @@ const Page = () => {
                 />
               </Stack>
             </Grid>
-            <Grid
-              xs={12}
-              lg={12}
-            >
+            <Grid size={{ xs: 12, lg: 12 }}>
               <Card>
                 <CardContent sx={{ textAlign: 'center', fontSize: 24 }}>
                   Mantenimiento KPIs

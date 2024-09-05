@@ -2,7 +2,7 @@ import Box from '@mui/material/Box';
 import Chip from '@mui/material/Chip';
 import Container from '@mui/material/Container';
 import Divider from '@mui/material/Divider';
-import Grid from '@mui/material/Unstable_Grid2';
+import Grid from '@mui/material/Grid2';
 import Stack from '@mui/material/Stack';
 import Switch from '@mui/material/Switch';
 import Typography from '@mui/material/Typography';

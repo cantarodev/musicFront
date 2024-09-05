@@ -1,54 +1,22 @@
 import PropTypes from 'prop-types';
 import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
-import { format, parse } from 'date-fns';
-import { es } from 'date-fns/locale';
-import { Checkbox, ListItemText, MenuItem } from '@mui/material';
+import { Button, Checkbox, ListItemText, MenuItem } from '@mui/material';
 import { useEffect, useState } from 'react';
+import FilterListIcon from '@mui/icons-material/FilterList';
 
-function convertirFecha(fechaStr) {
-  if (!/^\d{6}$/.test(fechaStr)) {
-    throw new Error('Formato de fecha inválido. Debe ser "YYYYMM".');
-  }
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
+import { LocalizationProvider, DatePicker } from '@mui/x-date-pickers';
+import { format, parse } from 'date-fns';
+import esES from 'date-fns/locale/es';
 
-  const anio = fechaStr.slice(0, 4);
-  const mes = fechaStr.slice(4, 6);
-
-  const fecha = parse(`${anio}-${mes}-01`, 'yyyy-MM-dd', new Date());
-
-  let fechaFormateada = format(fecha, 'MMMM, yyyy', { locale: es });
-
-  fechaFormateada = fechaFormateada.charAt(0).toUpperCase() + fechaFormateada.slice(1);
-
-  return fechaFormateada;
-}
-
-const searchPeriodOptions = [
-  {
-    label: convertirFecha('202408'),
-    value: '202408',
+const customEnLocale = {
+  ...esES,
+  options: {
+    ...esES.options,
+    weekStartsOn: 1,
   },
-  {
-    label: convertirFecha('202407'),
-    value: '202407',
-  },
-  {
-    label: convertirFecha('202406'),
-    value: '202406',
-  },
-  {
-    label: convertirFecha('202405'),
-    value: '202405',
-  },
-  {
-    label: convertirFecha('202404'),
-    value: '202404',
-  },
-  {
-    label: convertirFecha('202403'),
-    value: '202403',
-  },
-];
+};
 
 const searchTypeOptions = [
   {
@@ -112,7 +80,7 @@ const filterOptions = [
 ];
 
 export const PurchasesFilter = (props) => {
-  const { selectedParams, setSelectedParams } = props;
+  const { selectedParams, setSelectedParams, loading, onLoadData } = props;
   const [selectedOptions, setSelectedOptions] = useState(['general']);
 
   const handleSelected = (event) => {
@@ -159,6 +127,21 @@ export const PurchasesFilter = (props) => {
       .join(', ');
   };
 
+  const formatDate = (date) => {
+    if (!date) return '';
+    return format(date, 'yyyyMM');
+  };
+
+  const parseDateFromYYYYMM = (dateString) => {
+    if (!dateString) return null;
+    return parse(dateString, 'yyyyMM', new Date());
+  };
+
+  const handleDateChange = (date) => {
+    const value = formatDate(date);
+    setSelectedParams((state) => ({ ...state, period: value }));
+  };
+
   useEffect(() => {
     setSelectedParams((state) => ({
       ...state,
@@ -171,29 +154,34 @@ export const PurchasesFilter = (props) => {
       alignItems="center"
       direction="row"
       justifyContent="space-between"
+      sx={{ width: '100%' }}
     >
       <Stack
         alignItems="center"
         direction="row"
         gap={2}
+        sx={{ minWidth: 150 }}
       >
-        <TextField
-          label="Periodo"
-          name="period"
-          onChange={handleSelected}
-          select
-          SelectProps={{ native: true }}
-          value={selectedParams.period}
+        <LocalizationProvider
+          dateAdapter={AdapterDateFns}
+          adapterLocale={customEnLocale}
         >
-          {searchPeriodOptions.map((option) => (
-            <option
-              key={option.value}
-              value={option.value}
-            >
-              {option.label}
-            </option>
-          ))}
-        </TextField>
+          <DatePicker
+            label="Periodo"
+            views={['year', 'month']}
+            openTo="month"
+            value={parseDateFromYYYYMM(selectedParams.period)}
+            onChange={handleDateChange}
+            textField={(params) => (
+              <TextField
+                {...params}
+                margin="normal"
+                sx={{ width: '200px', height: 54 }}
+              />
+            )}
+            format="MMMM, yyyy"
+          />
+        </LocalizationProvider>
         <TextField
           label="Tipo Comprobante"
           name="docType"
@@ -201,6 +189,7 @@ export const PurchasesFilter = (props) => {
           select
           SelectProps={{ native: true }}
           value={selectedParams.docType}
+          sx={{ width: '200px', height: 54 }}
         >
           {searchTypeOptions.map((option) => (
             <option
@@ -218,6 +207,7 @@ export const PurchasesFilter = (props) => {
           select
           SelectProps={{ native: true }}
           value={selectedParams.currency}
+          sx={{ width: '150px', height: 54 }}
         >
           {searchCurrencyOptions.map((option) => (
             <option
@@ -229,9 +219,13 @@ export const PurchasesFilter = (props) => {
           ))}
         </TextField>
       </Stack>
-      <Stack>
+      <Stack
+        alignItems="center"
+        direction="row"
+        gap={2}
+      >
         <TextField
-          label="Filtros"
+          label="Validaciones"
           name="filter"
           select
           SelectProps={{
@@ -247,7 +241,7 @@ export const PurchasesFilter = (props) => {
           }}
           value={selectedOptions}
           onChange={() => {}}
-          sx={{ width: '200px' }}
+          sx={{ width: '200px', height: 54 }}
         >
           {filterOptions.map((option) => (
             <MenuItem
@@ -260,13 +254,25 @@ export const PurchasesFilter = (props) => {
             </MenuItem>
           ))}
         </TextField>
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={onLoadData}
+          startIcon={<FilterListIcon />}
+          sx={{ width: '100px', height: 50 }}
+          disabled={loading ? true : false}
+        >
+          Filtrar
+        </Button>
       </Stack>
     </Stack>
   );
 };
 
 PurchasesFilter.propTypes = {
+  loading: PropTypes.bool,
   selectedParams: PropTypes.object,
   setSelectedParams: PropTypes.func,
   onApplyFilters: PropTypes.func,
+  onLoadData: PropTypes.func,
 };

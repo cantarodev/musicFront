@@ -2,7 +2,7 @@ import PropTypes from 'prop-types';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import CardHeader from '@mui/material/CardHeader';
-import Grid from '@mui/material/Unstable_Grid2';
+import Grid from '@mui/material/Grid2';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import Stack from '@mui/material/Stack';

@@ -1,115 +1,278 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
-import Grid01Icon from '@untitled-ui/icons-react/build/esm/Grid01';
-import ListIcon from '@untitled-ui/icons-react/build/esm/List';
-import SearchMdIcon from '@untitled-ui/icons-react/build/esm/SearchMd';
-import Box from '@mui/material/Box';
-import Card from '@mui/material/Card';
-import InputAdornment from '@mui/material/InputAdornment';
-import OutlinedInput from '@mui/material/OutlinedInput';
 import Stack from '@mui/material/Stack';
-import SvgIcon from '@mui/material/SvgIcon';
 import TextField from '@mui/material/TextField';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
-import { LocalizationProvider } from '@mui/x-date-pickers';
+import { Button, Checkbox, ListItemText, MenuItem } from '@mui/material';
+import { useEffect, useState } from 'react';
+import FilterListIcon from '@mui/icons-material/FilterList';
+
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
-import { startOfMonth, format } from 'date-fns';
-import { esES } from '@mui/x-date-pickers/locales';
+import { LocalizationProvider, DatePicker } from '@mui/x-date-pickers';
+import { format, parse } from 'date-fns';
+import esES from 'date-fns/locale/es';
+
+const customEnLocale = {
+  ...esES,
+  options: {
+    ...esES.options,
+    weekStartsOn: 1,
+  },
+};
 
 const searchTypeOptions = [
   {
-    label: 'Compras',
-    value: 'compras',
+    label: 'Todos',
+    value: 'all',
   },
   {
-    label: 'Ventas',
-    value: 'ventas',
+    label: '01 - Factura',
+    value: '01',
+  },
+  {
+    label: '03 - Boleta de venta',
+    value: '03',
+  },
+  {
+    label: '07 - Nota de crédito',
+    value: 'F7',
+  },
+  {
+    label: '08 - Nota de débito',
+    value: 'F8',
   },
 ];
 
-const searchStatusOptions = [
+const searchCurrencyOptions = [
   {
-    label: 'Todo',
-    value: 'todo',
+    label: 'Todos',
+    value: 'all',
   },
   {
-    label: 'No existe en PLE',
-    value: 'no-ple',
+    label: 'USD - Dólares',
+    value: 'USD',
   },
   {
-    label: 'Existe en PLE',
-    value: 'si-ple',
+    label: 'PEN- Soles',
+    value: 'PEN',
   },
   {
-    label: 'No existe en Base de Datos',
-    value: 'no-bd',
+    label: 'EUR - Euros',
+    value: 'EUR',
+  },
+];
+
+const filterOptions = [
+  {
+    label: 'Todos',
+    value: 'all',
   },
   {
-    label: 'Existe en Base de Datos',
-    value: 'si-bd',
+    label: 'General',
+    value: 'general',
+  },
+  {
+    label: 'Tipo de Cambio',
+    value: 'tc',
+  },
+  {
+    label: 'Factoring',
+    value: 'facto',
   },
 ];
 
 export const SalesFilter = (props) => {
-  const { selectedParams, setSelectedParams } = props;
-
-  const currentDate = new Date();
-  const [selectedDate, setSelectedDate] = useState(startOfMonth(currentDate));
+  const { selectedParams, setSelectedParams, loading, onLoadData } = props;
+  const [selectedOptions, setSelectedOptions] = useState(['general']);
 
   const handleSelected = (event) => {
-    const { value } = event.target;
-    setSelectedParams((state) => ({ ...state, type: value }));
+    const { name, value } = event.target;
+    setSelectedParams((state) => ({ ...state, [name]: value }));
   };
 
-  const handleDateChange = useCallback(
-    (date) => {
-      const value = formatDate(date);
-      setSelectedDate(date);
-      setSelectedParams((state) => ({ ...state, period: value }));
-    },
-    [setSelectedParams]
-  );
+  const handleSelectedOptions = (option) => {
+    let updatedSelection = [];
+
+    if (option.value === 'all') {
+      if (selectedOptions.includes('all')) {
+        updatedSelection = [];
+      } else {
+        updatedSelection = [
+          'all',
+          ...filterOptions.filter((opt) => opt.value !== 'all').map((opt) => opt.value),
+        ];
+      }
+    } else {
+      updatedSelection = selectedOptions.includes(option.value)
+        ? selectedOptions.filter((item) => item !== option.value && item !== 'all')
+        : [...selectedOptions.filter((item) => item !== 'all'), option.value];
+
+      if (updatedSelection.length === filterOptions.length - 1) {
+        updatedSelection.push('all');
+      }
+    }
+
+    setSelectedOptions(updatedSelection);
+
+    setSelectedParams((state) => ({ ...state, ['filters']: updatedSelection }));
+  };
+
+  const renderValue = (selected) => {
+    if (selected.includes('all')) {
+      return 'Todos seleccionados';
+    }
+    if (selected.length > 2) {
+      return `${selected.length} seleccionados`;
+    }
+    return selected
+      .map((value) => filterOptions.find((opt) => opt.value === value)?.label)
+      .join(', ');
+  };
 
   const formatDate = (date) => {
     if (!date) return '';
     return format(date, 'yyyyMM');
   };
 
+  const parseDateFromYYYYMM = (dateString) => {
+    if (!dateString) return null;
+    return parse(dateString, 'yyyyMM', new Date());
+  };
+
+  const handleDateChange = (date) => {
+    const value = formatDate(date);
+    setSelectedParams((state) => ({ ...state, period: value }));
+  };
+
   useEffect(() => {
-    handleDateChange(selectedDate);
-  }, [selectedDate, handleDateChange]);
+    setSelectedParams((state) => ({
+      ...state,
+      filters: selectedOptions,
+    }));
+  }, [selectedOptions, setSelectedParams]);
 
   return (
     <Stack
       alignItems="center"
       direction="row"
       justifyContent="space-between"
-      gap={2}
+      sx={{ width: '100%' }}
     >
-      <LocalizationProvider
-        dateAdapter={AdapterDateFns}
-        locale={esES}
+      <Stack
+        alignItems="center"
+        direction="row"
+        gap={2}
+        sx={{ minWidth: 150 }}
       >
-        <DatePicker
-          label="Periodo"
-          views={['year', 'month']}
-          value={selectedDate}
-          onChange={handleDateChange}
-          textField={(params) => (
-            <TextField
-              {...params}
-              fullWidth
-              margin="normal"
-            />
-          )}
-          format="MMMM, yyyy" // Formato para la entrada
-        />
-      </LocalizationProvider>
+        <LocalizationProvider
+          dateAdapter={AdapterDateFns}
+          adapterLocale={customEnLocale}
+        >
+          <DatePicker
+            label="Periodo"
+            views={['year', 'month']}
+            openTo="month"
+            value={parseDateFromYYYYMM(selectedParams.period)}
+            onChange={handleDateChange}
+            textField={(params) => (
+              <TextField
+                {...params}
+                margin="normal"
+                sx={{ width: '200px', height: 54 }}
+              />
+            )}
+            format="MMMM, yyyy"
+          />
+        </LocalizationProvider>
+        <TextField
+          label="Tipo Comprobante"
+          name="docType"
+          onChange={handleSelected}
+          select
+          SelectProps={{ native: true }}
+          value={selectedParams.docType}
+          sx={{ width: '200px', height: 54 }}
+        >
+          {searchTypeOptions.map((option) => (
+            <option
+              key={option.value}
+              value={option.value}
+            >
+              {option.label}
+            </option>
+          ))}
+        </TextField>
+        <TextField
+          label="Moneda"
+          name="currency"
+          onChange={handleSelected}
+          select
+          SelectProps={{ native: true }}
+          value={selectedParams.currency}
+          sx={{ width: '150px', height: 54 }}
+        >
+          {searchCurrencyOptions.map((option) => (
+            <option
+              key={option.value}
+              value={option.value}
+            >
+              {option.label}
+            </option>
+          ))}
+        </TextField>
+      </Stack>
+      <Stack
+        alignItems="center"
+        direction="row"
+        gap={2}
+      >
+        <TextField
+          label="Validaciones"
+          name="filter"
+          select
+          SelectProps={{
+            multiple: true,
+            renderValue: renderValue,
+            MenuProps: {
+              PaperProps: {
+                style: {
+                  width: '200px',
+                },
+              },
+            },
+          }}
+          value={selectedOptions}
+          onChange={() => {}}
+          sx={{ width: '200px', height: 54 }}
+        >
+          {filterOptions.map((option) => (
+            <MenuItem
+              key={option.value}
+              value={option.value}
+              onClick={() => handleSelectedOptions(option)}
+            >
+              <Checkbox checked={selectedOptions.includes(option.value)} />
+              <ListItemText primary={option.label} />
+            </MenuItem>
+          ))}
+        </TextField>
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={onLoadData}
+          startIcon={<FilterListIcon />}
+          sx={{ width: '100px', height: 50 }}
+          disabled={loading ? true : false}
+        >
+          Filtrar
+        </Button>
+      </Stack>
     </Stack>
   );
 };
 
 SalesFilter.propTypes = {
+  loading: PropTypes.bool,
   selectedParams: PropTypes.object,
   setSelectedParams: PropTypes.func,
+  onApplyFilters: PropTypes.func,
+  onLoadData: PropTypes.func,
 };

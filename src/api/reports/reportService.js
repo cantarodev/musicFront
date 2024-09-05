@@ -16,9 +16,9 @@ class ReportApi {
   }
 
   async getReportMissings(request) {
-    const { user_id, period, queryType, docType, currency } = request;
+    const { user_id, period, queryType, docType, currency, account } = request;
 
-    return await getReportMissings(user_id, period, queryType, docType, currency);
+    return await getReportMissings(user_id, period, queryType, docType, currency, account);
   }
 
   async downloadObservations(request) {

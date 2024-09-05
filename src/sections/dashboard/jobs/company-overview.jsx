@@ -3,7 +3,7 @@ import Markdown from 'react-markdown';
 import ArrowRightIcon from '@untitled-ui/icons-react/build/esm/ArrowRight';
 import Box from '@mui/material/Box';
 import Divider from '@mui/material/Divider';
-import Grid from '@mui/material/Unstable_Grid2';
+import Grid from '@mui/material/Grid2';
 import ImageList from '@mui/material/ImageList';
 import ImageListItem from '@mui/material/ImageListItem';
 import Link from '@mui/material/Link';

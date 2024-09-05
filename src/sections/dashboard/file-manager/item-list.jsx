@@ -12,6 +12,7 @@ import { ItemListRow } from './item-list-row';
 
 export const ItemList = (props) => {
   const {
+    loading,
     count = 0,
     items = [],
     onDelete,
@@ -35,15 +36,16 @@ export const ItemList = (props) => {
           gridTemplateColumns: 'repeat(3, 1fr)',
         }}
       >
-        {items.map((item) => (
-          <ItemListCard
-            key={item.id}
-            item={item}
-            onDelete={onDelete}
-            onFavorite={onFavorite}
-            onOpen={onOpen}
-          />
-        ))}
+        {!loading &&
+          items.map((item) => (
+            <ItemListCard
+              key={item.id}
+              item={item}
+              onDelete={onDelete}
+              onFavorite={onFavorite}
+              onOpen={onOpen}
+            />
+          ))}
       </Box>
     );
   } else {
@@ -60,15 +62,16 @@ export const ItemList = (props) => {
               }}
             >
               <TableBody>
-                {items.map((item) => (
-                  <ItemListRow
-                    key={item._id}
-                    item={item}
-                    onDelete={onDelete}
-                    onFavorite={onFavorite}
-                    onOpen={onOpen}
-                  />
-                ))}
+                {!loading &&
+                  items.map((item) => (
+                    <ItemListRow
+                      key={item._id}
+                      item={item}
+                      onDelete={onDelete}
+                      onFavorite={onFavorite}
+                      onOpen={onOpen}
+                    />
+                  ))}
               </TableBody>
             </Table>
           </Box>
@@ -94,6 +97,7 @@ export const ItemList = (props) => {
 };
 
 ItemList.propTypes = {
+  bool: PropTypes.bool,
   items: PropTypes.array,
   count: PropTypes.number,
   onDelete: PropTypes.func,

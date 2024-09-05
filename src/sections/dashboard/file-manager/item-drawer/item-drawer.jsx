@@ -9,12 +9,12 @@ import { backdropClasses } from '@mui/material/Backdrop';
 import Box from '@mui/material/Box';
 import Divider from '@mui/material/Divider';
 import Drawer from '@mui/material/Drawer';
-import Grid from '@mui/material/Unstable_Grid2';
 import IconButton from '@mui/material/IconButton';
 import Stack from '@mui/material/Stack';
 import SvgIcon from '@mui/material/SvgIcon';
 import Typography from '@mui/material/Typography';
 import { bytesToSize } from 'src/utils/bytes-to-size';
+import Grid from '@mui/material/Grid2';
 
 import { ItemIcon } from '../item-icon';
 import { ItemTags } from './item-tags';
@@ -98,10 +98,7 @@ export const ItemDrawer = (props) => {
             container
             spacing={3}
           >
-            <Grid
-              xs={12}
-              sm={4}
-            >
+            <Grid size={{ xs: 12, sm: 4 }}>
               <Typography
                 color="text.secondary"
                 variant="caption"
@@ -109,16 +106,10 @@ export const ItemDrawer = (props) => {
                 Created by
               </Typography>
             </Grid>
-            <Grid
-              xs={12}
-              sm={8}
-            >
+            <Grid size={{ xs: 12, sm: 8 }}>
               {item.author && <Avatar src={item.author.avatar || undefined} />}
             </Grid>
-            <Grid
-              xs={12}
-              sm={4}
-            >
+            <Grid size={{ xs: 12, sm: 4 }}>
               <Typography
                 color="text.secondary"
                 variant="caption"
@@ -126,16 +117,10 @@ export const ItemDrawer = (props) => {
                 Size
               </Typography>
             </Grid>
-            <Grid
-              xs={12}
-              sm={8}
-            >
+            <Grid size={{ xs: 12, sm: 8 }}>
               <Typography variant="body2">{size}</Typography>
             </Grid>
-            <Grid
-              xs={12}
-              sm={4}
-            >
+            <Grid size={{ xs: 12, sm: 4 }}>
               <Typography
                 color="text.secondary"
                 variant="caption"
@@ -143,16 +128,10 @@ export const ItemDrawer = (props) => {
                 Created At
               </Typography>
             </Grid>
-            <Grid
-              xs={12}
-              sm={8}
-            >
+            <Grid size={{ xs: 12, sm: 8 }}>
               <Typography variant="body2">{createdAt}</Typography>
             </Grid>
-            <Grid
-              xs={12}
-              sm={4}
-            >
+            <Grid size={{ xs: 12, sm: 4 }}>
               <Typography
                 color="text.secondary"
                 variant="caption"
@@ -160,16 +139,10 @@ export const ItemDrawer = (props) => {
                 Modified At
               </Typography>
             </Grid>
-            <Grid
-              xs={12}
-              sm={8}
-            >
+            <Grid size={{ xs: 12, sm: 8 }}>
               <Typography variant="body2">{updatedAt}</Typography>
             </Grid>
-            <Grid
-              xs={12}
-              sm={4}
-            >
+            <Grid size={{ xs: 12, sm: 4 }}>
               <Typography
                 color="text.secondary"
                 variant="caption"
@@ -177,19 +150,13 @@ export const ItemDrawer = (props) => {
                 Tags
               </Typography>
             </Grid>
-            <Grid
-              xs={12}
-              sm={8}
-            >
+            <Grid size={{ xs: 12, sm: 8 }}>
               <ItemTags
                 tags={item.tags}
                 onChange={(tags) => onTagsChange?.(item.id, tags)}
               />
             </Grid>
-            <Grid
-              xs={12}
-              sm={4}
-            >
+            <Grid size={{ xs: 12, sm: 4 }}>
               <Typography
                 color="text.secondary"
                 variant="caption"
@@ -197,19 +164,13 @@ export const ItemDrawer = (props) => {
                 Shared with
               </Typography>
             </Grid>
-            <Grid
-              xs={12}
-              sm={8}
-            >
+            <Grid size={{ xs: 12, sm: 8 }}>
               <ItemShared
                 isPublic={item.isPublic}
                 shared={item.shared}
               />
             </Grid>
-            <Grid
-              xs={12}
-              sm={4}
-            >
+            <Grid size={{ xs: 12, sm: 4 }}>
               <Typography
                 color="text.secondary"
                 variant="caption"
@@ -217,10 +178,7 @@ export const ItemDrawer = (props) => {
                 Actions
               </Typography>
             </Grid>
-            <Grid
-              xs={12}
-              sm={8}
-            >
+            <Grid size={{ xs: 12, sm: 8 }}>
               <IconButton onClick={() => onDelete?.(item.id)}>
                 <SvgIcon fontSize="small">
                   <Trash02Icon />

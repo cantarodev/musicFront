@@ -15,7 +15,7 @@ import Button from '@mui/material/Button';
 import Chip from '@mui/material/Chip';
 import Divider from '@mui/material/Divider';
 import Drawer from '@mui/material/Drawer';
-import Grid from '@mui/material/Unstable_Grid2';
+import Grid from '@mui/material/Grid2';
 import IconButton from '@mui/material/IconButton';
 import Input from '@mui/material/Input';
 import Stack from '@mui/material/Stack';

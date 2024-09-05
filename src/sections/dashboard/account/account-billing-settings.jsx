@@ -9,7 +9,6 @@ import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import CardHeader from '@mui/material/CardHeader';
 import Divider from '@mui/material/Divider';
-import Grid from '@mui/material/Unstable_Grid2';
 import Link from '@mui/material/Link';
 import Stack from '@mui/material/Stack';
 import SvgIcon from '@mui/material/SvgIcon';
@@ -19,6 +18,7 @@ import TableCell from '@mui/material/TableCell';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Typography from '@mui/material/Typography';
+import Grid from '@mui/material/Grid2';
 
 import { PropertyList } from 'src/components/property-list';
 import { PropertyListItem } from 'src/components/property-list-item';

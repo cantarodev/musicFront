@@ -4,7 +4,7 @@ import Upload01Icon from '@untitled-ui/icons-react/build/esm/Upload01';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Container from '@mui/material/Container';
-import Grid from '@mui/material/Unstable_Grid2';
+import Grid from '@mui/material/Grid2';
 import Stack from '@mui/material/Stack';
 import SvgIcon from '@mui/material/SvgIcon';
 import Typography from '@mui/material/Typography';
@@ -93,6 +93,9 @@ const useItemsTotals = (user_id, rucAccount) => {
   }, [user_id, rucAccount]);
 
   useEffect(() => {
+    setState({
+      items: [],
+    });
     handleItemsTotalsGet();
   }, [rucAccount]);
 
@@ -186,6 +189,7 @@ const Page = () => {
   const pleSearchDialog = useDialog(); // Dialog state for PLE search
   const currentItem = useCurrentItem(itemsStore.items, detailsDialog.data);
   const totals = useItemsTotals(user?.user_id, selectedAccount);
+  const [loading, setLoading] = useState(true);
 
   const handleDelete = useCallback(
     (itemId) => {
@@ -194,6 +198,15 @@ const Page = () => {
     },
     [detailsDialog, itemsStore]
   );
+
+  useEffect(() => {
+    console.log('hola');
+
+    setLoading(true);
+    if (totals.items.length > 0) {
+      setLoading(false);
+    }
+  }, [totals.items]);
 
   return (
     <>
@@ -214,7 +227,7 @@ const Page = () => {
               lg: 4,
             }}
           >
-            <Grid xs={12}>
+            <Grid size={{ xs: 12 }}>
               <Stack
                 direction="row"
                 justifyContent="space-between"
@@ -230,17 +243,17 @@ const Page = () => {
                 ></Stack>
               </Stack>
             </Grid>
-            <Grid
-              xs={12}
-              md={12}
-            >
+            <Grid size={{ xs: 12, md: 12 }}>
               <Stack
                 spacing={{
                   xs: 3,
                   lg: 4,
                 }}
               >
-                <StorageStats items={totals.items} />
+                <StorageStats
+                  items={totals.items}
+                  loading={loading}
+                />
                 <ItemSearch
                   onFiltersChange={itemsSearch.handleFiltersChange}
                   onSortChange={itemsSearch.handleSortChange}
@@ -260,6 +273,7 @@ const Page = () => {
                   page={itemsSearch.state.page}
                   rowsPerPage={itemsSearch.state.rowsPerPage}
                   view={view}
+                  loading={loading}
                 />
               </Stack>
             </Grid>

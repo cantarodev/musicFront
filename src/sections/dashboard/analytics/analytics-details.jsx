@@ -19,52 +19,75 @@ import {
   SvgIcon,
   Paper,
   TableFooter,
-  Menu,
-  MenuItem,
   FormControlLabel,
   Checkbox,
   Dialog,
   DialogTitle,
   DialogContent,
+  Stack,
+  TableSortLabel,
 } from '@mui/material';
 
 import { ModalDetail } from './modal-detail';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 import ViewColumnIcon from '@mui/icons-material/ViewColumn';
 
+const columnLabels = {
+  periodo: 'Período',
+  ruc: 'RUC',
+  razonSocial: 'Razón Social',
+  fechaEmision: 'Fecha Emisión',
+  tipoComprobante: 'Tipo Comprobante',
+  numeroComprobante: 'Número Comprobante',
+  moneda: 'Moneda',
+  mtoBIGravadaDG: 'B.I / Gravada',
+  mtoBIGravadaDGNG: 'B.I / Gravada - No Grav.',
+  mtoIgvIpmDGNG: 'IGV / Gravada - No Grav.',
+  mtoBIGravadaDNG: 'B.I / No Gravada',
+  mtoIgvIpmDNG: 'IGV / No Gravada',
+  mtoValorAdqNG: 'Adq. No Gravadas',
+  mtoISC: 'Imp. Selectivo al Consumo',
+  mtoIcbp: 'Imp. a Bolsas Plásticas',
+  mtoOtrosTrib: 'Otros Tributos',
+  igv: 'IGV',
+  igvSunat: 'IGV Sunat',
+  importe: 'Importe',
+  importeSunat: 'Importe Sunat',
+  tipoCambio: 'Tipo de Cambio',
+  resumen: 'Resumen General',
+  resumenTC: 'Resumen Tipo de Cambio',
+  resumenFactoring: 'Resumen Factoring',
+};
+
+function descendingComparator(a, b, orderBy) {
+  if (b[orderBy] < a[orderBy]) return -1;
+  if (b[orderBy] > a[orderBy]) return 1;
+  return 0;
+}
+
+function getComparator(order, orderBy) {
+  return order === 'desc'
+    ? (a, b) => descendingComparator(a, b, orderBy)
+    : (a, b) => -descendingComparator(a, b, orderBy);
+}
+
+function sortRows(array, comparator) {
+  const stabilizedRows = array.map((el, index) => [el, index]);
+  stabilizedRows.sort((a, b) => {
+    const order = comparator(a[0], b[0]);
+    if (order !== 0) return order;
+    return a[1] - b[1];
+  });
+  return stabilizedRows.map((el) => el[0]);
+}
+
 export const AnalyticsDetails = (props) => {
-  const { loading, details, onLoadData, downloadPath, onDownload } = props;
+  const { loading, details, totalSums, onLoadData, downloadPath, onDownload } = props;
 
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedDetail, setSelectedDetail] = useState(null);
   const [selectedOption, setSelectedOption] = useState('');
-  const [totalSums, setTotalSums] = useState({
-    igv: 0.0,
-    igvSunat: 0.0,
-    importe: 0.0,
-    importeSunat: 0.0,
-    resumenGeneral: 0,
-    resumenTC: 0,
-  });
-
-  const columnLabels = {
-    periodo: 'Período',
-    ruc: 'RUC',
-    razonSocial: 'Razón Social',
-    fechaEmision: 'Fecha Emisión',
-    tipoComprobante: 'Tipo Comprobante',
-    numeroComprobante: 'Número Comprobante',
-    moneda: 'Moneda',
-    igv: 'IGV',
-    igvSunat: 'IGV Sunat',
-    importe: 'Importe',
-    importeSunat: 'Importe Sunat',
-    tipoCambio: 'Tipo de Cambio',
-    resumen: 'Resumen General',
-    resumenTC: 'Resumen Tipo de Cambio',
-    resumenFactoring: 'Resumen Factoring',
-  };
 
   const [columnVisibility, setColumnVisibility] = useState({
     periodo: true,
@@ -74,6 +97,15 @@ export const AnalyticsDetails = (props) => {
     tipoComprobante: true,
     numeroComprobante: true,
     moneda: true,
+    mtoBIGravadaDG: false,
+    mtoBIGravadaDGNG: false,
+    mtoIgvIpmDGNG: false,
+    mtoBIGravadaDNG: false,
+    mtoIgvIpmDNG: false,
+    mtoValorAdqNG: false,
+    mtoISC: false,
+    mtoIcbp: false,
+    mtoOtrosTrib: false,
     igv: true,
     igvSunat: false,
     importe: true,
@@ -83,8 +115,10 @@ export const AnalyticsDetails = (props) => {
     resumenTC: true,
     resumenFactoring: false,
   });
-
   const [open, setOpen] = useState(false);
+
+  const [order, setOrder] = useState('asc');
+  const [orderBy, setOrderBy] = useState('mtoBIGravadaDG');
 
   const handleDialogOpen = () => {
     setOpen(true);
@@ -101,6 +135,14 @@ export const AnalyticsDetails = (props) => {
     }));
   };
 
+  const handleRequestSort = (property) => {
+    const isAsc = orderBy === property && order === 'asc';
+    setOrder(isAsc ? 'desc' : 'asc');
+    setOrderBy(property);
+  };
+
+  const sortedRows = sortRows(details, getComparator(order, orderBy));
+
   const isEmpty = details.length === 0;
 
   const handleOpen = (detail, option = '') => {
@@ -111,48 +153,17 @@ export const AnalyticsDetails = (props) => {
 
   const handleClose = () => setModalOpen(false);
 
-  useEffect(() => {
-    const tcRegex = /Valor TC: [\d.]+ \(debería ser [\d.]+\)/;
-    const importeRegex = /Valor Importe: [\d.]+ \(debería ser [\d.]+\)/;
-    const igvRegex = /Valor IGV: [\d.]+ \(debería ser [\d.]+\)/;
-
-    const newTotals = details.reduce(
-      (totals, detail) => {
-        totals.igv += parseFloat(detail.mtoIGV) || 0;
-        totals.igvSunat += parseFloat(detail.mtoIGVSunat) || 0;
-        totals.importe += parseFloat(detail.mtoImporteTotal) || 0;
-        totals.importeSunat += parseFloat(detail.mtoImporteTotalSunat) || 0;
-
-        if (tcRegex.test(detail.observacion)) {
-          totals.resumenTC += 1;
-        }
-
-        if (importeRegex.test(detail.observacion) || igvRegex.test(detail.observacion)) {
-          totals.resumenGeneral += 1;
-        }
-
-        return totals;
-      },
-      {
-        igv: 0.0,
-        igvSunat: 0.0,
-        importe: 0.0,
-        importeSunat: 0.0,
-        resumenTC: 0,
-        resumenGeneral: 0,
-      }
-    );
-
-    setTotalSums(newTotals);
-  }, [details]);
-
   return (
     <Card>
       <CardHeader
         title="Inconsistencias"
         sx={{ p: 2, pb: 0 }}
         action={
-          <>
+          <Stack
+            direction="row"
+            alignItems="center"
+            spacing={1}
+          >
             {downloadPath && (
               <IconButton
                 color="inherit"
@@ -212,7 +223,7 @@ export const AnalyticsDetails = (props) => {
                 <RefreshCcw01Icon />
               </SvgIcon>
             </IconButton>
-          </>
+          </Stack>
         }
       />
       <Box
@@ -338,6 +349,210 @@ export const AnalyticsDetails = (props) => {
                     </Tooltip>
                   </TableCell>
                 )}
+                {columnVisibility.mtoBIGravadaDG && (
+                  <TableCell sx={{ textAlign: 'right' }}>
+                    <TableSortLabel
+                      active={orderBy === 'mtoBIGravadaDG'}
+                      direction={orderBy === 'mtoBIGravadaDG' ? order : 'asc'}
+                      onClick={() => handleRequestSort('mtoBIGravadaDG')}
+                    >
+                      <Tooltip
+                        title="B.I / Gravada"
+                        arrow
+                      >
+                        <Typography
+                          sx={{
+                            cursor: 'pointer',
+                            fontSize: 12,
+                            fontWeight: 'bold',
+                            whiteSpace: 'nowrap',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            maxWidth: '80px',
+                          }}
+                        >
+                          B.I / Gravada
+                        </Typography>
+                      </Tooltip>
+                    </TableSortLabel>
+                  </TableCell>
+                )}
+                {columnVisibility.mtoBIGravadaDGNG && (
+                  <TableCell sx={{ textAlign: 'right' }}>
+                    <Tooltip
+                      title="B.I / Gravada - No Grav."
+                      arrow
+                    >
+                      <Typography
+                        sx={{
+                          cursor: 'pointer',
+                          fontSize: 12,
+                          fontWeight: 'bold',
+                          whiteSpace: 'nowrap',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          maxWidth: '80px',
+                        }}
+                      >
+                        B.I / Gravada - No Grav.
+                      </Typography>
+                    </Tooltip>
+                  </TableCell>
+                )}
+                {columnVisibility.mtoIgvIpmDGNG && (
+                  <TableCell sx={{ textAlign: 'right' }}>
+                    <Tooltip
+                      title="IGV / Gravada - No Grav."
+                      arrow
+                    >
+                      <Typography
+                        sx={{
+                          cursor: 'pointer',
+                          fontSize: 12,
+                          fontWeight: 'bold',
+                          whiteSpace: 'nowrap',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          maxWidth: '80px',
+                        }}
+                      >
+                        IGV / Gravada - No Grav.
+                      </Typography>
+                    </Tooltip>
+                  </TableCell>
+                )}
+                {columnVisibility.mtoBIGravadaDNG && (
+                  <TableCell sx={{ textAlign: 'right' }}>
+                    <Tooltip
+                      title="B.I / No Gravada"
+                      arrow
+                    >
+                      <Typography
+                        sx={{
+                          cursor: 'pointer',
+                          fontSize: 12,
+                          fontWeight: 'bold',
+                          whiteSpace: 'nowrap',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          maxWidth: '80px',
+                        }}
+                      >
+                        B.I / No Gravada
+                      </Typography>
+                    </Tooltip>
+                  </TableCell>
+                )}
+                {columnVisibility.mtoIgvIpmDNG && (
+                  <TableCell sx={{ textAlign: 'right' }}>
+                    <Tooltip
+                      title="IGV / No Gravada"
+                      arrow
+                    >
+                      <Typography
+                        sx={{
+                          cursor: 'pointer',
+                          fontSize: 12,
+                          fontWeight: 'bold',
+                          whiteSpace: 'nowrap',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          maxWidth: '80px',
+                        }}
+                      >
+                        IGV / No Gravada
+                      </Typography>
+                    </Tooltip>
+                  </TableCell>
+                )}
+                {columnVisibility.mtoValorAdqNG && (
+                  <TableCell sx={{ textAlign: 'right' }}>
+                    <Tooltip
+                      title="Adq. No Gravadas"
+                      arrow
+                    >
+                      <Typography
+                        sx={{
+                          cursor: 'pointer',
+                          fontSize: 12,
+                          fontWeight: 'bold',
+                          whiteSpace: 'nowrap',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          maxWidth: '80px',
+                        }}
+                      >
+                        Adq. No Gravadas
+                      </Typography>
+                    </Tooltip>
+                  </TableCell>
+                )}
+                {columnVisibility.mtoISC && (
+                  <TableCell sx={{ textAlign: 'right' }}>
+                    <Tooltip
+                      title="Imp. Selectivo al Consumo"
+                      arrow
+                    >
+                      <Typography
+                        sx={{
+                          cursor: 'pointer',
+                          fontSize: 12,
+                          fontWeight: 'bold',
+                          whiteSpace: 'nowrap',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          maxWidth: '80px',
+                        }}
+                      >
+                        Imp. Selectivo al Consumo
+                      </Typography>
+                    </Tooltip>
+                  </TableCell>
+                )}
+                {columnVisibility.mtoIcbp && (
+                  <TableCell sx={{ textAlign: 'right' }}>
+                    <Tooltip
+                      title="Imp. a Bolsas Plásticas"
+                      arrow
+                    >
+                      <Typography
+                        sx={{
+                          cursor: 'pointer',
+                          fontSize: 12,
+                          fontWeight: 'bold',
+                          whiteSpace: 'nowrap',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          maxWidth: '80px',
+                        }}
+                      >
+                        Imp. a Bolsas Plásticas
+                      </Typography>
+                    </Tooltip>
+                  </TableCell>
+                )}
+                {columnVisibility.mtoOtrosTrib && (
+                  <TableCell sx={{ textAlign: 'right' }}>
+                    <Tooltip
+                      title="Otros Tributos"
+                      arrow
+                    >
+                      <Typography
+                        sx={{
+                          cursor: 'pointer',
+                          fontSize: 12,
+                          fontWeight: 'bold',
+                          whiteSpace: 'nowrap',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          maxWidth: '80px',
+                        }}
+                      >
+                        Otros Tributos
+                      </Typography>
+                    </Tooltip>
+                  </TableCell>
+                )}
                 {columnVisibility.igv && (
                   <TableCell sx={{ textAlign: 'right' }}>
                     <Typography sx={{ fontSize: 12, fontWeight: 'bold' }}>IGV</Typography>
@@ -368,7 +583,13 @@ export const AnalyticsDetails = (props) => {
                 )}
                 {columnVisibility.importe && (
                   <TableCell sx={{ textAlign: 'right' }}>
-                    <Typography sx={{ fontSize: 12, fontWeight: 'bold' }}>Importe</Typography>
+                    <TableSortLabel
+                      active={orderBy === 'importe'}
+                      direction={orderBy === 'importe' ? order : 'asc'}
+                      onClick={() => handleRequestSort('importe')}
+                    >
+                      <Typography sx={{ fontSize: 12, fontWeight: 'bold' }}>Importe</Typography>
+                    </TableSortLabel>
                   </TableCell>
                 )}
                 {columnVisibility.importeSunat && (
@@ -457,7 +678,7 @@ export const AnalyticsDetails = (props) => {
               {loading ? (
                 <TableRow>
                   <TableCell
-                    colSpan={15}
+                    colSpan={24}
                     align="center"
                     style={{ height: 200 }}
                   >
@@ -472,7 +693,7 @@ export const AnalyticsDetails = (props) => {
               ) : isEmpty ? (
                 <TableRow>
                   <TableCell
-                    colSpan={15}
+                    colSpan={24}
                     align="center"
                     style={{ height: 200 }}
                   >
@@ -557,6 +778,78 @@ export const AnalyticsDetails = (props) => {
                       {columnVisibility.moneda && (
                         <TableCell className="customTableCell">
                           <Typography sx={{ fontSize: 14 }}>{detail.codMoneda}</Typography>
+                        </TableCell>
+                      )}
+                      {columnVisibility.mtoBIGravadaDG && (
+                        <TableCell
+                          className="customTableCell"
+                          sx={{ textAlign: 'right' }}
+                        >
+                          <Typography sx={{ fontSize: 14 }}>{detail.mtoBIGravadaDG}</Typography>
+                        </TableCell>
+                      )}
+                      {columnVisibility.mtoBIGravadaDGNG && (
+                        <TableCell
+                          className="customTableCell"
+                          sx={{ textAlign: 'right' }}
+                        >
+                          <Typography sx={{ fontSize: 14 }}>{detail.mtoBIGravadaDGNG}</Typography>
+                        </TableCell>
+                      )}
+                      {columnVisibility.mtoIgvIpmDGNG && (
+                        <TableCell
+                          className="customTableCell"
+                          sx={{ textAlign: 'right' }}
+                        >
+                          <Typography sx={{ fontSize: 14 }}>{detail.mtoIgvIpmDGNG}</Typography>
+                        </TableCell>
+                      )}
+                      {columnVisibility.mtoBIGravadaDNG && (
+                        <TableCell
+                          className="customTableCell"
+                          sx={{ textAlign: 'right' }}
+                        >
+                          <Typography sx={{ fontSize: 14 }}>{detail.mtoBIGravadaDNG}</Typography>
+                        </TableCell>
+                      )}
+                      {columnVisibility.mtoIgvIpmDNG && (
+                        <TableCell
+                          className="customTableCell"
+                          sx={{ textAlign: 'right' }}
+                        >
+                          <Typography sx={{ fontSize: 14 }}>{detail.mtoIgvIpmDNG}</Typography>
+                        </TableCell>
+                      )}
+                      {columnVisibility.mtoValorAdqNG && (
+                        <TableCell
+                          className="customTableCell"
+                          sx={{ textAlign: 'right' }}
+                        >
+                          <Typography sx={{ fontSize: 14 }}>{detail.mtoValorAdqNG}</Typography>
+                        </TableCell>
+                      )}
+                      {columnVisibility.mtoISC && (
+                        <TableCell
+                          className="customTableCell"
+                          sx={{ textAlign: 'right' }}
+                        >
+                          <Typography sx={{ fontSize: 14 }}>{detail.mtoISC}</Typography>
+                        </TableCell>
+                      )}
+                      {columnVisibility.mtoIcbp && (
+                        <TableCell
+                          className="customTableCell"
+                          sx={{ textAlign: 'right' }}
+                        >
+                          <Typography sx={{ fontSize: 14 }}>{detail.mtoIcbp}</Typography>
+                        </TableCell>
+                      )}
+                      {columnVisibility.mtoOtrosTrib && (
+                        <TableCell
+                          className="customTableCell"
+                          sx={{ textAlign: 'right' }}
+                        >
+                          <Typography sx={{ fontSize: 14 }}>{detail.mtoOtrosTrib}</Typography>
                         </TableCell>
                       )}
                       {columnVisibility.igv && (
@@ -721,6 +1014,27 @@ export const AnalyticsDetails = (props) => {
                   {columnVisibility.tipoComprobante && <TableCell></TableCell>}
                   {columnVisibility.numeroComprobante && <TableCell></TableCell>}
                   {columnVisibility.moneda && <TableCell></TableCell>}
+                  {columnVisibility.mtoBIGravadaDG && (
+                    <TableCell sx={{ textAlign: 'right', fontSize: 14, fontWeight: 600 }}>
+                      {totalSums.baseIGravadaDG.toLocaleString('en-US')}
+                    </TableCell>
+                  )}
+                  {columnVisibility.mtoBIGravadaDGNG && (
+                    <TableCell sx={{ textAlign: 'right', fontSize: 14, fontWeight: 600 }}>
+                      {totalSums.baseIGravadaDGNG.toLocaleString('en-US')}
+                    </TableCell>
+                  )}
+                  {columnVisibility.mtoIgvIpmDGNG && <TableCell></TableCell>}
+                  {columnVisibility.mtoBIGravadaDNG && (
+                    <TableCell sx={{ textAlign: 'right', fontSize: 14, fontWeight: 600 }}>
+                      {totalSums.baseIGravadaDNG.toLocaleString('en-US')}
+                    </TableCell>
+                  )}
+                  {columnVisibility.mtoIgvIpmDNG && <TableCell></TableCell>}
+                  {columnVisibility.mtoValorAdqNG && <TableCell></TableCell>}
+                  {columnVisibility.mtoISC && <TableCell></TableCell>}
+                  {columnVisibility.mtoIcbp && <TableCell></TableCell>}
+                  {columnVisibility.mtoOtrosTrib && <TableCell></TableCell>}
                   {columnVisibility.igv && (
                     <TableCell sx={{ textAlign: 'right', fontSize: 14, fontWeight: 600 }}>
                       {totalSums.igv.toLocaleString('en-US')}
@@ -773,6 +1087,7 @@ export const AnalyticsDetails = (props) => {
 AnalyticsDetails.propTypes = {
   loading: PropTypes.bool,
   details: PropTypes.array.isRequired,
+  totalSums: PropTypes.object,
   downloadPath: PropTypes.string,
   onDownload: PropTypes.func,
   onLoadData: PropTypes.func,

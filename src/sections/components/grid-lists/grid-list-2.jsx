@@ -7,7 +7,7 @@ import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import CardMedia from '@mui/material/CardMedia';
 import Divider from '@mui/material/Divider';
-import Grid from '@mui/material/Unstable_Grid2';
+import Grid from '@mui/material/Grid2';
 import IconButton from '@mui/material/IconButton';
 import Link from '@mui/material/Link';
 import Rating from '@mui/material/Rating';

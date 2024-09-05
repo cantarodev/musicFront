@@ -1,5 +1,5 @@
 import Box from '@mui/material/Box';
-import Grid from '@mui/material/Unstable_Grid2';
+import Grid from '@mui/material/Grid2';
 import TextField from '@mui/material/TextField';
 
 export const Inputs4 = () => (

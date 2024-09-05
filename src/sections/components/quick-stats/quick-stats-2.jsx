@@ -3,7 +3,7 @@ import FolderIcon from '@untitled-ui/icons-react/build/esm/Folder';
 import Avatar from '@mui/material/Avatar';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
-import Grid from '@mui/material/Unstable_Grid2';
+import Grid from '@mui/material/Grid2';
 import LinearProgress from '@mui/material/LinearProgress';
 import Stack from '@mui/material/Stack';
 import SvgIcon from '@mui/material/SvgIcon';

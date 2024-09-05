@@ -5,7 +5,7 @@ import ChevronRightIcon from '@untitled-ui/icons-react/build/esm/ChevronRight';
 import Box from '@mui/material/Box';
 import Collapse from '@mui/material/Collapse';
 import Container from '@mui/material/Container';
-import Grid from '@mui/material/Unstable_Grid2';
+import Grid from '@mui/material/Grid2';
 import Stack from '@mui/material/Stack';
 import SvgIcon from '@mui/material/SvgIcon';
 import Typography from '@mui/material/Typography';

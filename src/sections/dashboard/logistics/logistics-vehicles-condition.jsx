@@ -3,7 +3,7 @@ import { alpha } from '@mui/system/colorManipulator';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import CardHeader from '@mui/material/CardHeader';
-import Grid from '@mui/material/Unstable_Grid2';
+import Grid from '@mui/material/Grid2';
 import Typography from '@mui/material/Typography';
 import { useTheme } from '@mui/material/styles';
 import { Chart } from 'src/components/chart';
