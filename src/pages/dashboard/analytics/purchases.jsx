@@ -34,6 +34,7 @@ const Page = () => {
     docType: 'all',
     currency: 'all',
     filters: {},
+    factoringStatuses : [],
   });
 
   const handleApplyFilters = async () => {
