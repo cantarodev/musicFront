@@ -43,7 +43,6 @@
     "@fullcalendar/timegrid": "6.1.15",
     "@fullcalendar/timeline": "6.1.15",
     "@mui/icons-material": "6.0.2",
-    "@mui/lab": "^5.0.0-alpha.140",
     "@mui/material": "^6.0.2",
     "@mui/styled-engine-sc": "^6.0.2",
     "@mui/system": "6.0.2",
