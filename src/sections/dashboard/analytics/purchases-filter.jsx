@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types';
 import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
-import { Button, Checkbox, ListItemText, MenuItem } from '@mui/material';
+import { Box, Button, Checkbox, ListItemText, MenuItem } from '@mui/material';
 import { useEffect, useState } from 'react';
 import FilterListIcon from '@mui/icons-material/FilterList';
 
@@ -19,69 +19,40 @@ const customEnLocale = {
 };
 
 const searchTypeOptions = [
-  {
-    label: 'Todos',
-    value: 'all',
-  },
-  {
-    label: '01 - Factura',
-    value: '01',
-  },
-  {
-    label: '03 - Boleta de venta',
-    value: '03',
-  },
-  {
-    label: '07 - Nota de crédito',
-    value: 'F7',
-  },
-  {
-    label: '08 - Nota de débito',
-    value: 'F8',
-  },
+  { label: 'Todos', value: 'all' },
+  { label: '01 - Factura', value: '01' },
+  { label: '03 - Boleta de venta', value: '03' },
+  { label: '07 - Nota de crédito', value: 'F7' },
+  { label: '08 - Nota de débito', value: 'F8' },
 ];
 
 const searchCurrencyOptions = [
-  {
-    label: 'Todos',
-    value: 'all',
-  },
-  {
-    label: 'USD - Dólares',
-    value: 'USD',
-  },
-  {
-    label: 'PEN- Soles',
-    value: 'PEN',
-  },
-  {
-    label: 'EUR - Euros',
-    value: 'EUR',
-  },
+  { label: 'Todos', value: 'all' },
+  { label: 'USD - Dólares', value: 'USD' },
+  { label: 'PEN- Soles', value: 'PEN' },
+  { label: 'EUR - Euros', value: 'EUR' },
+];
+
+// Agregamos las opciones de estados de Factoring
+const factoringStatusOptions = [
+  { label: 'No válido', value: 'No válido' },
+  { label: 'Pendiente', value: 'Pendiente' },
+  { label: 'Pendiente por reinicio', value: 'Pendiente por reinicio' },
+  { label: 'Subsanado', value: 'Subsanado' },
+  { label: 'Disconforme', value: 'Disconforme' },
 ];
 
 const filterOptions = [
-  {
-    label: 'Todos',
-    value: 'all',
-  },
-  {
-    label: 'General',
-    value: 'general',
-  },
-  {
-    label: 'Tipo de Cambio',
-    value: 'tc',
-  },
-  {
-    label: 'Factoring',
-    value: 'facto',
-  },
+  { label: 'Todos', value: 'all' },
+  { label: 'General', value: 'general' },
+  { label: 'Tipo de Cambio', value: 'tc' },
+  { label: 'Factoring', value: 'facto' },
 ];
 
 export const PurchasesFilter = (props) => {
   const { selectedParams, setSelectedParams, loading, onLoadData } = props;
   const [selectedOptions, setSelectedOptions] = useState(['general']);
+  const [selectedFactoringStatus, setSelectedFactoringStatus] = useState([]); // Para almacenar estados seleccionados
 
   const handleSelected = (event) => {
     const { name, value } = event.target;
@@ -115,6 +86,15 @@ export const PurchasesFilter = (props) => {
     setSelectedParams((state) => ({ ...state, ['filters']: updatedSelection }));
   };
 
+  const handleFactoringStatusChange = (event) => {
+    const { value } = event.target;
+    setSelectedFactoringStatus((prevSelected) =>
+      prevSelected.includes(value)
+        ? prevSelected.filter((status) => status !== value)
+        : [...prevSelected, value]
+    );
+  };
+
   const renderValue = (selected) => {
     if (selected.includes('all')) {
       return 'Todos seleccionados';
@@ -146,9 +126,14 @@ export const PurchasesFilter = (props) => {
     setSelectedParams((state) => ({
       ...state,
       filters: selectedOptions,
+      factoringStatuses: selectedFactoringStatus,
     }));
-  }, [selectedOptions, setSelectedParams]);
 
+    // Agregar console.log para validar los datos
+    console.log('Filtros seleccionados: ', selectedOptions);
+    console.log('Estados de Factoring seleccionados: ', selectedFactoringStatus);
+  }, [selectedOptions, selectedFactoringStatus, setSelectedParams]);
+  console.log('PARAMS', selectedParams);
   return (
     <Stack
       alignItems="center"
@@ -265,6 +250,30 @@ export const PurchasesFilter = (props) => {
           Filtrar
         </Button>
       </Stack>
+
+      {/* Estados de Factoring alineados en la misma línea */}
+      {selectedOptions.includes('facto') && (
+        <Box
+          mt={2}
+          display="flex"
+          flexDirection="row"
+          gap={2}
+        >
+          {factoringStatusOptions.map((status) => (
+            <MenuItem
+              key={status.value}
+              value={status.value}
+            >
+              <Checkbox
+                checked={selectedFactoringStatus.includes(status.value)}
+                onChange={handleFactoringStatusChange}
+                value={status.value}
+              />
+              <ListItemText primary={status.label} />
+            </MenuItem>
+          ))}
+        </Box>
+      )}
     </Stack>
   );
 };

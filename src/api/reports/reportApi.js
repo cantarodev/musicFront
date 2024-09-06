@@ -8,7 +8,8 @@ export const reportObservations = (
   docType,
   currency,
   filters,
-  account
+  account,
+  factoringStatuses
 ) => {
   console.log(account);
 
@@ -21,6 +22,7 @@ export const reportObservations = (
       currency,
       filters,
       account,
+      factoringStatuses
     })
   );
 };

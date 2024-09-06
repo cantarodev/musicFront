@@ -1,0 +1,70 @@
+[33m8566fb0[m[33m ([m[1;36mHEAD -> [m[1;32mdevelop[m[33m)[m last updated
+[33m29c3568[m last updated
+[33me2f1d43[m[33m ([m[1;31morigin/develop[m[33m)[m factoring filter
+[33mda9a704[m env prod
+[33mfafe6e3[m estados factoring filtro
+[33maa7a9a9[m se agrego columna factoring reporte
+[33mc6bbe7b[m last updated
+[33mc5a02a8[m[33m ([m[1;32mfix/clave-sol[m[33m)[m added reports count
+[33m92bfb58[m[33m ([m[1;32mfeature/report-count-observations[m[33m)[m added exchange rate
+[33m597e867[m added exchange rate
+[33m897bf45[m[33m ([m[1;32mfeature/report-tc[m[33m)[m fix login
+[33mb9cdf5b[m[33m ([m[1;32mfix/login[m[33m)[m added download validations
+[33m611d986[m env prod
+[33m1eac6da[m[33m ([m[1;32mfeature/download-validations[m[33m)[m add download icon
+[33m3f1f7a8[m last updated
+[33m6896533[m Merge branch 'develop' of https://github.com/RodrigoAnalytia/web-bots-impuestos-frontend into develop
+[33m15ff9e4[m ajustes file-manager
+[33mbf96cfa[m Merge branch 'feature/report-graphic' into develop
+[33me0627e2[m[33m ([m[1;32mfeature/report-graphic[m[33m)[m last updated
+[33m01ff6f8[m ajustes file-manager ple
+[33m9c331c0[m fix main htaccess
+[33mb0ea81a[m test main htaccess
+[33mf48ac6b[m fix htaccess
+[33mb225589[m fix htaccess
+[33m87e9966[m fix htaccess upload
+[33m936ac33[m se agrego htaccess package
+[33ma21c1f5[m add htaccess
+[33m8ffb332[m ajustes item list card
+[33m2bc0b6d[m ajustar y buscador de comprobantes
+[33mb6adf92[m add env file
+[33m3af958c[m Update main.yml
+[33m304a31a[m Update main.yml
+[33m6093938[m Update main.yml
+[33m85563bb[m Update main.yml
+[33m94776e5[m Update main.yml
+[33m36045ff[m Update main.yml
+[33m918531d[m Create main.yml
+[33m1deaa7c[m se activo sourcemap
+[33m3422710[m last updated
+[33m4a9f686[m last updated
+[33m0a1e498[m cambios
+[33m8ddade4[m merge changes
+[33m7df8b1f[m reporte ple y clavesol config
+[33m70e2cb2[m last updated
+[33md3e6cdf[m merge changes
+[33mf11c8c5[m manejo de error aws-sdk
+[33m58ccafc[m last updated
+[33mc686da4[m last updated
+[33m85b13b9[m last updated
+[33m621d0a1[m Merge branch 'develop' of https://github.com/RodrigoAnalytia/web-bots-impuestos-frontend into develop
+[33m9dd4720[m cambio url request  a izitax y format
+[33m4593d39[m[33m ([m[1;32mfeature/report-validate-quantity[m[33m)[m Merge branch 'develop' of https://github.com/RodrigoAnalytia/web-bots-impuestos-frontend into develop
+[33m59a27cb[m last updated
+[33m55312e2[m Merge branch 'develop' of https://github.com/RodrigoAnalytia/web-bots-impuestos-frontend into develop
+[33m48cda1e[m ajustes subida de ple
+[33m08849c1[m last updated
+[33md889dfe[m last updated
+[33mdc645b4[m[33m ([m[1;32mclave_sol[m[33m)[m last updated
+[33mc4bc829[m last updated
+[33m1f89f64[m last updated
+[33m08b26ea[m last updated
+[33m0e994e5[m first commit
+[33med467dd[m last updated
+[33me7b5c0b[m[33m ([m[1;31morigin/main[m[33m, [m[1;32mmain[m[33m)[m Merge branch 'main' of https://github.com/RodrigoAnalytia/web-bots-impuestos-frontend
+[33m8d82e6a[m first code upload
+[33mc0ac25d[m Initial commit
+[33m01c6c7a[m Merge branch 'main' of https://github.com/iamcantaro/corridasImpuestosSunatFront
+[33m6565ad8[m uploading the project
+[33m7d32685[m uploading the project
+[33m7a31f4d[m Initial commit

@@ -37,6 +37,7 @@ const Page = () => {
     docType: 'all',
     currency: 'all',
     filters: {},
+    factoringStatuses: [],
   });
 
   const [totalSums, setTotalSums] = useState({

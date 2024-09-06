@@ -113,7 +113,7 @@ export const AnalyticsDetails = (props) => {
     tipoCambio: true,
     resumen: true,
     resumenTC: true,
-    resumenFactoring: false,
+    resumenFactoring: true,
   });
   const [open, setOpen] = useState(false);
 
@@ -985,7 +985,11 @@ export const AnalyticsDetails = (props) => {
                                 cursor: 'pointer',
                               },
                             }}
-                          ></Typography>
+                          >
+                            {detail.observacion_factoring
+                              ? detail.observacion_factoring
+                              : 'Sin observaciones'}
+                          </Typography>
                         </TableCell>
                       )}
                     </TableRow>
