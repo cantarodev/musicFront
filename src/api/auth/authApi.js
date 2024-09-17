@@ -25,8 +25,8 @@ export const createUser = (name, lastname, dni, phone, business_name, ruc, email
   );
 };
 
-export const me = (userId) => {
-  return handleResponse(apiClient.get(`/user/me/${userId}`));
+export const me = () => {
+  return handleResponse(apiClient.get(`/user/me`));
 };
 
 export const verifyAccount = (user_id, token) => {

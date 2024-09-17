@@ -1,4 +1,4 @@
-import { decode, JWT_EXPIRES_IN, JWT_SECRET, sign } from 'src/utils/jwt';
+import { decode } from 'src/utils/jwt';
 
 import { getUser, createUser, me } from './authApi';
 
@@ -8,9 +8,7 @@ class AuthApi {
 
     const { data } = await getUser(email, password);
 
-    const accessToken = sign({ userId: data.user_id }, JWT_SECRET, {
-      expiresIn: JWT_EXPIRES_IN,
-    });
+    const accessToken = data.token;
 
     return { accessToken };
   }
@@ -20,11 +18,8 @@ class AuthApi {
     return await createUser(name, lastname, dni, phone, business_name, ruc, email, password);
   }
 
-  async me(request) {
-    const { accessToken } = request;
-    const decodedToken = decode(accessToken);
-    const { userId } = decodedToken;
-    const { data } = await me(userId);
+  async me() {
+    const { data } = await me();
 
     return {
       user_id: data.user_id,

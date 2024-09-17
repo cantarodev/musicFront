@@ -49,7 +49,7 @@ const Page = () => {
             align="center"
             variant={mdUp ? 'h1' : 'h4'}
           >
-            404: No encontramos esa página.
+            404: No encontramos esa página
           </Typography>
           <Typography
             align="center"
@@ -70,7 +70,7 @@ const Page = () => {
               component={RouterLink}
               href={paths.index}
             >
-              Regresar
+              Ir al inicio
             </Button>
           </Box>
         </Container>

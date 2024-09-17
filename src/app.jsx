@@ -23,32 +23,12 @@ import { useAnalytics } from 'src/hooks/use-analytics';
 import { routes } from 'src/routes';
 import { store } from 'src/store';
 import { createTheme } from 'src/theme';
-import { useState } from 'react';
 
 export const App = () => {
   useAnalytics(gtmConfig);
   useNprogress();
-  const [user, setUser] = useState(null);
 
-  const filteredRoutes =
-    user?.role_id === 1
-      ? routes
-      : routes
-          .map((route) => {
-            if (route.children) {
-              return {
-                ...route,
-                children: route.children.filter(
-                  (child) => child.path !== 'bots' && child.path !== 'users'
-                ),
-              };
-            } else {
-              return route;
-            }
-          })
-          .filter((route) => route.path !== 'bots' && route.path !== 'users');
-
-  const element = useRoutes(filteredRoutes);
+  const element = useRoutes(routes);
 
   return (
     <ReduxProvider store={store}>
@@ -97,7 +77,6 @@ export const App = () => {
                               <SettingsButton
                                 onClick={settings.handleDrawerOpen}
                                 routes={routes}
-                                setUser={setUser}
                               />
                               <SettingsDrawer
                                 canReset={settings.isCustom}
@@ -118,10 +97,7 @@ export const App = () => {
                               />
                             </>
                           )}
-                          <Toaster
-                            position="top-right"
-                            reverseOrder={false}
-                          />
+                          <Toaster reverseOrder={false} />
                         </RTL>
                       </ThemeProvider>
                     );

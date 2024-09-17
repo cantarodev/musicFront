@@ -19,10 +19,11 @@ import {
   IconButton,
   SvgIcon,
   Stack,
+  Paper,
 } from '@mui/material';
 
 export const MergeDataTable = (props) => {
-  const { loading, details, sourceCounts, onLoadData } = props;
+  const { loading, details, sourceCounts } = props;
 
   const isEmpty = details.length === 0;
 
@@ -49,14 +50,6 @@ export const MergeDataTable = (props) => {
             >
               <span style={{ color: 'red', fontSize: 24, marginRight: 4 }}>•</span> No existe
             </Typography>{' '}
-            <IconButton
-              color="inherit"
-              onClick={onLoadData}
-            >
-              <SvgIcon fontSize="small">
-                <RefreshCcw01Icon />
-              </SvgIcon>
-            </IconButton>
           </Stack>
         }
       />
@@ -66,7 +59,10 @@ export const MergeDataTable = (props) => {
         maxHeight="500px"
         p={2}
       >
-        <TableContainer sx={{ flex: 1, overflowY: 'auto', position: 'relative' }}>
+        <TableContainer
+          sx={{ flex: 1, overflowY: 'auto', position: 'relative' }}
+          component={Paper}
+        >
           <Table stickyHeader>
             <TableHead>
               <TableRow>
@@ -148,8 +144,8 @@ export const MergeDataTable = (props) => {
                         className="customTableCell"
                       >
                         <Typography
+                          variant="body1"
                           sx={detail?.source === 'sunat' ? { color: 'green' } : { color: 'red' }}
-                          variant="h5"
                           padding={1}
                         >
                           •
@@ -160,8 +156,8 @@ export const MergeDataTable = (props) => {
                         className="customTableCell"
                       >
                         <Typography
+                          variant="body1"
                           sx={detail?.source === 'ple' ? { color: 'green' } : { color: 'red' }}
-                          variant="h5"
                           padding={1}
                         >
                           •
@@ -204,5 +200,4 @@ MergeDataTable.propTypes = {
   loading: PropTypes.bool,
   details: PropTypes.array.isRequired,
   sourceCounts: PropTypes.object,
-  onLoadData: PropTypes.func,
 };

@@ -1,41 +1,33 @@
 import Box from '@mui/material/Box';
-import Container from '@mui/material/Container';
-import Grid from '@mui/material/Grid2';
 import { useEffect, useState } from 'react';
 
-import { Seo } from 'src/components/seo';
 import { useMockedUser } from 'src/hooks/use-mocked-user';
-import { useSettings } from 'src/hooks/use-settings';
 import { AnalyticsDetails } from 'src/sections/dashboard/analytics/analytics-details';
-import { MergeDataTable } from 'src/sections/dashboard/analytics/merged-data-table';
-import { SalesFilter } from 'src/sections/dashboard/analytics/sales-filter';
 import { reportApi } from 'src/api/reports/reportService';
 import { format, subMonths } from 'date-fns';
 
 import axios from 'axios';
 import { useSelector } from 'react-redux';
-import { StorageStats } from 'src/sections/dashboard/analytics/purchases-inconsistencies-cards';
+import { PurchasesInconsistenciesCards } from 'src/sections/dashboard/analytics/purchases-inconsistencies-cards';
+import { PurchasesInconsistenciesFilter } from './purchases-inconsistencies-filter';
 
 const Page = () => {
-  const settings = useSettings();
   const selectedAccount = useSelector((state) => state.account);
   const [detailsMain, setDetailsMain] = useState([]);
   const [downloadPath, setDownloadPath] = useState('');
-  const [detailsMerge, setDetailsMerge] = useState([]);
-  const [totals, setTotals] = useState({ totalSunat: 0, totalPle: 0 });
 
-  const [loadingObservations, setLoadingObservations] = useState(false);
-  const [loadingMissings, setLoadingMissings] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const user = useMockedUser();
 
   const [selectedParams, setSelectedParams] = useState({
     period: format(subMonths(new Date(), 1), 'yyyyMM'),
     account: selectedAccount,
-    queryType: 'ventas',
+    queryType: 'compras',
     docType: 'all',
     currency: 'all',
     filters: {},
+    factoringStatuses: [],
   });
 
   const [totalSums, setTotalSums] = useState({
@@ -54,7 +46,7 @@ const Page = () => {
     const user_id = user?.user_id;
 
     setDetailsMain([]);
-    setLoadingObservations(true);
+    setLoading(true);
     try {
       const response = await reportApi.reportObservations({
         ...selectedParams,
@@ -65,11 +57,10 @@ const Page = () => {
 
       setDetailsMain(data?.all_results);
       setDownloadPath(data?.download_path);
-      setTotals({ totalSunat: data?.total_sunat, totalPle: data?.total_ple });
-      setLoadingObservations(false);
+      setLoading(false);
     } catch (err) {
       console.error(err);
-      setLoadingObservations(false);
+      setLoading(false);
     }
   };
 
@@ -101,37 +92,8 @@ const Page = () => {
     }
   };
 
-  const loadData = async () => {
-    const user_id = user?.user_id;
-    const period = selectedParams.period;
-    const queryType = selectedParams.queryType;
-    const docType = selectedParams.docType;
-    const currency = selectedParams.currency;
-
-    setLoadingMissings(true);
-    try {
-      const response = await reportApi.getReportMissings({
-        user_id,
-        period,
-        queryType,
-        docType,
-        currency,
-      });
-
-      const data = response?.data;
-
-      setDetailsMerge(data?.all_results);
-      setLoadingMissings(false);
-    } catch (err) {
-      console.error(err);
-      setLoadingMissings(false);
-    }
-  };
-
   useEffect(() => {
     setDetailsMain([]);
-    setDetailsMerge([]);
-    setTotals({ totalSunat: 0, totalPle: 0 });
     setSelectedParams((state) => ({ ...state, account: selectedAccount }));
   }, [selectedAccount]);
 
@@ -176,68 +138,33 @@ const Page = () => {
     setTotalSums(newTotals);
   }, [detailsMain]);
 
-  const sourceCounts = detailsMerge.reduce((counts, item) => {
-    counts[item.source] = (counts[item.source] || 0) + 1;
-    return counts;
-  }, {});
-
   return (
-    <>
-      <Seo title="Dashboard: Ventas" />
-      <Box
-        component="main"
-        sx={{
-          flexGrow: 1,
-          pt: 2,
-          pb: 8,
-        }}
-      >
-        <Container maxWidth={settings.stretch ? false : 'xl'}>
-          <Grid
-            container
-            spacing={{
-              xs: 3,
-              lg: 4,
-            }}
-          >
-            <Grid
-              xs={12}
-              lg={12}
-            >
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-                <SalesFilter
-                  selectedParams={selectedParams}
-                  setSelectedParams={setSelectedParams}
-                  onLoadData={handleApplyFilters}
-                  loading={loadingObservations}
-                />
-                <StorageStats
-                  title="Ventas"
-                  totals={totals}
-                  totalInconsistencies={detailsMain.length || 0}
-                  totalSums={totalSums}
-                  loading={loadingObservations}
-                />
-                <AnalyticsDetails
-                  loading={loadingObservations}
-                  details={detailsMain || []}
-                  downloadPath={downloadPath}
-                  onLoadData={handleApplyFilters}
-                  onDownload={handleDownloadObservations}
-                  totals={totals}
-                />
-                <MergeDataTable
-                  loading={loadingMissings}
-                  details={detailsMerge || []}
-                  sourceCounts={sourceCounts}
-                  onLoadData={loadData}
-                />
-              </Box>
-            </Grid>
-          </Grid>
-        </Container>
-      </Box>
-    </>
+    <Box
+      display="flex"
+      flexDirection="column"
+      gap={2}
+    >
+      <PurchasesInconsistenciesFilter
+        selectedParams={selectedParams}
+        setSelectedParams={setSelectedParams}
+        onLoadData={handleApplyFilters}
+        loading={loading}
+      />
+      <PurchasesInconsistenciesCards
+        title="Compras"
+        totalInconsistencies={detailsMain.length || 0}
+        totalSums={totalSums}
+        loading={loading}
+      />
+      <AnalyticsDetails
+        loading={loading}
+        details={detailsMain || []}
+        downloadPath={downloadPath}
+        onLoadData={handleApplyFilters}
+        onDownload={handleDownloadObservations}
+        totalSums={totalSums}
+      />
+    </Box>
   );
 };
 

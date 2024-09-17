@@ -22,7 +22,8 @@ import { useAuth } from 'src/hooks/use-auth';
 import { Issuer } from 'src/utils/auth';
 import { useMockedUser } from 'src/hooks/use-mocked-user';
 import { AccountButton } from '../account-button';
-import { Divider, Grid, IconButton, Menu, MenuItem, Tooltip } from '@mui/material';
+import { Divider, IconButton, Menu, MenuItem, Tooltip } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import { NotificationsButton } from '../notifications-button';
 import XCloseIcon from '@untitled-ui/icons-react/build/esm/XClose';
 import ChevronDownIcon from '@untitled-ui/icons-react/build/esm/ChevronDown';
@@ -215,18 +216,28 @@ export const SideNav = (props) => {
 
   useEffect(() => {
     const accounts = async () => {
-      try {
-        const response = await claveSolAccountsApi.getClaveSolAccounts({ user_id: user.user_id });
-        setMenuItems(response.data);
-        setSelectedName(response.data[0].name);
-        dispatch(setAccount(response.data[0].ruc));
-      } catch (err) {
-        console.error(err.message);
+      if (user) {
+        try {
+          const response = await claveSolAccountsApi.getClaveSolAccounts({
+            user_id: user?.user_id,
+          });
+
+          const items = response.data;
+          const uniqueItems = items.filter(
+            (item, index, self) => index === self.findIndex((i) => i.ruc === item.ruc)
+          );
+
+          setMenuItems(uniqueItems);
+          setSelectedName(response.data[0].name);
+          dispatch(setAccount(response.data[0].ruc));
+        } catch (err) {
+          console.error(err.message);
+        }
       }
     };
 
     accounts();
-  }, [user.user_id, dispatch]);
+  }, [user?.user_id, dispatch]);
 
   return (
     <Drawer

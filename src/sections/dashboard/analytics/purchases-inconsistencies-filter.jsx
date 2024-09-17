@@ -1,9 +1,20 @@
 import PropTypes from 'prop-types';
-import Stack from '@mui/material/Stack';
+import Grid from '@mui/material/Grid2';
 import TextField from '@mui/material/TextField';
-import { Box, Button, Checkbox, ListItemText, MenuItem } from '@mui/material';
+import {
+  Box,
+  Button,
+  Checkbox,
+  Collapse,
+  Container,
+  IconButton,
+  List,
+  ListItemText,
+  MenuItem,
+} from '@mui/material';
 import { useEffect, useState } from 'react';
 import FilterListIcon from '@mui/icons-material/FilterList';
+import { ExpandMore, ExpandLess } from '@mui/icons-material';
 
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { LocalizationProvider, DatePicker } from '@mui/x-date-pickers';
@@ -46,13 +57,24 @@ const filterOptions = [
   { label: 'Todos', value: 'all' },
   { label: 'General', value: 'general' },
   { label: 'Tipo de Cambio', value: 'tc' },
-  { label: 'Factoring', value: 'facto' },
+  {
+    label: 'Factoring',
+    value: 'facto',
+    subOptions: [
+      { label: 'No válido', value: 'No válido' },
+      { label: 'Pendiente', value: 'Pendiente' },
+      { label: 'Pendiente por reinicio', value: 'Pendiente por reinicio' },
+      { label: 'Subsanado', value: 'Subsanado' },
+      { label: 'Disconforme', value: 'Disconforme' },
+    ],
+  },
 ];
 
-export const PurchasesFilter = (props) => {
+export const PurchasesInconsistenciesFilter = (props) => {
   const { selectedParams, setSelectedParams, loading, onLoadData } = props;
   const [selectedOptions, setSelectedOptions] = useState(['general']);
   const [selectedFactoringStatus, setSelectedFactoringStatus] = useState([]); // Para almacenar estados seleccionados
+  const [expanded, setExpanded] = useState({});
 
   const handleSelected = (event) => {
     const { name, value } = event.target;
@@ -86,13 +108,16 @@ export const PurchasesFilter = (props) => {
     setSelectedParams((state) => ({ ...state, ['filters']: updatedSelection }));
   };
 
-  const handleFactoringStatusChange = (event) => {
-    const { value } = event.target;
-    setSelectedFactoringStatus((prevSelected) =>
-      prevSelected.includes(value)
-        ? prevSelected.filter((status) => status !== value)
-        : [...prevSelected, value]
-    );
+  const handleSubOptionSelect = (subOption) => {
+    setSelectedFactoringStatus((prevSelected) => {
+      const alreadySelected = prevSelected.includes(subOption.value);
+
+      if (alreadySelected) {
+        return prevSelected.filter((val) => val !== subOption.value);
+      } else {
+        return [...prevSelected, subOption.value];
+      }
+    });
   };
 
   const renderValue = (selected) => {
@@ -122,6 +147,13 @@ export const PurchasesFilter = (props) => {
     setSelectedParams((state) => ({ ...state, period: value }));
   };
 
+  const toggleSubMenu = (option) => {
+    setExpanded((prevExpanded) => ({
+      ...prevExpanded,
+      [option.value]: !prevExpanded[option.value],
+    }));
+  };
+
   useEffect(() => {
     setSelectedParams((state) => ({
       ...state,
@@ -134,18 +166,26 @@ export const PurchasesFilter = (props) => {
     console.log('Estados de Factoring seleccionados: ', selectedFactoringStatus);
   }, [selectedOptions, selectedFactoringStatus, setSelectedParams]);
   console.log('PARAMS', selectedParams);
+
   return (
-    <Stack
-      alignItems="center"
-      direction="row"
-      justifyContent="space-between"
-      sx={{ width: '100%' }}
+    <Box
+      sx={{
+        width: '100%',
+        maxWidth: { xs: '100%', md: 'none' },
+      }}
     >
-      <Stack
-        alignItems="center"
-        direction="row"
-        gap={2}
-        sx={{ minWidth: 150 }}
+      <Box
+        sx={{
+          width: '100%',
+          display: 'flex',
+          flexDirection: { xs: 'column', md: 'row' },
+          alignItems: { xs: 'stretch', md: 'center' },
+          gap: 2,
+          '& > *': {
+            flex: { xs: '1 1 100%', md: '1 1 0' },
+            minWidth: { xs: '100%', md: 0 },
+          },
+        }}
       >
         <LocalizationProvider
           dateAdapter={AdapterDateFns}
@@ -160,21 +200,22 @@ export const PurchasesFilter = (props) => {
             textField={(params) => (
               <TextField
                 {...params}
+                fullWidth
                 margin="normal"
-                sx={{ width: '200px', height: 54 }}
               />
             )}
             format="MMMM, yyyy"
           />
         </LocalizationProvider>
+
         <TextField
+          fullWidth
           label="Tipo Comprobante"
           name="docType"
           onChange={handleSelected}
           select
           SelectProps={{ native: true }}
           value={selectedParams.docType}
-          sx={{ width: '200px', height: 54 }}
         >
           {searchTypeOptions.map((option) => (
             <option
@@ -185,14 +226,15 @@ export const PurchasesFilter = (props) => {
             </option>
           ))}
         </TextField>
+
         <TextField
+          fullWidth
           label="Moneda"
           name="currency"
           onChange={handleSelected}
           select
           SelectProps={{ native: true }}
           value={selectedParams.currency}
-          sx={{ width: '150px', height: 54 }}
         >
           {searchCurrencyOptions.map((option) => (
             <option
@@ -203,13 +245,9 @@ export const PurchasesFilter = (props) => {
             </option>
           ))}
         </TextField>
-      </Stack>
-      <Stack
-        alignItems="center"
-        direction="row"
-        gap={2}
-      >
+
         <TextField
+          fullWidth
           label="Validaciones"
           name="filter"
           select
@@ -219,66 +257,80 @@ export const PurchasesFilter = (props) => {
             MenuProps: {
               PaperProps: {
                 style: {
-                  width: '200px',
+                  maxHeight: 600,
                 },
               },
             },
           }}
           value={selectedOptions}
           onChange={() => {}}
-          sx={{ width: '200px', height: 54 }}
+          sx={{ height: 54 }}
         >
           {filterOptions.map((option) => (
-            <MenuItem
-              key={option.value}
-              value={option.value}
-              onClick={() => handleSelectedOptions(option)}
-            >
-              <Checkbox checked={selectedOptions.includes(option.value)} />
-              <ListItemText primary={option.label} />
-            </MenuItem>
+            <div key={option.value}>
+              <MenuItem
+                key={option.value}
+                value={option.value}
+                onClick={() => handleSelectedOptions(option)}
+              >
+                <Checkbox checked={selectedOptions.includes(option.value)} />
+                <ListItemText primary={option.label} />
+                {option.subOptions?.length > 0 && (
+                  <IconButton
+                    size="small"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggleSubMenu(option);
+                    }}
+                  >
+                    {expanded[option.value] ? <ExpandLess /> : <ExpandMore />}
+                  </IconButton>
+                )}
+              </MenuItem>
+              {option.subOptions?.length > 0 && (
+                <Collapse
+                  in={expanded[option.value]}
+                  timeout="auto"
+                  unmountOnExit
+                >
+                  <List
+                    component="div"
+                    disablePadding
+                  >
+                    {option.subOptions.map((subOption) => (
+                      <MenuItem
+                        key={subOption.value}
+                        onClick={() => handleSubOptionSelect(subOption)}
+                        sx={{ pl: 4 }} // Indent the subitems
+                      >
+                        <Checkbox checked={selectedFactoringStatus.includes(subOption.value)} />
+                        <ListItemText primary={subOption.label} />
+                      </MenuItem>
+                    ))}
+                  </List>
+                </Collapse>
+              )}
+            </div>
           ))}
         </TextField>
+
         <Button
+          fullWidth
           variant="contained"
           color="primary"
           onClick={onLoadData}
           startIcon={<FilterListIcon />}
-          sx={{ width: '100px', height: 50 }}
           disabled={loading ? true : false}
+          sx={{ height: '56px' }}
         >
           Filtrar
         </Button>
-      </Stack>
-
-      {/* Estados de Factoring alineados en la misma línea */}
-      {selectedOptions.includes('facto') && (
-        <Box
-          mt={2}
-          display="flex"
-          flexDirection="row"
-          gap={2}
-        >
-          {factoringStatusOptions.map((status) => (
-            <MenuItem
-              key={status.value}
-              value={status.value}
-            >
-              <Checkbox
-                checked={selectedFactoringStatus.includes(status.value)}
-                onChange={handleFactoringStatusChange}
-                value={status.value}
-              />
-              <ListItemText primary={status.label} />
-            </MenuItem>
-          ))}
-        </Box>
-      )}
-    </Stack>
+      </Box>
+    </Box>
   );
 };
 
-PurchasesFilter.propTypes = {
+PurchasesInconsistenciesFilter.propTypes = {
   loading: PropTypes.bool,
   selectedParams: PropTypes.object,
   setSelectedParams: PropTypes.func,

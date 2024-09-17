@@ -1,5 +1,6 @@
 import { lazy, Suspense } from 'react';
 import { Outlet } from 'react-router-dom';
+import { RoleGuard } from 'src/guards/role-guard';
 
 import { Layout as DashboardLayout } from 'src/layouts/dashboard';
 
@@ -57,7 +58,6 @@ const AccountPage = lazy(() => import('src/pages/dashboard/account'));
 const BlankPage = lazy(() => import('src/pages/dashboard/blank'));
 const CalendarPage = lazy(() => import('src/pages/dashboard/calendar'));
 const SunKeyPage = lazy(() => import('src/pages/dashboard/sun-key'));
-const BotsPage = lazy(() => import('src/pages/dashboard/bots'));
 const ChatPage = lazy(() => import('src/pages/dashboard/chat'));
 const CryptoPage = lazy(() => import('src/pages/dashboard/crypto'));
 const EcommercePage = lazy(() => import('src/pages/dashboard/ecommerce'));
@@ -134,7 +134,11 @@ export const dashboardRoutes = [
       },
       {
         path: 'users',
-        element: <UserPage />,
+        element: (
+          <RoleGuard allowedRoles={['admin']}>
+            <UserPage />
+          </RoleGuard>
+        ),
       },
       {
         path: 'invoices',
@@ -256,10 +260,7 @@ export const dashboardRoutes = [
         path: 'sun-key',
         element: <SunKeyPage />,
       },
-      {
-        path: 'bots',
-        element: <BotsPage />,
-      },
+
       {
         path: 'chat',
         element: <ChatPage />,

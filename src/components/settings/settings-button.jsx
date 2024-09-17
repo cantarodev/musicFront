@@ -4,17 +4,9 @@ import Box from '@mui/material/Box';
 import ButtonBase from '@mui/material/ButtonBase';
 import SvgIcon from '@mui/material/SvgIcon';
 import Tooltip from '@mui/material/Tooltip';
-import { useEffect } from 'react';
-
-import { useMockedUser } from 'src/hooks/use-mocked-user';
 
 export const SettingsButton = (props) => {
-  const { onClick, setUser } = props;
-  const user = useMockedUser();
-
-  useEffect(() => {
-    setUser(user);
-  }, []);
+  const { onClick } = props;
 
   return (
     <Tooltip title="Settings">
@@ -50,5 +42,4 @@ export const SettingsButton = (props) => {
 
 SettingsButton.propTypes = {
   onClick: PropTypes.func,
-  setUser: PropTypes.func,
 };

@@ -104,9 +104,9 @@ export const AuthProvider = (props) => {
   const signIn = useCallback(
     async (email, password) => {
       const { accessToken } = await authApi.signIn({ email, password });
-
-      const user = await authApi.me({ accessToken });
       sessionStorage.setItem(STORAGE_KEY, accessToken);
+
+      const user = await authApi.me();
       dispatch({
         type: ActionType.SIGN_IN,
         payload: {

@@ -1,12 +1,12 @@
 import { lazy } from 'react';
 import { Outlet } from 'react-router-dom';
 
-import { Layout as MarketingLayout } from 'src/layouts/marketing';
+// import { Layout as MarketingLayout } from 'src/layouts/marketing';
 import { Layout as AuthLayout } from 'src/layouts/auth/classic-layout';
 
 import { authRoutes } from './auth';
-import { authDemoRoutes } from './auth-demo';
-import { componentsRoutes } from './components';
+// import { authDemoRoutes } from './auth-demo';
+// import { componentsRoutes } from './components';
 import { dashboardRoutes } from './dashboard';
 
 const Error401Page = lazy(() => import('src/pages/401'));
@@ -17,7 +17,7 @@ const Error500Page = lazy(() => import('src/pages/500'));
 const HomePage = lazy(() => import('src/pages/index'));
 const ContactPage = lazy(() => import('src/pages/contact'));
 const CheckoutPage = lazy(() => import('src/pages/checkout'));
-const PricingPage = lazy(() => import('src/pages/pricing'));
+// const PricingPage = lazy(() => import('src/pages/pricing'));
 
 export const routes = [
   {

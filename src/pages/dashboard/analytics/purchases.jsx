@@ -6,15 +6,12 @@ import { useEffect, useState } from 'react';
 import { Seo } from 'src/components/seo';
 import { useMockedUser } from 'src/hooks/use-mocked-user';
 import { useSettings } from 'src/hooks/use-settings';
-import { AnalyticsDetails } from 'src/sections/dashboard/analytics/analytics-details';
-import { MergeDataTable } from 'src/sections/dashboard/analytics/merged-data-table';
-import { PurchasesFilter } from 'src/sections/dashboard/analytics/purchases-filter';
 import { reportApi } from 'src/api/reports/reportService';
 import { format, subMonths } from 'date-fns';
 
 import axios from 'axios';
 import { useSelector } from 'react-redux';
-import { StorageStats } from 'src/sections/dashboard/analytics/storage-stats';
+import BasicTabs from 'src/components/tabs-components';
 
 const Page = () => {
   const settings = useSettings();
@@ -183,54 +180,10 @@ const Page = () => {
         component="main"
         sx={{
           flexGrow: 1,
-          pt: 2,
           pb: 8,
         }}
       >
-        <Container maxWidth={settings.stretch ? false : 'xl'}>
-          <Grid
-            container
-            spacing={{
-              xs: 3,
-              lg: 4,
-            }}
-          >
-            <Grid
-              xs={12}
-              lg={12}
-            >
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-                <PurchasesFilter
-                  selectedParams={selectedParams}
-                  setSelectedParams={setSelectedParams}
-                  onLoadData={handleApplyFilters}
-                  loading={loadingObservations}
-                />
-                <StorageStats
-                  title="Compras"
-                  totals={totals}
-                  totalInconsistencies={detailsMain.length || 0}
-                  totalSums={totalSums}
-                  loading={loadingObservations}
-                />
-                <AnalyticsDetails
-                  loading={loadingObservations}
-                  details={detailsMain || []}
-                  downloadPath={downloadPath}
-                  onLoadData={handleApplyFilters}
-                  onDownload={handleDownloadObservations}
-                  totalSums={totalSums}
-                />
-                <MergeDataTable
-                  loading={loadingMissings}
-                  details={detailsMerge || []}
-                  sourceCounts={sourceCounts}
-                  onLoadData={loadData}
-                />
-              </Box>
-            </Grid>
-          </Grid>
-        </Container>
+        <BasicTabs />
       </Box>
     </>
   );

@@ -31,11 +31,11 @@ import { FaRobot } from 'react-icons/fa';
 import XSquareIcon from 'src/icons/untitled-ui/duocolor/x-square';
 import { tokens } from 'src/locales/tokens';
 import { paths } from 'src/paths';
-import { useMockedUser } from 'src/hooks/use-mocked-user';
+import useUserRole from 'src/hooks/use-user-role';
 
 export const useSections = () => {
   const { t } = useTranslation();
-  const user = useMockedUser();
+  const { userRole } = useUserRole();
 
   return useMemo(() => {
     const sections = [
@@ -563,17 +563,8 @@ export const useSections = () => {
       // },
     ];
 
-    if (user?.role_id === 1) {
+    if (userRole === 'admin') {
       sections[1].items.splice(1, 0, {
-        title: t(tokens.nav.bots),
-        path: paths.dashboard.bots,
-        icon: (
-          <SvgIcon fontSize="small">
-            <FaRobot />
-          </SvgIcon>
-        ),
-      });
-      sections[1].items.splice(2, 0, {
         title: t(tokens.nav.users),
         path: paths.dashboard.users,
         icon: (
@@ -585,5 +576,5 @@ export const useSections = () => {
     }
 
     return sections;
-  }, [t, user?.role_id]);
+  }, [t, userRole]);
 };

@@ -16,7 +16,7 @@ const Page = () => {
 
   return (
     <>
-      <Seo title="Error: Authorization Required" />
+      <Seo title="Error: Autorización requerida" />
       <Box
         component="main"
         sx={{
@@ -49,15 +49,15 @@ const Page = () => {
             align="center"
             variant={mdUp ? 'h1' : 'h4'}
           >
-            401: Authorization required
+            401: Autorización requerida
           </Typography>
           <Typography
             align="center"
             color="text.secondary"
             sx={{ mt: 0.5 }}
           >
-            You either tried some shady route or you came here by mistake. Whichever it is, try
-            using the navigation.
+            Intentaste acceder a una ruta no permitida o llegaste aquí por error. Sea cual sea el
+            caso, intenta usar la navegación.
           </Typography>
           <Box
             sx={{
@@ -70,7 +70,7 @@ const Page = () => {
               component={RouterLink}
               href={paths.index}
             >
-              Back to Home
+              Ir al inicio
             </Button>
           </Box>
         </Container>

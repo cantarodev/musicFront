@@ -16,7 +16,7 @@ const Page = () => {
 
   return (
     <>
-      <Seo title="Error: Server Error" />
+      <Seo title="Error: Error de sevidor" />
       <Box
         component="main"
         sx={{
@@ -49,15 +49,15 @@ const Page = () => {
             align="center"
             variant={mdUp ? 'h1' : 'h4'}
           >
-            500: Internal Server Error
+            500: Error Interno del Servidor
           </Typography>
           <Typography
             align="center"
             color="text.secondary"
             sx={{ mt: 0.5 }}
           >
-            You either tried some shady route or you came here by mistake. Whichever it is, try
-            using the navigation.
+            Parece que intentaste acceder a una ruta incorrecta o te encontraste aquí por error. En
+            cualquier caso, intenta navegar usando el menú.
           </Typography>
           <Box
             sx={{
@@ -70,7 +70,7 @@ const Page = () => {
               component={RouterLink}
               href={paths.index}
             >
-              Back to Home
+              Ir al inicio
             </Button>
           </Box>
         </Container>

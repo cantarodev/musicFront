@@ -7,7 +7,6 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
-import RefreshCcw01Icon from '@untitled-ui/icons-react/build/esm/RefreshCcw01';
 import DownloadIcon from '@untitled-ui/icons-react/build/esm/Download01';
 
 import {
@@ -17,7 +16,6 @@ import {
   LinearProgress,
   IconButton,
   SvgIcon,
-  Paper,
   TableFooter,
   FormControlLabel,
   Checkbox,
@@ -61,8 +59,8 @@ const columnLabels = {
 };
 
 function descendingComparator(a, b, orderBy) {
-  if (b[orderBy] < a[orderBy]) return -1;
-  if (b[orderBy] > a[orderBy]) return 1;
+  if (parseFloat(b[orderBy]) < parseFloat(a[orderBy])) return -1;
+  if (parseFloat(b[orderBy]) > parseFloat(a[orderBy])) return 1;
   return 0;
 }
 
@@ -118,7 +116,7 @@ export const AnalyticsDetails = (props) => {
   const [open, setOpen] = useState(false);
 
   const [order, setOrder] = useState('asc');
-  const [orderBy, setOrderBy] = useState('mtoBIGravadaDG');
+  const [orderBy, setOrderBy] = useState('mtoImporteTotal');
 
   const handleDialogOpen = () => {
     setOpen(true);
@@ -143,7 +141,7 @@ export const AnalyticsDetails = (props) => {
 
   const sortedRows = sortRows(details, getComparator(order, orderBy));
 
-  const isEmpty = details.length === 0;
+  const isEmpty = sortedRows.length === 0;
 
   const handleOpen = (detail, option = '') => {
     setModalOpen(true);
@@ -152,6 +150,16 @@ export const AnalyticsDetails = (props) => {
   };
 
   const handleClose = () => setModalOpen(false);
+
+  const formatNumber = (number) => {
+    const formattedNumber = new Intl.NumberFormat('en-US', {
+      style: 'decimal',
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(parseFloat(number));
+
+    return formattedNumber;
+  };
 
   return (
     <Card>
@@ -215,14 +223,6 @@ export const AnalyticsDetails = (props) => {
                 ))}
               </DialogContent>
             </Dialog>
-            <IconButton
-              color="inherit"
-              onClick={onLoadData}
-            >
-              <SvgIcon fontSize="small">
-                <RefreshCcw01Icon />
-              </SvgIcon>
-            </IconButton>
           </Stack>
         }
       />
@@ -232,10 +232,7 @@ export const AnalyticsDetails = (props) => {
         maxHeight="500px"
         p={2}
       >
-        <TableContainer
-          sx={{ flex: 1, overflowY: 'auto', position: 'relative' }}
-          component={Paper}
-        >
+        <TableContainer sx={{ flex: 1, overflowY: 'auto', position: 'relative' }}>
           <Table stickyHeader>
             <TableHead>
               <TableRow>
@@ -555,7 +552,13 @@ export const AnalyticsDetails = (props) => {
                 )}
                 {columnVisibility.igv && (
                   <TableCell sx={{ textAlign: 'right' }}>
-                    <Typography sx={{ fontSize: 12, fontWeight: 'bold' }}>IGV</Typography>
+                    <TableSortLabel
+                      active={orderBy === 'mtoIGV'}
+                      direction={orderBy === 'mtoIGV' ? order : 'asc'}
+                      onClick={() => handleRequestSort('mtoIGV')}
+                    >
+                      <Typography sx={{ fontSize: 12, fontWeight: 'bold' }}>IGV</Typography>
+                    </TableSortLabel>
                   </TableCell>
                 )}
                 {columnVisibility.igvSunat && (
@@ -584,9 +587,9 @@ export const AnalyticsDetails = (props) => {
                 {columnVisibility.importe && (
                   <TableCell sx={{ textAlign: 'right' }}>
                     <TableSortLabel
-                      active={orderBy === 'importe'}
-                      direction={orderBy === 'importe' ? order : 'asc'}
-                      onClick={() => handleRequestSort('importe')}
+                      active={orderBy === 'mtoImporteTotal'}
+                      direction={orderBy === 'mtoImporteTotal' ? order : 'asc'}
+                      onClick={() => handleRequestSort('mtoImporteTotal')}
                     >
                       <Typography sx={{ fontSize: 12, fontWeight: 'bold' }}>Importe</Typography>
                     </TableSortLabel>
@@ -706,7 +709,7 @@ export const AnalyticsDetails = (props) => {
                   </TableCell>
                 </TableRow>
               ) : (
-                details?.map((detail, index) => {
+                sortedRows?.map((detail, index) => {
                   return (
                     <TableRow
                       key={index}
@@ -785,7 +788,9 @@ export const AnalyticsDetails = (props) => {
                           className="customTableCell"
                           sx={{ textAlign: 'right' }}
                         >
-                          <Typography sx={{ fontSize: 14 }}>{detail.mtoBIGravadaDG}</Typography>
+                          <Typography sx={{ fontSize: 14 }}>
+                            {formatNumber(detail.mtoBIGravadaDG)}
+                          </Typography>
                         </TableCell>
                       )}
                       {columnVisibility.mtoBIGravadaDGNG && (
@@ -793,7 +798,9 @@ export const AnalyticsDetails = (props) => {
                           className="customTableCell"
                           sx={{ textAlign: 'right' }}
                         >
-                          <Typography sx={{ fontSize: 14 }}>{detail.mtoBIGravadaDGNG}</Typography>
+                          <Typography sx={{ fontSize: 14 }}>
+                            {formatNumber(detail.mtoBIGravadaDGNG)}
+                          </Typography>
                         </TableCell>
                       )}
                       {columnVisibility.mtoIgvIpmDGNG && (
@@ -801,7 +808,9 @@ export const AnalyticsDetails = (props) => {
                           className="customTableCell"
                           sx={{ textAlign: 'right' }}
                         >
-                          <Typography sx={{ fontSize: 14 }}>{detail.mtoIgvIpmDGNG}</Typography>
+                          <Typography sx={{ fontSize: 14 }}>
+                            {formatNumber(detail.mtoIgvIpmDGNG)}
+                          </Typography>
                         </TableCell>
                       )}
                       {columnVisibility.mtoBIGravadaDNG && (
@@ -809,7 +818,9 @@ export const AnalyticsDetails = (props) => {
                           className="customTableCell"
                           sx={{ textAlign: 'right' }}
                         >
-                          <Typography sx={{ fontSize: 14 }}>{detail.mtoBIGravadaDNG}</Typography>
+                          <Typography sx={{ fontSize: 14 }}>
+                            {formatNumber(detail.mtoBIGravadaDNG)}
+                          </Typography>
                         </TableCell>
                       )}
                       {columnVisibility.mtoIgvIpmDNG && (
@@ -817,7 +828,9 @@ export const AnalyticsDetails = (props) => {
                           className="customTableCell"
                           sx={{ textAlign: 'right' }}
                         >
-                          <Typography sx={{ fontSize: 14 }}>{detail.mtoIgvIpmDNG}</Typography>
+                          <Typography sx={{ fontSize: 14 }}>
+                            {formatNumber(detail.mtoIgvIpmDNG)}
+                          </Typography>
                         </TableCell>
                       )}
                       {columnVisibility.mtoValorAdqNG && (
@@ -825,7 +838,9 @@ export const AnalyticsDetails = (props) => {
                           className="customTableCell"
                           sx={{ textAlign: 'right' }}
                         >
-                          <Typography sx={{ fontSize: 14 }}>{detail.mtoValorAdqNG}</Typography>
+                          <Typography sx={{ fontSize: 14 }}>
+                            {formatNumber(detail.mtoValorAdqNG)}
+                          </Typography>
                         </TableCell>
                       )}
                       {columnVisibility.mtoISC && (
@@ -833,7 +848,9 @@ export const AnalyticsDetails = (props) => {
                           className="customTableCell"
                           sx={{ textAlign: 'right' }}
                         >
-                          <Typography sx={{ fontSize: 14 }}>{detail.mtoISC}</Typography>
+                          <Typography sx={{ fontSize: 14 }}>
+                            {formatNumber(detail.mtoISC)}
+                          </Typography>
                         </TableCell>
                       )}
                       {columnVisibility.mtoIcbp && (
@@ -841,7 +858,9 @@ export const AnalyticsDetails = (props) => {
                           className="customTableCell"
                           sx={{ textAlign: 'right' }}
                         >
-                          <Typography sx={{ fontSize: 14 }}>{detail.mtoIcbp}</Typography>
+                          <Typography sx={{ fontSize: 14 }}>
+                            {formatNumber(detail.mtoIcbp)}
+                          </Typography>
                         </TableCell>
                       )}
                       {columnVisibility.mtoOtrosTrib && (
@@ -849,7 +868,9 @@ export const AnalyticsDetails = (props) => {
                           className="customTableCell"
                           sx={{ textAlign: 'right' }}
                         >
-                          <Typography sx={{ fontSize: 14 }}>{detail.mtoOtrosTrib}</Typography>
+                          <Typography sx={{ fontSize: 14 }}>
+                            {formatNumber(detail.mtoOtrosTrib)}
+                          </Typography>
                         </TableCell>
                       )}
                       {columnVisibility.igv && (
@@ -865,7 +886,7 @@ export const AnalyticsDetails = (props) => {
                             }
                             style={{ fontSize: 14 }}
                           >
-                            {detail.mtoIGV}
+                            {formatNumber(detail.mtoIGV)}
                           </Typography>
                         </TableCell>
                       )}
@@ -874,7 +895,9 @@ export const AnalyticsDetails = (props) => {
                           className="customTableCell"
                           sx={{ textAlign: 'right' }}
                         >
-                          <Typography sx={{ fontSize: 14 }}>{detail.mtoIGVSunat}</Typography>
+                          <Typography sx={{ fontSize: 14 }}>
+                            {formatNumber(detail.mtoIGVSunat)}
+                          </Typography>
                         </TableCell>
                       )}
                       {columnVisibility.importe && (
@@ -890,7 +913,7 @@ export const AnalyticsDetails = (props) => {
                             }
                             style={{ fontSize: 14 }}
                           >
-                            {detail.mtoImporteTotal}
+                            {formatNumber(detail.mtoImporteTotal)}
                           </Typography>
                         </TableCell>
                       )}
@@ -900,7 +923,7 @@ export const AnalyticsDetails = (props) => {
                           sx={{ textAlign: 'right' }}
                         >
                           <Typography sx={{ fontSize: 14 }}>
-                            {detail.mtoImporteTotalSunat}
+                            {formatNumber(detail.mtoImporteTotalSunat)}
                           </Typography>
                         </TableCell>
                       )}
@@ -909,7 +932,6 @@ export const AnalyticsDetails = (props) => {
                           className="customTableCell"
                           sx={{ textAlign: 'right' }}
                         >
-                          {/* 17863 */}
                           <Typography
                             style={{ fontSize: 14 }}
                             sx={
