@@ -6,9 +6,8 @@ import Grid from '@mui/material/Grid2';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import Skeleton from '@mui/material/Skeleton';
-import { useSelector } from 'react-redux';
 
-export const PurchasesSireCards = (props) => {
+export const SalesSireCards = (props) => {
   const { title, loading, relevantData } = props;
 
   return (
@@ -39,7 +38,7 @@ export const PurchasesSireCards = (props) => {
                 Total de Registros SUNAT
               </Typography>
               <Typography variant="h5">
-                {loading ? <Skeleton variant="text" /> : relevantData.total_sunat}
+                {loading ? <Skeleton variant="text" /> : relevantData?.total_sunat}
               </Typography>
             </Stack>
           </Grid>
@@ -60,7 +59,7 @@ export const PurchasesSireCards = (props) => {
                 Total de Registros PLE
               </Typography>
               <Typography variant="h5">
-                {loading ? <Skeleton variant="text" /> : relevantData.total_ple}
+                {loading ? <Skeleton variant="text" /> : relevantData?.total_ple}
               </Typography>
             </Stack>
           </Grid>
@@ -81,7 +80,7 @@ export const PurchasesSireCards = (props) => {
                 Registros Coincidentes
               </Typography>
               <Typography variant="h5">
-                {loading ? <Skeleton variant="text" /> : relevantData.coincidences}
+                {loading ? <Skeleton variant="text" /> : relevantData?.coincidences}
               </Typography>
             </Stack>
           </Grid>
@@ -102,7 +101,7 @@ export const PurchasesSireCards = (props) => {
                 Registros No Coincidentes (SUNAT)
               </Typography>
               <Typography variant="h5">
-                {loading ? <Skeleton variant="text" /> : relevantData.num_only_in_database}
+                {loading ? <Skeleton variant="text" /> : relevantData?.num_only_in_database}
               </Typography>
             </Stack>
           </Grid>
@@ -123,7 +122,7 @@ export const PurchasesSireCards = (props) => {
                 Registros No Coincidentes (PLE)
               </Typography>
               <Typography variant="h5">
-                {loading ? <Skeleton variant="text" /> : relevantData.num_only_in_s3}
+                {loading ? <Skeleton variant="text" /> : relevantData?.num_only_in_s3}
               </Typography>
             </Stack>
           </Grid>
@@ -147,7 +146,7 @@ export const PurchasesSireCards = (props) => {
                 {loading ? (
                   <Skeleton variant="text" />
                 ) : (
-                  parseFloat(relevantData.coincidence_percentage).toFixed(2) + '%'
+                  parseFloat(relevantData?.coincidence_percentage).toFixed(2) + '%'
                 )}
               </Typography>
             </Stack>
@@ -173,7 +172,7 @@ export const PurchasesSireCards = (props) => {
                   <Skeleton variant="text" />
                 ) : (
                   'S/ ' +
-                  parseFloat(relevantData.sum_total_difference.toLocaleString('en-US')).toFixed(2)
+                  parseFloat(relevantData?.sum_total_difference.toLocaleString('en-US')).toFixed(2)
                 )}
               </Typography>
             </Stack>
@@ -198,7 +197,7 @@ export const PurchasesSireCards = (props) => {
                 {loading ? (
                   <Skeleton variant="text" />
                 ) : (
-                  relevantData.discrepancy_percentage.toFixed(2) + '%'
+                  relevantData?.discrepancy_percentage.toFixed(2) + '%'
                 )}
               </Typography>
             </Stack>
@@ -209,7 +208,7 @@ export const PurchasesSireCards = (props) => {
   );
 };
 
-PurchasesSireCards.propTypes = {
+SalesSireCards.propTypes = {
   title: PropTypes.string,
   loading: PropTypes.bool,
   relevantData: PropTypes.object,

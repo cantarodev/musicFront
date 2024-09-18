@@ -59,7 +59,7 @@ const filterOptions = [
   },
 ];
 
-export const PurchasesSireFilter = (props) => {
+export const SalesSireFilter = (props) => {
   const { selectedParams, setSelectedParams, loading, onLoadData } = props;
 
   const handleSelected = (event) => {
@@ -81,6 +81,8 @@ export const PurchasesSireFilter = (props) => {
     const value = formatDate(date);
     setSelectedParams((state) => ({ ...state, period: value }));
   };
+
+  console.log('PARAMS', selectedParams);
 
   return (
     <Box
@@ -179,7 +181,7 @@ export const PurchasesSireFilter = (props) => {
   );
 };
 
-PurchasesSireFilter.propTypes = {
+SalesSireFilter.propTypes = {
   loading: PropTypes.bool,
   selectedParams: PropTypes.object,
   setSelectedParams: PropTypes.func,

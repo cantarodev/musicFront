@@ -10,7 +10,7 @@ import { PurchasesSireCards } from './purchases-sire-cards';
 import { PurchasesSireFilter } from './purchases-sire-filter';
 import { Box } from '@mui/material';
 
-const Page = () => {
+const Page = ({ type }) => {
   const selectedAccount = useSelector((state) => state.account);
   const [detailsMerge, setDetailsMerge] = useState([]);
   const [relevantData, setRelevantData] = useState({
@@ -35,7 +35,7 @@ const Page = () => {
   const [selectedParams, setSelectedParams] = useState({
     period: format(subMonths(new Date(), 1), 'yyyyMM'),
     account: selectedAccount,
-    queryType: 'compras',
+    queryType: String(type).toLowerCase(),
     docType: 'all',
     currency: 'all',
     filters: {},
@@ -65,6 +65,20 @@ const Page = () => {
 
   useEffect(() => {
     setDetailsMerge([]);
+    setRelevantData({
+      total_sunat: 0,
+      total_ple: 0,
+      coincidences: 0,
+      num_only_in_database: 0,
+      num_only_in_s3: 0,
+      coincidence_percentage: 0,
+      sum_total_difference: 0,
+      sum_total_database: 0,
+      sum_total_ple: 0,
+      discrepancy_percentage: 0,
+      discrepancy_count: 0,
+      total_coincidences: 0,
+    });
     setSelectedParams((state) => ({ ...state, account: selectedAccount }));
   }, [selectedAccount]);
 

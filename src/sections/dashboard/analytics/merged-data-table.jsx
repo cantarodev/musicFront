@@ -144,7 +144,7 @@ export const MergeDataTable = (props) => {
                         className="customTableCell"
                       >
                         <Typography
-                          variant="body1"
+                          variant="h5"
                           sx={detail?.source === 'sunat' ? { color: 'green' } : { color: 'red' }}
                           padding={1}
                         >
@@ -156,7 +156,7 @@ export const MergeDataTable = (props) => {
                         className="customTableCell"
                       >
                         <Typography
-                          variant="body1"
+                          variant="h5"
                           sx={detail?.source === 'ple' ? { color: 'green' } : { color: 'red' }}
                           padding={1}
                         >

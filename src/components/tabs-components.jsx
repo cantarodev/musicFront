@@ -1,7 +1,11 @@
 import React, { useState } from 'react';
 import { Tabs, Tab, Box, Typography } from '@mui/material';
+
 import PurchasesInconsinstencies from 'src/sections/dashboard/analytics/purchases-inconsistencies';
 import PurchasesSire from 'src/sections/dashboard/analytics/purchases-sire';
+
+import SalesInconsinstencies from 'src/sections/dashboard/analytics/sales-inconsistencies';
+import SalesSire from 'src/sections/dashboard/analytics/sales-sire';
 
 const TabPanel = (props) => {
   const { children, value, index, ...other } = props;
@@ -23,7 +27,7 @@ const TabPanel = (props) => {
   );
 };
 
-const BasicTabs = () => {
+const BasicTabs = ({ type }) => {
   const [value, setValue] = useState(0);
 
   const handleChange = (event, newValue) => {
@@ -49,13 +53,17 @@ const BasicTabs = () => {
         value={value}
         index={0}
       >
-        <PurchasesInconsinstencies />
+        {type === 'Compras' ? (
+          <PurchasesInconsinstencies type={type} />
+        ) : (
+          <SalesInconsinstencies type={type} />
+        )}
       </TabPanel>
       <TabPanel
         value={value}
         index={1}
       >
-        <PurchasesSire />
+        {type === 'Compras' ? <PurchasesSire type={type} /> : <SalesSire type={type} />}
       </TabPanel>
     </Box>
   );

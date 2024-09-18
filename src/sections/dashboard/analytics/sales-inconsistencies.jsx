@@ -8,8 +8,8 @@ import { format, subMonths } from 'date-fns';
 
 import axios from 'axios';
 import { useSelector } from 'react-redux';
-import { PurchasesInconsistenciesCards } from 'src/sections/dashboard/analytics/purchases-inconsistencies-cards';
-import { PurchasesInconsistenciesFilter } from './purchases-inconsistencies-filter';
+import { SalesInconsistenciesCards } from 'src/sections/dashboard/analytics/sales-inconsistencies-cards';
+import { SalesInconsistenciesFilter } from './sales-inconsistencies-filter';
 
 const Page = ({ type }) => {
   const selectedAccount = useSelector((state) => state.account);
@@ -54,6 +54,7 @@ const Page = ({ type }) => {
       });
 
       const data = response?.data;
+      console.log(data);
 
       setDetailsMain(data?.all_results);
       setDownloadPath(data?.download_path);
@@ -144,13 +145,13 @@ const Page = ({ type }) => {
       flexDirection="column"
       gap={2}
     >
-      <PurchasesInconsistenciesFilter
+      <SalesInconsistenciesFilter
         selectedParams={selectedParams}
         setSelectedParams={setSelectedParams}
         onLoadData={handleApplyFilters}
         loading={loading}
       />
-      <PurchasesInconsistenciesCards
+      <SalesInconsistenciesCards
         title={type}
         totalInconsistencies={detailsMain.length || 0}
         totalSums={totalSums}
