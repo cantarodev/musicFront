@@ -2,7 +2,7 @@ import Box from '@mui/material/Box';
 import { useEffect, useState } from 'react';
 
 import { useMockedUser } from 'src/hooks/use-mocked-user';
-import { AnalyticsDetails } from 'src/sections/dashboard/analytics/analytics-details';
+import { PurchasesInconsistenciesDetails } from 'src/sections/dashboard/analytics/purchases-inconsistencies-details';
 import { reportApi } from 'src/api/reports/reportService';
 import { format, subMonths } from 'date-fns';
 
@@ -156,7 +156,7 @@ const Page = ({ type }) => {
         totalSums={totalSums}
         loading={loading}
       />
-      <AnalyticsDetails
+      <PurchasesInconsistenciesDetails
         loading={loading}
         details={detailsMain || []}
         downloadPath={downloadPath}

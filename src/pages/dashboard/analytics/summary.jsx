@@ -9,7 +9,7 @@ import { useSettings } from 'src/hooks/use-settings';
 import { useCallback, useEffect, useState } from 'react';
 import { reportApi } from 'src/api/reports/reportService';
 import { useMockedUser } from 'src/hooks/use-mocked-user';
-import { AnalyticsDetails } from 'src/sections/dashboard/analytics/analytics-details';
+import { AnalyticsDetails } from 'src/sections/dashboard/analytics/purchases-inconsistencies-details';
 import { SummaryFilter } from 'src/sections/dashboard/analytics/summary-filter';
 import { OverviewSubscriptionUsage } from 'src/sections/dashboard/overview/overview-subscription-usage';
 import { Card, CardContent } from '@mui/material';

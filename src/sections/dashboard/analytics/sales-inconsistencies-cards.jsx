@@ -62,7 +62,7 @@ export const SalesInconsistenciesCards = (props) => {
                 {loading ? (
                   <Skeleton variant="text" />
                 ) : (
-                  'S/ ' + totalSums.baseIGravadaDG.toLocaleString('en-US')
+                  'S/ ' + totalSums.baseIGravada.toLocaleString('en-US')
                 )}
               </Typography>
             </Stack>

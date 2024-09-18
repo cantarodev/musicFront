@@ -80,8 +80,8 @@ function sortRows(array, comparator) {
   return stabilizedRows.map((el) => el[0]);
 }
 
-export const AnalyticsDetails = (props) => {
-  const { loading, details, totalSums, onLoadData, downloadPath, onDownload } = props;
+export const PurchasesInconsistenciesDetails = (props) => {
+  const { loading, details, totalSums, downloadPath, onDownload } = props;
 
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedDetail, setSelectedDetail] = useState(null);
@@ -1110,11 +1110,10 @@ export const AnalyticsDetails = (props) => {
   );
 };
 
-AnalyticsDetails.propTypes = {
+PurchasesInconsistenciesDetails.propTypes = {
   loading: PropTypes.bool,
   details: PropTypes.array.isRequired,
   totalSums: PropTypes.object,
   downloadPath: PropTypes.string,
   onDownload: PropTypes.func,
-  onLoadData: PropTypes.func,
 };

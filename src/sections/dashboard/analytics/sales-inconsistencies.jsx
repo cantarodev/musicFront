@@ -2,7 +2,7 @@ import Box from '@mui/material/Box';
 import { useEffect, useState } from 'react';
 
 import { useMockedUser } from 'src/hooks/use-mocked-user';
-import { AnalyticsDetails } from 'src/sections/dashboard/analytics/analytics-details';
+import { SalesInconsistenciesDetails } from 'src/sections/dashboard/analytics/sales-inconsistencies-details';
 import { reportApi } from 'src/api/reports/reportService';
 import { format, subMonths } from 'date-fns';
 
@@ -31,9 +31,7 @@ const Page = ({ type }) => {
   });
 
   const [totalSums, setTotalSums] = useState({
-    baseIGravadaDG: 0.0,
-    baseIGravadaDGNG: 0.0,
-    baseIGravadaDNG: 0.0,
+    baseIGravada: 0.0,
     igv: 0.0,
     igvSunat: 0.0,
     importe: 0.0,
@@ -105,9 +103,7 @@ const Page = ({ type }) => {
 
     const newTotals = detailsMain.reduce(
       (totals, detail) => {
-        totals.baseIGravadaDG += parseFloat(detail.mtoBIGravadaDG) || 0;
-        totals.baseIGravadaDGNG += parseFloat(detail.mtoBIGravadaDGNG) || 0;
-        totals.baseIGravadaDNG += parseFloat(detail.mtoBIGravadaDNG) || 0;
+        totals.baseIGravada += parseFloat(detail.mtoBIGravada) || 0;
         totals.igv += parseFloat(detail.mtoIGV) || 0;
         totals.igvSunat += parseFloat(detail.mtoIGVSunat) || 0;
         totals.importe += parseFloat(detail.mtoImporteTotal) || 0;
@@ -124,9 +120,7 @@ const Page = ({ type }) => {
         return totals;
       },
       {
-        baseIGravadaDG: 0.0,
-        baseIGravadaDGNG: 0.0,
-        baseIGravadaDNG: 0.0,
+        baseIGravada: 0.0,
         igv: 0.0,
         igvSunat: 0.0,
         importe: 0.0,
@@ -157,7 +151,7 @@ const Page = ({ type }) => {
         totalSums={totalSums}
         loading={loading}
       />
-      <AnalyticsDetails
+      <SalesInconsistenciesDetails
         loading={loading}
         details={detailsMain || []}
         downloadPath={downloadPath}
