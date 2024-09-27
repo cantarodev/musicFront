@@ -54,4 +54,5 @@ export const es = {
   [tokens.nav.summary]: 'Resumen',
   [tokens.nav.purchases]: 'Compras',
   [tokens.nav.sales]: 'Ventas',
+  [tokens.nav.detractions]: 'Detracciones',
 };
