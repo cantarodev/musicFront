@@ -16,8 +16,6 @@ function descendingComparator(a, b, sortBy) {
 }
 
 function getComparator(sortDir, sortBy) {
-  console.log(sortDir);
-
   return sortDir === 'desc'
     ? (a, b) => descendingComparator(a, b, sortBy)
     : (a, b) => -descendingComparator(a, b, sortBy);
@@ -26,7 +24,7 @@ function getComparator(sortDir, sortBy) {
 export function applySort(documents, sortBy, sortDir) {
   const comparator = getComparator(sortDir, sortBy);
 
-  const stabilizedThis = documents.map((el, index) => [el, index]);
+  const stabilizedThis = documents?.map((el, index) => [el, index]);
 
   stabilizedThis.sort((a, b) => {
     const newOrder = comparator(a[0], b[0]);

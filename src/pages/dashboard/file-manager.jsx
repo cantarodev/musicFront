@@ -180,7 +180,7 @@ const useItemsStore = (searchState, rucAccount) => {
   }, []);
 
   useEffect(() => {
-    if (searchState && rucAccount) {
+    if (searchState && String(rucAccount)?.trim()) {
       handleItemsGet();
     }
   }, [searchState, rucAccount]);
