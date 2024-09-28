@@ -56,5 +56,8 @@ export const tokens = {
     summary: 'nav.summary',
     purchases: 'nav.purchases',
     sales: 'nav.sales',
+    sunat: 'nav.sunat',
+    vouching: 'nav.vouching',
+    pdt621: 'nav.pdt621',
   },
 };

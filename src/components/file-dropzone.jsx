@@ -15,7 +15,7 @@ import SvgIcon from '@mui/material/SvgIcon';
 import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
 import toast from 'react-hot-toast';
-import { fileManagerApi } from 'src/api/file-manager/index';
+import { fileManagerApi } from 'src/api/file-manager/fileService';
 import { FileIcon } from 'src/components/file-icon';
 import { bytesToSize } from 'src/utils/bytes-to-size';
 import { useState } from 'react';
@@ -25,6 +25,7 @@ import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import InputLabel from '@mui/material/InputLabel';
 import { useSelector } from 'react-redux';
+import { LinearProgress } from '@mui/material';
 
 export const FileDropzone = (props) => {
   const {
@@ -64,7 +65,7 @@ export const FileDropzone = (props) => {
 
   const confirmUpload = async () => {
     setUploading(true);
-    console.log('Enviando los siguientes valores:');
+
     try {
       const formData = new FormData();
       formData.append('user_id', user?.user_id);
@@ -76,11 +77,11 @@ export const FileDropzone = (props) => {
       });
       const response = await fileManagerApi.createFile(formData);
 
-      if (response.status === 'SUCCESS') {
+      if (response.status === 'success') {
         toast.success(response.message, { duration: 3000, position: 'top-center' });
         onClose();
-        handleItemsGet();
         handleItemsTotalsGet();
+        handleItemsGet();
       }
 
       setUploading(false);
@@ -203,14 +204,6 @@ export const FileDropzone = (props) => {
       </Box>
       {hasAnyFiles && (
         <Box sx={{ mt: 2 }}>
-          {uploading && (
-            <Typography
-              variant="body2"
-              style={{ marginTop: '10px' }}
-            >
-              Subiendo archivos, por favor espera...
-            </Typography>
-          )}
           <List>
             {files.map((file) => {
               const extension = file.name.split('.').pop();
@@ -249,6 +242,25 @@ export const FileDropzone = (props) => {
               );
             })}
           </List>
+          {uploading && (
+            <Typography
+              variant="body1"
+              color="text.secondary"
+              style={{ marginTop: '10px' }}
+            >
+              <LinearProgress />
+            </Typography>
+          )}
+          {!uploading && showConfirmation && (
+            <Typography
+              variant="body1"
+              color="text.secondary"
+              style={{ marginTop: '10px' }}
+            >
+              ¿Estás seguro de subir PLE {type}, periodo {periodocpe}?
+            </Typography>
+          )}
+
           <Stack
             alignItems="center"
             direction="row"
@@ -258,58 +270,21 @@ export const FileDropzone = (props) => {
           >
             <Button
               color="inherit"
-              onClick={onRemoveAll}
+              onClick={showConfirmation ? cancelUpload : onRemoveAll}
               size="small"
               type="button"
             >
-              Eliminar todo
+              {showConfirmation ? 'Cancelar' : 'Eliminar todo'}
             </Button>
             <Button
-              onClick={handleUpload}
+              disa
+              onClick={showConfirmation ? confirmUpload : handleUpload}
               size="small"
               type="button"
               variant="contained"
-              disabled={!periodocpe || !type}
+              disabled={!periodocpe || !type || uploading}
             >
-              Subir
-            </Button>
-          </Stack>
-        </Box>
-      )}
-      {showConfirmation && (
-        <Box
-          sx={{
-            alignItems: 'center',
-            border: 1,
-            borderRadius: 1,
-            borderStyle: 'solid',
-            borderColor: 'primary.main',
-            p: 3,
-            mt: 2,
-            backgroundColor: 'background.paper',
-          }}
-        >
-          <Typography variant="h6">
-            ¿Estás seguro de subir PLE {type}, periodo {periodocpe}?
-          </Typography>
-          <Stack
-            direction="row"
-            spacing={2}
-            sx={{ mt: 2 }}
-          >
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={confirmUpload}
-            >
-              Confirmar
-            </Button>
-            <Button
-              variant="outlined"
-              color="secondary"
-              onClick={cancelUpload}
-            >
-              Cancelar
+              {showConfirmation ? 'Confirmar' : 'Subir'}
             </Button>
           </Stack>
         </Box>

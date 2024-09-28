@@ -39,7 +39,7 @@ const columnLabels = {
   tipoComprobante: 'Tipo Comprobante',
   numeroComprobante: 'Número Comprobante',
   moneda: 'Moneda',
-  mtoBIGravadaDG: 'B.I / Gravada',
+  mtoBIGravadaDG: 'Base Imponible',
   mtoBIGravadaDGNG: 'B.I / Gravada - No Grav.',
   mtoIgvIpmDGNG: 'IGV / Gravada - No Grav.',
   mtoBIGravadaDNG: 'B.I / No Gravada',
@@ -53,9 +53,10 @@ const columnLabels = {
   importe: 'Importe',
   importeSunat: 'Importe Sunat',
   tipoCambio: 'Tipo de Cambio',
-  resumen: 'Resumen General',
-  resumenTC: 'Resumen Tipo de Cambio',
-  resumenFactoring: 'Resumen Factoring',
+  observacion: 'Observación General',
+  observacionTC: 'Observación Tipo de Cambio',
+  observacionFactoring: 'Observación Factoring',
+  observacionIncons: 'Observación Incons.',
 };
 
 function descendingComparator(a, b, orderBy) {
@@ -95,7 +96,7 @@ export const PurchasesInconsistenciesDetails = (props) => {
     tipoComprobante: true,
     numeroComprobante: true,
     moneda: true,
-    mtoBIGravadaDG: false,
+    mtoBIGravadaDG: true,
     mtoBIGravadaDGNG: false,
     mtoIgvIpmDGNG: false,
     mtoBIGravadaDNG: false,
@@ -109,9 +110,10 @@ export const PurchasesInconsistenciesDetails = (props) => {
     importe: true,
     importeSunat: false,
     tipoCambio: true,
-    resumen: true,
-    resumenTC: true,
-    resumenFactoring: true,
+    observacion: true,
+    observacionTC: true,
+    observacionFactoring: true,
+    observacionIncons: true,
   });
   const [open, setOpen] = useState(false);
 
@@ -346,34 +348,6 @@ export const PurchasesInconsistenciesDetails = (props) => {
                     </Tooltip>
                   </TableCell>
                 )}
-                {columnVisibility.mtoBIGravadaDG && (
-                  <TableCell sx={{ textAlign: 'right' }}>
-                    <TableSortLabel
-                      active={orderBy === 'mtoBIGravadaDG'}
-                      direction={orderBy === 'mtoBIGravadaDG' ? order : 'asc'}
-                      onClick={() => handleRequestSort('mtoBIGravadaDG')}
-                    >
-                      <Tooltip
-                        title="B.I / Gravada"
-                        arrow
-                      >
-                        <Typography
-                          sx={{
-                            cursor: 'pointer',
-                            fontSize: 12,
-                            fontWeight: 'bold',
-                            whiteSpace: 'nowrap',
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis',
-                            maxWidth: '80px',
-                          }}
-                        >
-                          B.I / Gravada
-                        </Typography>
-                      </Tooltip>
-                    </TableSortLabel>
-                  </TableCell>
-                )}
                 {columnVisibility.mtoBIGravadaDGNG && (
                   <TableCell sx={{ textAlign: 'right' }}>
                     <Tooltip
@@ -550,6 +524,34 @@ export const PurchasesInconsistenciesDetails = (props) => {
                     </Tooltip>
                   </TableCell>
                 )}
+                {columnVisibility.mtoBIGravadaDG && (
+                  <TableCell sx={{ textAlign: 'right' }}>
+                    <TableSortLabel
+                      active={orderBy === 'mtoBIGravadaDG'}
+                      direction={orderBy === 'mtoBIGravadaDG' ? order : 'asc'}
+                      onClick={() => handleRequestSort('mtoBIGravadaDG')}
+                    >
+                      <Tooltip
+                        title="Base Imponible"
+                        arrow
+                      >
+                        <Typography
+                          sx={{
+                            cursor: 'pointer',
+                            fontSize: 12,
+                            fontWeight: 'bold',
+                            whiteSpace: 'nowrap',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            maxWidth: '80px',
+                          }}
+                        >
+                          B. Imponible
+                        </Typography>
+                      </Tooltip>
+                    </TableSortLabel>
+                  </TableCell>
+                )}
                 {columnVisibility.igv && (
                   <TableCell sx={{ textAlign: 'right' }}>
                     <TableSortLabel
@@ -639,7 +641,7 @@ export const PurchasesInconsistenciesDetails = (props) => {
                     </Tooltip>
                   </TableCell>
                 )}
-                {columnVisibility.resumen && (
+                {columnVisibility.observacion && (
                   <TableCell>
                     <Typography
                       sx={{
@@ -647,11 +649,11 @@ export const PurchasesInconsistenciesDetails = (props) => {
                         fontWeight: 'bold',
                       }}
                     >
-                      Resumen
+                      Observación
                     </Typography>
                   </TableCell>
                 )}
-                {columnVisibility.resumenTC && (
+                {columnVisibility.observacionTC && (
                   <TableCell>
                     <Typography
                       sx={{
@@ -659,11 +661,11 @@ export const PurchasesInconsistenciesDetails = (props) => {
                         fontWeight: 'bold',
                       }}
                     >
-                      Resumen Tipo de Cambio
+                      Observación Tipo de Cambio
                     </Typography>
                   </TableCell>
                 )}
-                {columnVisibility.resumenFactoring && (
+                {columnVisibility.observacionFactoring && (
                   <TableCell>
                     <Typography
                       sx={{
@@ -671,7 +673,19 @@ export const PurchasesInconsistenciesDetails = (props) => {
                         fontWeight: 'bold',
                       }}
                     >
-                      Resumen Factoring
+                      Observación Factoring
+                    </Typography>
+                  </TableCell>
+                )}
+                {columnVisibility.observacionIncons && (
+                  <TableCell>
+                    <Typography
+                      sx={{
+                        fontSize: 12,
+                        fontWeight: 'bold',
+                      }}
+                    >
+                      Observación Incons.
                     </Typography>
                   </TableCell>
                 )}
@@ -681,7 +695,7 @@ export const PurchasesInconsistenciesDetails = (props) => {
               {loading ? (
                 <TableRow>
                   <TableCell
-                    colSpan={24}
+                    colSpan={25}
                     align="center"
                     style={{ height: 200 }}
                   >
@@ -696,7 +710,7 @@ export const PurchasesInconsistenciesDetails = (props) => {
               ) : isEmpty ? (
                 <TableRow>
                   <TableCell
-                    colSpan={24}
+                    colSpan={25}
                     align="center"
                     style={{ height: 200 }}
                   >
@@ -783,16 +797,6 @@ export const PurchasesInconsistenciesDetails = (props) => {
                           <Typography sx={{ fontSize: 14 }}>{detail.codMoneda}</Typography>
                         </TableCell>
                       )}
-                      {columnVisibility.mtoBIGravadaDG && (
-                        <TableCell
-                          className="customTableCell"
-                          sx={{ textAlign: 'right' }}
-                        >
-                          <Typography sx={{ fontSize: 14 }}>
-                            {formatNumber(detail.mtoBIGravadaDG)}
-                          </Typography>
-                        </TableCell>
-                      )}
                       {columnVisibility.mtoBIGravadaDGNG && (
                         <TableCell
                           className="customTableCell"
@@ -873,6 +877,16 @@ export const PurchasesInconsistenciesDetails = (props) => {
                           </Typography>
                         </TableCell>
                       )}
+                      {columnVisibility.mtoBIGravadaDG && (
+                        <TableCell
+                          className="customTableCell"
+                          sx={{ textAlign: 'right' }}
+                        >
+                          <Typography sx={{ fontSize: 14 }}>
+                            {formatNumber(detail.mtoBIGravadaDG)}
+                          </Typography>
+                        </TableCell>
+                      )}
                       {columnVisibility.igv && (
                         <TableCell
                           className="customTableCell"
@@ -944,7 +958,7 @@ export const PurchasesInconsistenciesDetails = (props) => {
                           </Typography>
                         </TableCell>
                       )}
-                      {columnVisibility.resumen && (
+                      {columnVisibility.observacion && (
                         <TableCell className="customTableCell">
                           <Typography
                             sx={{
@@ -968,7 +982,7 @@ export const PurchasesInconsistenciesDetails = (props) => {
                           </Typography>
                         </TableCell>
                       )}
-                      {columnVisibility.resumenTC && (
+                      {columnVisibility.observacionTC && (
                         <TableCell className="customTableCell">
                           <Typography
                             sx={{
@@ -992,7 +1006,7 @@ export const PurchasesInconsistenciesDetails = (props) => {
                           </Typography>
                         </TableCell>
                       )}
-                      {columnVisibility.resumenFactoring && (
+                      {columnVisibility.observacionFactoring && (
                         <TableCell className="customTableCell">
                           <Typography
                             sx={{
@@ -1011,6 +1025,26 @@ export const PurchasesInconsistenciesDetails = (props) => {
                             {detail.observacion_factoring
                               ? detail.observacion_factoring
                               : 'Sin observaciones'}
+                          </Typography>
+                        </TableCell>
+                      )}
+                      {columnVisibility.observacionIncons && (
+                        <TableCell className="customTableCell">
+                          <Typography
+                            sx={{
+                              cursor: 'pointer',
+                              fontSize: 14,
+                              fontWeight: 'normal',
+                              whiteSpace: 'nowrap',
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                              '&:hover': {
+                                color: 'primary.main',
+                                cursor: 'pointer',
+                              },
+                            }}
+                          >
+                            {detail.observacion}
                           </Typography>
                         </TableCell>
                       )}
@@ -1040,11 +1074,6 @@ export const PurchasesInconsistenciesDetails = (props) => {
                   {columnVisibility.tipoComprobante && <TableCell></TableCell>}
                   {columnVisibility.numeroComprobante && <TableCell></TableCell>}
                   {columnVisibility.moneda && <TableCell></TableCell>}
-                  {columnVisibility.mtoBIGravadaDG && (
-                    <TableCell sx={{ textAlign: 'right', fontSize: 14, fontWeight: 600 }}>
-                      {totalSums.baseIGravadaDG.toLocaleString('en-US')}
-                    </TableCell>
-                  )}
                   {columnVisibility.mtoBIGravadaDGNG && (
                     <TableCell sx={{ textAlign: 'right', fontSize: 14, fontWeight: 600 }}>
                       {totalSums.baseIGravadaDGNG.toLocaleString('en-US')}
@@ -1061,6 +1090,11 @@ export const PurchasesInconsistenciesDetails = (props) => {
                   {columnVisibility.mtoISC && <TableCell></TableCell>}
                   {columnVisibility.mtoIcbp && <TableCell></TableCell>}
                   {columnVisibility.mtoOtrosTrib && <TableCell></TableCell>}
+                  {columnVisibility.mtoBIGravadaDG && (
+                    <TableCell sx={{ textAlign: 'right', fontSize: 14, fontWeight: 600 }}>
+                      {totalSums.baseIGravadaDG.toLocaleString('en-US')}
+                    </TableCell>
+                  )}
                   {columnVisibility.igv && (
                     <TableCell sx={{ textAlign: 'right', fontSize: 14, fontWeight: 600 }}>
                       {totalSums.igv.toLocaleString('en-US')}
@@ -1082,17 +1116,18 @@ export const PurchasesInconsistenciesDetails = (props) => {
                     </TableCell>
                   )}
                   {columnVisibility.tipoCambio && <TableCell></TableCell>}
-                  {columnVisibility.resumen && (
+                  {columnVisibility.observacion && (
                     <TableCell sx={{ textAlign: 'center', fontSize: 14, fontWeight: 600 }}>
-                      {totalSums.resumenGeneral}
+                      {totalSums.observacionGeneral}
                     </TableCell>
                   )}
-                  {columnVisibility.resumenTC && (
+                  {columnVisibility.observacionTC && (
                     <TableCell sx={{ textAlign: 'center', fontSize: 14, fontWeight: 600 }}>
-                      {totalSums.resumenTC}
+                      {totalSums.observacionTC}
                     </TableCell>
                   )}
-                  {columnVisibility.resumenFactoring && <TableCell></TableCell>}
+                  {columnVisibility.observacionFactoring && <TableCell></TableCell>}
+                  {columnVisibility.observacionIncons && <TableCell></TableCell>}
                 </TableRow>
               </TableFooter>
             )}

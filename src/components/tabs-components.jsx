@@ -47,6 +47,8 @@ const BasicTabs = ({ type }) => {
       >
         <Tab label="Home" />
         <Tab label="Sire" />
+        <Tab label="Notas Créd. Déb." />
+        <Tab label="Detracciones" />
       </Tabs>
 
       <TabPanel
@@ -65,6 +67,14 @@ const BasicTabs = ({ type }) => {
       >
         {type === 'Compras' ? <PurchasesSire type={type} /> : <SalesSire type={type} />}
       </TabPanel>
+      <TabPanel
+        value={value}
+        index={2}
+      ></TabPanel>
+      <TabPanel
+        value={value}
+        index={3}
+      ></TabPanel>
     </Box>
   );
 };

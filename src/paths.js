@@ -44,6 +44,9 @@ export const paths = {
       index: '/dashboard/analytics',
       purchases: '/dashboard/analytics/purchases',
       sales: '/dashboard/analytics/sales',
+      sunat: '/dashboard/analytics/sunat',
+      vouching: '/dashboard/analytics/vouching',
+      pdt621: '/dashboard/analytics/pdt621',
     },
     blank: '/dashboard/blank',
     blog: {

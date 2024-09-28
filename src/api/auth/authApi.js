@@ -3,10 +3,14 @@ import { handleResponse } from 'src/utils/api-utils';
 
 export const getUser = (email, password) => {
   return handleResponse(
-    apiClient.post('/user/info', {
-      email,
-      password,
-    })
+    apiClient.post(
+      '/user/info',
+      {
+        email,
+        password,
+      }
+      // { withCredentials: true }
+    )
   );
 };
 

@@ -1,5 +1,4 @@
 import PropTypes from 'prop-types';
-import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -7,82 +6,95 @@ import TablePagination from '@mui/material/TablePagination';
 
 import { Scrollbar } from 'src/components/scrollbar';
 
-import { ItemListCard } from './item-list-card';
 import { ItemListRow } from './item-list-row';
+import {
+  LinearProgress,
+  Paper,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Typography,
+} from '@mui/material';
 
 export const ItemList = (props) => {
   const {
+    setLoading,
     loading,
     count = 0,
     items = [],
     onDelete,
-    onFavorite,
-    onOpen,
     onPageChange = () => {},
     onRowsPerPageChange,
     page = 0,
     rowsPerPage = 0,
-    view = 'grid',
   } = props;
 
-  let content;
-
-  if (view === 'grid') {
-    content = (
-      <Box
-        sx={{
-          display: 'grid',
-          gap: 3,
-          gridTemplateColumns: 'repeat(3, 1fr)',
-        }}
-      >
-        {!loading &&
-          items.map((item) => (
-            <ItemListCard
-              key={item.id}
-              item={item}
-              onDelete={onDelete}
-              onFavorite={onFavorite}
-              onOpen={onOpen}
-            />
-          ))}
-      </Box>
-    );
-  } else {
-    // Negative margin is a fix for the box shadow. The virtual scrollbar cuts it.
-    content = (
-      <Box sx={{ m: -3 }}>
-        <Scrollbar>
-          <Box sx={{ p: 3 }}>
-            <Table
-              sx={{
-                minWidth: 600,
-                borderCollapse: 'separate',
-                borderSpacing: '0 8px',
-              }}
-            >
-              <TableBody>
-                {!loading &&
-                  items.map((item) => (
-                    <ItemListRow
-                      key={item._id}
-                      item={item}
-                      onDelete={onDelete}
-                      onFavorite={onFavorite}
-                      onOpen={onOpen}
-                    />
-                  ))}
-              </TableBody>
-            </Table>
-          </Box>
-        </Scrollbar>
-      </Box>
-    );
-  }
+  const isEmpty = items.length === 0;
 
   return (
     <Stack spacing={4}>
-      {content}
+      <Scrollbar>
+        <TableContainer component={Paper}>
+          <Table sx={{ minWidth: 700 }}>
+            <TableHead>
+              <TableRow>
+                <TableCell>Estado</TableCell>
+                <TableCell>Año</TableCell>
+                <TableCell>Mes</TableCell>
+                <TableCell>Nombre del archivo</TableCell>
+                <TableCell>Cantidad docs</TableCell>
+                <TableCell>Fecha subida del archivo / hora</TableCell>
+                <TableCell>Tamaño del archivo</TableCell>
+                <TableCell>Tipo de archivo</TableCell>
+                <TableCell align="right">Acciones</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {loading ? (
+                <TableRow>
+                  <TableCell
+                    colSpan={25}
+                    align="center"
+                    style={{ height: 200 }}
+                  >
+                    <Typography
+                      variant="body1"
+                      color="textSecondary"
+                    >
+                      <LinearProgress />
+                    </Typography>
+                  </TableCell>
+                </TableRow>
+              ) : isEmpty ? (
+                <TableRow>
+                  <TableCell
+                    colSpan={25}
+                    align="center"
+                    style={{ height: 200 }}
+                  >
+                    <Typography
+                      variant="body1"
+                      color="textSecondary"
+                    >
+                      No hay datos disponibles
+                    </Typography>
+                  </TableCell>
+                </TableRow>
+              ) : (
+                items.map((item) => (
+                  <ItemListRow
+                    setLoading={setLoading}
+                    key={item._id}
+                    item={item}
+                    onDelete={onDelete}
+                  />
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </Scrollbar>
       <TablePagination
         component="div"
         count={count}
@@ -97,6 +109,7 @@ export const ItemList = (props) => {
 };
 
 ItemList.propTypes = {
+  setLoading: PropTypes.func,
   bool: PropTypes.bool,
   items: PropTypes.array,
   count: PropTypes.number,

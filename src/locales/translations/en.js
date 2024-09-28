@@ -54,4 +54,7 @@ export const en = {
   [tokens.nav.summary]: 'Summary',
   [tokens.nav.purchases]: 'Purchases',
   [tokens.nav.sales]: 'Sales',
+  [tokens.nav.sunat]: 'SUNAT',
+  [tokens.nav.vouching]: 'Vouching',
+  [tokens.nav.pdt621]: 'PDT 621',
 };

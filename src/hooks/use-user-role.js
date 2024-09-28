@@ -6,7 +6,7 @@ const useUserRole = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const token = sessionStorage.getItem('accessToken');
+    const token = localStorage.getItem('accessToken');
 
     if (token) {
       try {

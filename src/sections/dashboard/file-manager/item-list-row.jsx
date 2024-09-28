@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -19,11 +19,24 @@ import Typography from '@mui/material/Typography';
 import { usePopover } from 'src/hooks/use-popover';
 import { bytesToSize } from 'src/utils/bytes-to-size';
 
-import { ItemIcon } from './item-icon';
 import { ItemMenu } from './item-menu';
+import { SeverityPill } from 'src/components/severity-pill';
+
+const getMonthInSpanish = (period) => {
+  const year = parseInt(period.substring(0, 4), 10);
+  const month = parseInt(period.substring(4, 6), 10);
+
+  const date = new Date(year, month - 1);
+
+  let monthName = format(date, 'MMMM', { locale: es });
+
+  monthName = monthName.charAt(0).toUpperCase() + monthName.slice(1);
+
+  return monthName;
+};
 
 export const ItemListRow = (props) => {
-  const { item, onDelete, onFavorite, onOpen } = props;
+  const { item, onDelete } = props;
   const popover = usePopover();
 
   const handleDelete = useCallback(() => {
@@ -33,103 +46,76 @@ export const ItemListRow = (props) => {
 
   let size = bytesToSize(item.size);
 
-  // if (item.type === 'folder') {
-  //   size += `• ${item.itemsCount} items`;
-  // }
-
-  // const createdAt = item.createdAt && format(item.createdAt, 'MMM dd, yyyy');
   const createDate = new Date(item.createdAt);
-  const createdAtFormat = createDate && format(createDate, 'MMMM dd, yyyy', { locale: es });
-  // const showShared = !item.isPublic && (item.shared || []).length > 0;
+  const createdAtFormat = createDate && format(createDate, 'MMMM dd, yyyy HH:mm', { locale: es });
+  const fieldYear = item.period && String(item.period).substring(0, 4);
+
+  const statusFormat =
+    item.cpe_validation_status === 'pending'
+      ? 'Pendiente'
+      : item.cpe_validation_status === 'validating'
+        ? 'Validando'
+        : 'Procesado';
+
+  const statusColor =
+    item.cpe_validation_status === 'pending'
+      ? 'warning'
+      : item.cpe_validation_status === 'validating'
+        ? 'info'
+        : 'success';
 
   return (
     <>
-      <TableRow
-        key={item._id}
-        sx={{
-          backgroundColor: 'transparent',
-          borderRadius: 1.5,
-          boxShadow: 0,
-          transition: (theme) =>
-            theme.transitions.create(['background-color', 'box-shadow'], {
-              easing: theme.transitions.easing.easeInOut,
-              duration: 200,
-            }),
-          '&:hover': {
-            backgroundColor: 'background.paper',
-            boxShadow: 16,
-          },
-          [`& .${tableCellClasses.root}`]: {
-            borderBottomWidth: 1,
-            borderBottomColor: 'divider',
-            borderBottomStyle: 'solid',
-            borderTopWidth: 1,
-            borderTopColor: 'divider',
-            borderTopStyle: 'solid',
-            '&:first-of-type': {
-              borderTopLeftRadius: (theme) => theme.shape.borderRadius * 1.5,
-              borderBottomLeftRadius: (theme) => theme.shape.borderRadius * 1.5,
-              borderLeftWidth: 1,
-              borderLeftColor: 'divider',
-              borderLeftStyle: 'solid',
-            },
-            '&:last-of-type': {
-              borderTopRightRadius: (theme) => theme.shape.borderRadius * 1.5,
-              borderBottomRightRadius: (theme) => theme.shape.borderRadius * 1.5,
-              borderRightWidth: 1,
-              borderRightColor: 'divider',
-              borderRightStyle: 'solid',
-            },
-          },
-        }}
-      >
+      <TableRow key={item._id}>
         <TableCell>
-          <Stack
-            alignItems="center"
-            direction="row"
-            spacing={2}
-          >
-            <Box
-              onClick={() => onOpen?.(item._id)}
-              sx={{ cursor: 'pointer' }}
-            >
-              <ItemIcon
-                type="file"
-                extension="txt"
-              />
-            </Box>
-            <div>
-              <Typography
-                noWrap
-                onClick={() => onOpen?.(item._id)}
-                sx={{ cursor: 'pointer' }}
-                variant="subtitle2"
-              >
-                {item.name}
-              </Typography>
-              <Typography
-                color="text.secondary"
-                noWrap
-                variant="body2"
-              >
-                {size}
-              </Typography>
-            </div>
-          </Stack>
+          <Typography variant="subtitle2">
+            <SeverityPill color={statusColor}>{statusFormat}</SeverityPill>
+          </Typography>
+        </TableCell>
+        <TableCell>
+          <Typography variant="subtitle2">{fieldYear}</Typography>
+        </TableCell>
+        <TableCell>
+          <Typography variant="subtitle2">{getMonthInSpanish(item.period)}</Typography>
         </TableCell>
         <TableCell>
           <Typography
             noWrap
             variant="subtitle2"
           >
-            Creado en
+            {item.name}
           </Typography>
+        </TableCell>
+        <TableCell>
           <Typography
-            color="text.secondary"
             noWrap
-            variant="body2"
+            variant="subtitle2"
+          >
+            {item.count > 1 ? item.count + ' documentos' : item.count + ' documento'}
+          </Typography>
+        </TableCell>
+        <TableCell>
+          <Typography
+            noWrap
+            variant="subtitle2"
           >
             {createdAtFormat.charAt(0).toUpperCase() + createdAtFormat.slice(1)}
+          </Typography>
+        </TableCell>
+        <TableCell>
+          <Typography
+            noWrap
+            variant="subtitle2"
+          >
+            {size}
+          </Typography>
+        </TableCell>
+        <TableCell>
+          <Typography
+            noWrap
+            variant="subtitle2"
+          >
+            {item.type.charAt(0).toUpperCase() + item.type.slice(1)}
           </Typography>
         </TableCell>
         <TableCell align="right">
@@ -147,6 +133,7 @@ export const ItemListRow = (props) => {
         anchorEl={popover.anchorRef.current}
         onClose={popover.handleClose}
         onDelete={handleDelete}
+        item={item}
         open={popover.open}
       />
     </>

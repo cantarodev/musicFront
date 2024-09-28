@@ -5,21 +5,21 @@ import Menu from '@mui/material/Menu';
 import MenuItem, { menuItemClasses } from '@mui/material/MenuItem';
 import SvgIcon from '@mui/material/SvgIcon';
 import SearchIcon from '@mui/icons-material/Search';
-import { PLESearchDialog } from 'src/sections/dashboard/file-manager/search-ple'; 
+import { PLESearchDialog } from 'src/sections/dashboard/file-manager/search-ple';
 
 import { useState } from 'react';
 import axios from 'axios';
-import { fileManagerApi } from 'src/api/file-manager';
+import { fileManagerApi } from 'src/api/file-manager/fileService';
 
 export const ItemMenu = (props) => {
   const { anchorEl, onClose, onDelete, item, open = false } = props;
-  
+
   // Estado para controlar la apertura del diálogo
   const [isDialogOpen, setDialogOpen] = useState(false);
   const [comprobante, setComprobante] = useState(''); // Estado para guardar el valor del comprobante
 
   const handleDownload = async () => {
-    console.log("ITEMDOWNLOAD---------------------------", item);
+    console.log('ITEMDOWNLOAD---------------------------', item);
     try {
       const response = await fileManagerApi.downloadFile({
         user_id: item?.user_id,
@@ -54,14 +54,14 @@ export const ItemMenu = (props) => {
   };
 
   const handleSearch = async (query) => {
-    console.log("ITEMSEARCH---------------------------", item);
+    console.log('ITEMSEARCH---------------------------', item);
     setComprobante(query); // Actualizar el valor del comprobante
     const request = {
       user_id: item?.user_id,
       file_id: item?._id,
       comprobante: query,
     };
-    console.log("Search Request: ", request);
+    console.log('Search Request: ', request);
     await fileManagerApi.searchComprobante(request); // Llamar a la búsqueda del comprobante
   };
 
@@ -116,8 +116,8 @@ export const ItemMenu = (props) => {
         open={isDialogOpen}
         onClose={handleCloseDialog}
         onSearch={handleSearch} // Pasar la función de búsqueda al diálogo
-        user_id={item?.user_id}  // Pasar user_id al hijo
-        file_id={item?._id}  // Pasar file_id al hijo
+        user_id={item?.user_id} // Pasar user_id al hijo
+        file_id={item?._id} // Pasar file_id al hijo
       />
     </>
   );

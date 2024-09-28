@@ -60,7 +60,7 @@ export const AuthProvider = (props) => {
 
   const initialize = useCallback(async () => {
     try {
-      const accessToken = window.sessionStorage.getItem(STORAGE_KEY);
+      const accessToken = window.localStorage.getItem(STORAGE_KEY);
 
       if (accessToken) {
         const user = await authApi.me({ accessToken });
@@ -104,7 +104,7 @@ export const AuthProvider = (props) => {
   const signIn = useCallback(
     async (email, password) => {
       const { accessToken } = await authApi.signIn({ email, password });
-      sessionStorage.setItem(STORAGE_KEY, accessToken);
+      localStorage.setItem(STORAGE_KEY, accessToken);
 
       const user = await authApi.me();
       dispatch({
@@ -132,7 +132,7 @@ export const AuthProvider = (props) => {
   );
 
   const signOut = useCallback(async () => {
-    sessionStorage.removeItem(STORAGE_KEY);
+    localStorage.removeItem(STORAGE_KEY);
     dispatch({ type: ActionType.SIGN_OUT });
   }, [dispatch]);
 

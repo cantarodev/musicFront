@@ -95,6 +95,7 @@
     "redux-thunk": "3.1.0",
     "simplebar-react": "3.2.6",
     "slick-carousel": "1.8.1",
+    "socket.io-client": "^4.8.0",
     "styled-components": "^6.1.13",
     "stylis": "4.3.4",
     "stylis-plugin-rtl": "2.1.1",

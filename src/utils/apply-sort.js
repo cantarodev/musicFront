@@ -1,12 +1,14 @@
 function descendingComparator(a, b, sortBy) {
   // When compared to something undefined, always returns false.
   // This means that if a field does not exist from either element ('a' or 'b') the return will be 0.
+  const valueA = sortBy === 'createdAt' ? new Date(a[sortBy]) : a[sortBy];
+  const valueB = sortBy === 'createdAt' ? new Date(b[sortBy]) : b[sortBy];
 
-  if (b[sortBy] < a[sortBy]) {
+  if (valueB < valueA) {
     return -1;
   }
 
-  if (b[sortBy] > a[sortBy]) {
+  if (valueB > valueA) {
     return 1;
   }
 
@@ -14,6 +16,8 @@ function descendingComparator(a, b, sortBy) {
 }
 
 function getComparator(sortDir, sortBy) {
+  console.log(sortDir);
+
   return sortDir === 'desc'
     ? (a, b) => descendingComparator(a, b, sortBy)
     : (a, b) => -descendingComparator(a, b, sortBy);
@@ -21,6 +25,7 @@ function getComparator(sortDir, sortBy) {
 
 export function applySort(documents, sortBy, sortDir) {
   const comparator = getComparator(sortDir, sortBy);
+
   const stabilizedThis = documents.map((el, index) => [el, index]);
 
   stabilizedThis.sort((a, b) => {

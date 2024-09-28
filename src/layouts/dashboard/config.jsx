@@ -80,6 +80,18 @@ export const useSections = () => {
                 title: t(tokens.nav.sales),
                 path: paths.dashboard.analytics.sales,
               },
+              {
+                title: t(tokens.nav.sunat),
+                path: paths.dashboard.analytics.sunat,
+              },
+              {
+                title: t(tokens.nav.vouching),
+                path: paths.dashboard.analytics.vouching,
+              },
+              {
+                title: t(tokens.nav.pdt621),
+                path: paths.dashboard.analytics.pdt621,
+              },
             ],
           },
           // {

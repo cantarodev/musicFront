@@ -52,7 +52,6 @@ const Page = ({ type }) => {
       });
 
       const data = response?.data;
-      console.log(data);
 
       setDetailsMain(data?.all_results);
       setDownloadPath(data?.download_path);

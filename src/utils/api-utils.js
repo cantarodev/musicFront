@@ -3,7 +3,9 @@ export const handleResponse = async (promise) => {
     const response = await promise;
     return response.data || response;
   } catch (error) {
-    console.error('API Error:', error);
-    throw new Error(error.response.data.message || error.message);
+    if (error?.response?.data) {
+      console.error('API Error:', error);
+      throw new Error(error?.response.data.message || error?.message);
+    }
   }
 };

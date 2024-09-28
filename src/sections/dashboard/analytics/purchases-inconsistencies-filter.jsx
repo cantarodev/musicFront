@@ -44,15 +44,6 @@ const searchCurrencyOptions = [
   { label: 'EUR - Euros', value: 'EUR' },
 ];
 
-// Agregamos las opciones de estados de Factoring
-const factoringStatusOptions = [
-  { label: 'No válido', value: 'No válido' },
-  { label: 'Pendiente', value: 'Pendiente' },
-  { label: 'Pendiente por reinicio', value: 'Pendiente por reinicio' },
-  { label: 'Subsanado', value: 'Subsanado' },
-  { label: 'Disconforme', value: 'Disconforme' },
-];
-
 const filterOptions = [
   { label: 'Todos', value: 'all' },
   { label: 'General', value: 'general' },
@@ -68,12 +59,26 @@ const filterOptions = [
       { label: 'Disconforme', value: 'Disconforme' },
     ],
   },
+  {
+    label: 'CPE',
+    value: 'cpe',
+    subOptions: [
+      { label: 'NO EXISTE', value: 'NO EXISTE' },
+      { label: 'ACEPTADO', value: 'ACEPTADO' },
+      { label: 'ANULADO', value: 'ANULADO' },
+      { label: 'AUTORIZADO', value: 'AUTORIZADO' },
+      { label: 'NO AUTORIZADO', value: 'NO AUTORIZADO' },
+    ],
+  },
+  { label: 'Inconsistencia', value: 'incons' },
 ];
 
 export const PurchasesInconsistenciesFilter = (props) => {
   const { selectedParams, setSelectedParams, loading, onLoadData } = props;
   const [selectedOptions, setSelectedOptions] = useState(['general']);
   const [selectedFactoringStatus, setSelectedFactoringStatus] = useState([]); // Para almacenar estados seleccionados
+  const [selectedSubValidation, setSelectedSubValidation] = useState('');
+  const [subValidations, setSubValidations] = useState([]);
   const [expanded, setExpanded] = useState({});
 
   const handleSelected = (event) => {
@@ -105,6 +110,12 @@ export const PurchasesInconsistenciesFilter = (props) => {
 
     setSelectedOptions(updatedSelection);
 
+    if (option.subOptions) {
+      setSubValidations(option.subOptions);
+    } else {
+      setSubValidations([]);
+    }
+
     setSelectedParams((state) => ({ ...state, ['filters']: updatedSelection }));
   };
 
@@ -118,6 +129,12 @@ export const PurchasesInconsistenciesFilter = (props) => {
         return [...prevSelected, subOption.value];
       }
     });
+  };
+
+  console.log('PARAMS:', subValidations);
+
+  const handleSubValidationChange = (event) => {
+    setSelectedSubValidation(event.target.value);
   };
 
   const renderValue = (selected) => {
@@ -314,6 +331,25 @@ export const PurchasesInconsistenciesFilter = (props) => {
           ))}
         </TextField>
 
+        {subValidations.length > 0 && (
+          <TextField
+            select
+            label="Sub-validaciones"
+            value={selectedSubValidation}
+            onChange={handleSubValidationChange}
+            fullWidth
+            sx={{ height: 54 }}
+          >
+            {subValidations.map((sub) => (
+              <MenuItem
+                key={sub.value}
+                value={sub.value}
+              >
+                {sub.label}
+              </MenuItem>
+            ))}
+          </TextField>
+        )}
         <Button
           fullWidth
           variant="contained"

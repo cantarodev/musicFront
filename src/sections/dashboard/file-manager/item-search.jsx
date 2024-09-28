@@ -12,108 +12,94 @@ import OutlinedInput from '@mui/material/OutlinedInput';
 import Stack from '@mui/material/Stack';
 import SvgIcon from '@mui/material/SvgIcon';
 import TextField from '@mui/material/TextField';
-import ToggleButton from '@mui/material/ToggleButton';
-import ToggleButtonGroup, { toggleButtonGroupClasses } from '@mui/material/ToggleButtonGroup';
 import { useDialog } from 'src/hooks/use-dialog'; // Importa el hook useDialog
 import { FileUploader } from 'src/sections/dashboard/file-manager/file-uploader'; // Importa el componente FileUploader
 
-import { fileManagerApi } from 'src/api/file-manager'; // Importa la API de gestión de archivos
-import toast from 'react-hot-toast'; // Para notificaciones
+const currentYear = new Date().getFullYear();
+const lastFiveYears = Array.from({ length: 5 }, (_, i) => currentYear - i);
 
 const sortOptions = [
   {
     label: 'El último',
-    value: 'desc',
+    value: 'createdAt|desc',
   },
   {
     label: 'Más antiguo',
-    value: 'asc',
+    value: 'createdAt|asc',
+  },
+];
+
+const typeOptions = [
+  {
+    label: 'Todo',
+    value: 'all',
+  },
+  {
+    label: 'Compras',
+    value: 'compras',
+  },
+  {
+    label: 'Ventas',
+    value: 'ventas',
   },
 ];
 
 export const ItemSearch = (props) => {
   const {
+    setLoading,
+    onFilterType,
+    onFilterYear,
     onFiltersChange,
     onSortChange,
-    onViewChange,
-    view = 'grid',
-    sortDir = 'asc',
-    user_id,
+    sortBy,
+    sortDir,
+    year,
+    type,
+    handleItemsTotalsGet,
+    handleItemsGet,
   } = props;
 
   const queryRef = useRef(null);
   const uploadDialog = useDialog(); // Hook para manejar el estado del diálogo de subida de archivos
 
-  const [state, setState] = useState({
-    items: [],
-    itemsCount: 0,
-  });
-
-  // Función para obtener los ítems
-  const handleItemsGet = useCallback(async () => {
-    try {
-      const response = await fileManagerApi.getFiles({
-        filters: {
-          query: queryRef.current?.value || '',
-        },
-        page: 0,
-        rowsPerPage: 9,
-        sortBy: 'createdAt',
-        sortDir: sortDir,
-        user_id: user_id,
-      });
-      setState({
-        items: response.data,
-        itemsCount: response.count,
-      });
-    } catch (err) {
-      console.error(err);
-    }
-  }, [sortDir, user_id]);
-
-  // Función para actualizar los totales de los ítems
-  const handleItemsTotalsGet = useCallback(async () => {
-    try {
-      const response = await fileManagerApi.getTotals({ user_id });
-      setState((prevState) => ({
-        ...prevState,
-        items: response,
-      }));
-    } catch (err) {
-      console.error(err);
-    }
-  }, [user_id]);
-
   const handleQueryChange = useCallback(
     (event) => {
       event.preventDefault();
+
       onFiltersChange?.({
         query: queryRef.current?.value || '',
       });
-      handleItemsGet(); // Actualiza los ítems al cambiar la consulta
     },
-    [onFiltersChange, handleItemsGet]
+    [onFiltersChange]
   );
 
   const handleSortChange = useCallback(
     (event) => {
-      const sortDir = event.target.value;
-      onSortChange?.(sortDir);
-      handleItemsGet(); // Actualiza los ítems al cambiar el orden
+      const [sortBy, sortDir] = event.target.value.split('|');
+
+      onSortChange?.({
+        sortBy,
+        sortDir,
+      });
     },
-    [onSortChange, handleItemsGet]
+    [onSortChange]
   );
 
-  const handleViewChange = useCallback(
-    (event, value) => {
-      onViewChange?.(value);
+  const handleYearSelected = useCallback(
+    (event) => {
+      const year = event.target.value;
+      onFilterYear?.(year);
     },
-    [onViewChange]
+    [year]
   );
 
-  useEffect(() => {
-    handleItemsGet();
-  }, [handleItemsGet]);
+  const handleTypeSelected = useCallback(
+    (event) => {
+      const type = event.target.value;
+      onFilterType?.(type);
+    },
+    [type]
+  );
 
   return (
     <Card>
@@ -145,45 +131,49 @@ export const ItemSearch = (props) => {
           />
         </Box>
         <Box sx={{ display: 'flex', columnGap: 1 }}>
-          <ToggleButtonGroup
-            exclusive
-            onChange={handleViewChange}
-            sx={{
-              borderWidth: 1,
-              borderColor: 'divider',
-              borderStyle: 'solid',
-              [`& .${toggleButtonGroupClasses.grouped}`]: {
-                margin: 0.5,
-                border: 0,
-                '&:not(:first-of-type)': {
-                  borderRadius: 1,
-                },
-                '&:first-of-type': {
-                  borderRadius: 1,
-                },
-              },
-            }}
-            value={view}
+          <TextField
+            label="Tipo"
+            name="type"
+            onChange={handleTypeSelected}
+            select
+            SelectProps={{ native: true }}
+            value={type}
+            sx={{ minWidth: 120 }} // Asegúrate de que el campo de selección sea compacto
           >
-            <ToggleButton value="grid">
-              <SvgIcon fontSize="small">
-                <Grid01Icon />
-              </SvgIcon>
-            </ToggleButton>
-            <ToggleButton value="list">
-              <SvgIcon fontSize="small">
-                <ListIcon />
-              </SvgIcon>
-            </ToggleButton>
-          </ToggleButtonGroup>
+            {typeOptions.map((option) => (
+              <option
+                key={option.value}
+                value={option.value}
+              >
+                {option.label}
+              </option>
+            ))}
+          </TextField>
+          <TextField
+            label="Año"
+            name="year"
+            onChange={handleYearSelected}
+            select
+            SelectProps={{ native: true }}
+            value={year}
+            sx={{ minWidth: 120 }} // Asegúrate de que el campo de selección sea compacto
+          >
+            {lastFiveYears.map((year) => (
+              <option
+                key={year}
+                value={year}
+              >
+                {year}
+              </option>
+            ))}
+          </TextField>
           <TextField
             label="Ordenar por"
             name="sort"
             onChange={handleSortChange}
             select
             SelectProps={{ native: true }}
-            value={sortDir}
-            sx={{ minWidth: 120 }} // Asegúrate de que el campo de selección sea compacto
+            value={`${sortBy}|${sortDir}`}
           >
             {sortOptions.map((option) => (
               <option
@@ -208,6 +198,7 @@ export const ItemSearch = (props) => {
         </Box>
       </Stack>
       <FileUploader
+        setLoading={setLoading}
         onClose={uploadDialog.handleClose} // Maneja el cierre del diálogo
         open={uploadDialog.open} // Estado del diálogo (abierto o cerrado)
         handleItemsTotalsGet={handleItemsTotalsGet} // Pasa la función para actualizar los totales
@@ -218,13 +209,17 @@ export const ItemSearch = (props) => {
 };
 
 ItemSearch.propTypes = {
+  onFilterType: PropTypes.func,
+  onFilterYear: PropTypes.func,
   onFiltersChange: PropTypes.func,
+  handleItemsTotalsGet: PropTypes.func,
+  handleItemsGet: PropTypes.func,
   onSortChange: PropTypes.func,
-  onViewChange: PropTypes.func,
+  setLoading: PropTypes.func,
   sortBy: PropTypes.string,
   sortDir: PropTypes.oneOf(['asc', 'desc']),
-  view: PropTypes.oneOf(['grid', 'list']),
-  user_id: PropTypes.string.isRequired,
+  year: PropTypes.string,
+  type: PropTypes.string,
 };
 
 export default ItemSearch;

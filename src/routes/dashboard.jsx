@@ -50,8 +50,11 @@ const SocialProfilePage = lazy(() => import('src/pages/dashboard/social/profile'
 
 // Analytic
 const AnalyticsSummaryPage = lazy(() => import('src/pages/dashboard/analytics/summary'));
-const AnalyticsBuyPage = lazy(() => import('src/pages/dashboard/analytics/purchases'));
-const AnalyticsSellPage = lazy(() => import('src/pages/dashboard/analytics/sales'));
+const AnalyticsPurchasesPage = lazy(() => import('src/pages/dashboard/analytics/purchases'));
+const AnalyticsSalesPage = lazy(() => import('src/pages/dashboard/analytics/sales'));
+const AnalyticsSunatPage = lazy(() => import('src/pages/dashboard/analytics/sunat'));
+const AnalyticsVouchingPage = lazy(() => import('src/pages/dashboard/analytics/vouching'));
+const AnalyticsPdt621Page = lazy(() => import('src/pages/dashboard/analytics/pdt621'));
 
 // Other
 const AccountPage = lazy(() => import('src/pages/dashboard/account'));
@@ -240,11 +243,23 @@ export const dashboardRoutes = [
           },
           {
             path: 'purchases',
-            element: <AnalyticsBuyPage />,
+            element: <AnalyticsPurchasesPage />,
           },
           {
             path: 'sales',
-            element: <AnalyticsSellPage />,
+            element: <AnalyticsSalesPage />,
+          },
+          {
+            path: 'sunat',
+            element: <AnalyticsSunatPage />,
+          },
+          {
+            path: 'vouching',
+            element: <AnalyticsVouchingPage />,
+          },
+          {
+            path: 'pdt621',
+            element: <AnalyticsPdt621Page />,
           },
         ],
       },

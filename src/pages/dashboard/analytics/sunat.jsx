@@ -116,7 +116,7 @@ const Page = () => {
             <Grid size={{ xs: 12, lg: 12 }}>
               <Card>
                 <CardContent sx={{ textAlign: 'center', fontSize: 24 }}>
-                  Mantenimiento KPIs
+                  Mantenimiento SUNAT
                 </CardContent>
               </Card>
             </Grid>

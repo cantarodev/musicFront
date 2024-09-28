@@ -16,43 +16,45 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 import Button from '@mui/material/Button';
-import { fileManagerApi } from 'src/api/file-manager';
+import { fileManagerApi } from 'src/api/file-manager/fileService';
 
 export const PLESearchDialog = (props) => {
-  const { onClose, open = false, onSearch, user_id, file_id } = props; 
+  const { onClose, open = false, onSearch, user_id, file_id } = props;
   const [query, setQuery] = useState('');
   const [results, setResults] = useState([]);
 
   const handleSearch = useCallback(async () => {
     if (query) {
       try {
-        console.log("QUERY PLE SEARCH COMPROBANTES :::::::::: ", query);
+        console.log('QUERY PLE SEARCH COMPROBANTES :::::::::: ', query);
 
         const response = await fileManagerApi.searchComprobante({
-          user_id: user_id,  
+          user_id: user_id,
           file_id: file_id,
           comprobante: query,
         });
 
-        console.log("RESPONSE ::::::: ", response);
+        console.log('RESPONSE ::::::: ', response);
 
         if (response.status === 'SUCCESS') {
-          const resultArray = Array.isArray(response.message) ? response.message : [response.message];
+          const resultArray = Array.isArray(response.message)
+            ? response.message
+            : [response.message];
           setResults(resultArray);
         } else {
           setResults([]); // No se encontraron resultados
         }
 
-        console.log("RESULT: ", response.message);
+        console.log('RESULT: ', response.message);
       } catch (error) {
-        console.error("Error fetching data:", error);
+        console.error('Error fetching data:', error);
         setResults([]); // Manejo de error
       }
     }
   }, [query, user_id, file_id]);
 
   const handleQueryChange = useCallback((event) => {
-    setQuery(event.target.value); 
+    setQuery(event.target.value);
   }, []);
 
   const handleDialogClose = useCallback(() => {
@@ -137,7 +139,10 @@ export const PLESearchDialog = (props) => {
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={5} align="center">
+                  <TableCell
+                    colSpan={5}
+                    align="center"
+                  >
                     No se encontraron resultados
                   </TableCell>
                 </TableRow>
@@ -153,7 +158,7 @@ export const PLESearchDialog = (props) => {
 PLESearchDialog.propTypes = {
   onClose: PropTypes.func,
   open: PropTypes.bool,
-  onSearch: PropTypes.func, 
-  user_id: PropTypes.string, 
-  file_id: PropTypes.string, 
+  onSearch: PropTypes.func,
+  user_id: PropTypes.string,
+  file_id: PropTypes.string,
 };

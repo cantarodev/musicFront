@@ -40,7 +40,7 @@ const columnLabels = {
   numeroComprobante: 'Número Comprobante',
   moneda: 'Moneda',
   mtoValFactExpo: 'Valor Exportación',
-  mtoBIGravada: 'B.I Gravada',
+  mtoBIGravada: 'Base Imponible',
   mtoDsctoBI: 'Desc. B.I Gravada',
   mtoDsctoIGV: 'Desc. IGV',
   mtoExonerado: 'Exonerado',
@@ -95,7 +95,7 @@ export const SalesInconsistenciesDetails = (props) => {
     numeroComprobante: true,
     moneda: true,
     mtoValFactExpo: false,
-    mtoBIGravada: false,
+    mtoBIGravada: true,
     mtoDsctoBI: false,
     mtoDsctoIGV: false,
     mtoExonerado: false,
@@ -347,37 +347,8 @@ export const SalesInconsistenciesDetails = (props) => {
                 )}
                 {columnVisibility.mtoValFactExpo && (
                   <TableCell sx={{ textAlign: 'right' }}>
-                    <TableSortLabel
-                      active={orderBy === 'mtoBIGravadaDG'}
-                      direction={orderBy === 'mtoBIGravadaDG' ? order : 'asc'}
-                      onClick={() => handleRequestSort('mtoBIGravadaDG')}
-                    >
-                      <Tooltip
-                        title="B.I / Gravada"
-                        arrow
-                      >
-                        <Typography
-                          sx={{
-                            cursor: 'pointer',
-                            fontSize: 12,
-                            fontWeight: 'bold',
-                            whiteSpace: 'nowrap',
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis',
-                            maxWidth: '80px',
-                          }}
-                        >
-                          Valor Exportación
-                        </Typography>
-                      </Tooltip>
-                    </TableSortLabel>
-                  </TableCell>
-                )}
-
-                {columnVisibility.mtoBIGravada && (
-                  <TableCell sx={{ textAlign: 'right' }}>
                     <Tooltip
-                      title="B.I / Gravada - No Grav."
+                      title="Valor Exportación"
                       arrow
                     >
                       <Typography
@@ -391,7 +362,7 @@ export const SalesInconsistenciesDetails = (props) => {
                           maxWidth: '80px',
                         }}
                       >
-                        B.I Gravada
+                        Valor Exportación
                       </Typography>
                     </Tooltip>
                   </TableCell>
@@ -399,7 +370,7 @@ export const SalesInconsistenciesDetails = (props) => {
                 {columnVisibility.mtoDsctoBI && (
                   <TableCell sx={{ textAlign: 'right' }}>
                     <Tooltip
-                      title="IGV / Gravada - No Grav."
+                      title="Desc. B.I Gravada"
                       arrow
                     >
                       <Typography
@@ -421,7 +392,7 @@ export const SalesInconsistenciesDetails = (props) => {
                 {columnVisibility.mtoDsctoIGV && (
                   <TableCell sx={{ textAlign: 'right' }}>
                     <Tooltip
-                      title="B.I / No Gravada"
+                      title="Desc. IGV"
                       arrow
                     >
                       <Typography
@@ -443,7 +414,7 @@ export const SalesInconsistenciesDetails = (props) => {
                 {columnVisibility.mtoExonerado && (
                   <TableCell sx={{ textAlign: 'right' }}>
                     <Tooltip
-                      title="IGV / No Gravada"
+                      title="Exonerado"
                       arrow
                     >
                       <Typography
@@ -465,7 +436,7 @@ export const SalesInconsistenciesDetails = (props) => {
                 {columnVisibility.mtoInafecto && (
                   <TableCell sx={{ textAlign: 'right' }}>
                     <Tooltip
-                      title="Adq. No Gravadas"
+                      title="Inafecto"
                       arrow
                     >
                       <Typography
@@ -527,6 +498,34 @@ export const SalesInconsistenciesDetails = (props) => {
                         Otros Tributos
                       </Typography>
                     </Tooltip>
+                  </TableCell>
+                )}
+                {columnVisibility.mtoBIGravada && (
+                  <TableCell sx={{ textAlign: 'right' }}>
+                    <TableSortLabel
+                      active={orderBy === 'mtoBIGravada'}
+                      direction={orderBy === 'mtoBIGravada' ? order : 'asc'}
+                      onClick={() => handleRequestSort('mtoBIGravada')}
+                    >
+                      <Tooltip
+                        title="Base Imponible"
+                        arrow
+                      >
+                        <Typography
+                          sx={{
+                            cursor: 'pointer',
+                            fontSize: 12,
+                            fontWeight: 'bold',
+                            whiteSpace: 'nowrap',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            maxWidth: '80px',
+                          }}
+                        >
+                          B. Imponible
+                        </Typography>
+                      </Tooltip>
+                    </TableSortLabel>
                   </TableCell>
                 )}
                 {columnVisibility.igv && (
@@ -1002,7 +1001,6 @@ export const SalesInconsistenciesDetails = (props) => {
                       {details.length}
                     </TableCell>
                   )}
-
                   {columnVisibility.ruc && <TableCell></TableCell>}
                   {columnVisibility.razonSocial && <TableCell></TableCell>}
                   {columnVisibility.fechaEmision && <TableCell></TableCell>}
@@ -1010,17 +1008,17 @@ export const SalesInconsistenciesDetails = (props) => {
                   {columnVisibility.numeroComprobante && <TableCell></TableCell>}
                   {columnVisibility.moneda && <TableCell></TableCell>}
                   {columnVisibility.mtoValFactExpo && <TableCell></TableCell>}
-                  {columnVisibility.mtoBIGravada && (
-                    <TableCell sx={{ textAlign: 'right', fontSize: 14, fontWeight: 600 }}>
-                      {totalSums.baseIGravada.toLocaleString('en-US')}
-                    </TableCell>
-                  )}
                   {columnVisibility.mtoDsctoBI && <TableCell></TableCell>}
                   {columnVisibility.mtoDsctoIGV && <TableCell></TableCell>}
                   {columnVisibility.mtoExonerado && <TableCell></TableCell>}
                   {columnVisibility.mtoInafecto && <TableCell></TableCell>}
                   {columnVisibility.mtoISC && <TableCell></TableCell>}
                   {columnVisibility.mtoOtrosTrib && <TableCell></TableCell>}
+                  {columnVisibility.mtoBIGravada && (
+                    <TableCell sx={{ textAlign: 'right', fontSize: 14, fontWeight: 600 }}>
+                      {totalSums.baseIGravada.toLocaleString('en-US')}
+                    </TableCell>
+                  )}
                   {columnVisibility.igv && (
                     <TableCell sx={{ textAlign: 'right', fontSize: 14, fontWeight: 600 }}>
                       {totalSums.igv.toLocaleString('en-US')}

@@ -1,19 +1,14 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import Upload01Icon from '@untitled-ui/icons-react/build/esm/Upload01';
-// import SearchIcon from '@untitled-ui/icons-react/build/esm/Search'; // Asegúrate de que esta ruta sea correcta
 import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
 import Container from '@mui/material/Container';
 import Grid from '@mui/material/Grid2';
 import Stack from '@mui/material/Stack';
-import SvgIcon from '@mui/material/SvgIcon';
 import Typography from '@mui/material/Typography';
 
-import { fileManagerApi } from 'src/api/file-manager';
+import { fileManagerApi } from 'src/api/file-manager/fileService';
 import { Seo } from 'src/components/seo';
 import { useDialog } from 'src/hooks/use-dialog';
 import { useMounted } from 'src/hooks/use-mounted';
-import { usePageView } from 'src/hooks/use-page-view';
 import { useSettings } from 'src/hooks/use-settings';
 import { FileUploader } from 'src/sections/dashboard/file-manager/file-uploader';
 import { ItemDrawer } from 'src/sections/dashboard/file-manager/item-drawer';
@@ -22,9 +17,17 @@ import { ItemSearch } from 'src/sections/dashboard/file-manager/item-search';
 import { StorageStats } from 'src/sections/dashboard/file-manager/storage-stats';
 import { useMockedUser } from 'src/hooks/use-mocked-user';
 import { PLESearchDialog } from 'src/sections/dashboard/file-manager/search-ple'; // Asegúrate de que la ruta sea correcta
-import { set } from 'nprogress';
 import toast from 'react-hot-toast';
 import { useSelector } from 'react-redux';
+
+import io from 'socket.io-client';
+import { usePageView } from 'src/hooks/use-page-view';
+
+const fullUrl = import.meta.env.VITE_API_URL;
+const url = new URL(fullUrl);
+const baseUrl = `${url.protocol}//${url.hostname}:${url.port}`;
+
+const socket = io(baseUrl);
 
 const useItemsSearch = (user_id, rucAccount) => {
   const [state, setState] = useState({
@@ -37,7 +40,23 @@ const useItemsSearch = (user_id, rucAccount) => {
     sortDir: 'desc',
     user_id: user_id,
     rucAccount,
+    year: new Date().getFullYear(),
+    type: 'all',
   });
+
+  const handleFilterType = useCallback((type) => {
+    setState((prevState) => ({
+      ...prevState,
+      type,
+    }));
+  }, []);
+
+  const handleFilterYear = useCallback((year) => {
+    setState((prevState) => ({
+      ...prevState,
+      year,
+    }));
+  }, []);
 
   const handleFiltersChange = useCallback((filters) => {
     setState((prevState) => ({
@@ -46,10 +65,11 @@ const useItemsSearch = (user_id, rucAccount) => {
     }));
   }, []);
 
-  const handleSortChange = useCallback((sortDir) => {
+  const handleSortChange = useCallback((sort) => {
     setState((prevState) => ({
       ...prevState,
-      sortDir,
+      sortBy: sort.sortBy,
+      sortDir: sort.sortDir,
     }));
   }, []);
 
@@ -68,6 +88,8 @@ const useItemsSearch = (user_id, rucAccount) => {
   }, []);
 
   return {
+    handleFilterType,
+    handleFilterYear,
     handleFiltersChange,
     handleSortChange,
     handlePageChange,
@@ -77,6 +99,7 @@ const useItemsSearch = (user_id, rucAccount) => {
 };
 
 const useItemsTotals = (user_id, rucAccount) => {
+  const isMounted = useMounted();
   const [state, setState] = useState({
     items: [],
   });
@@ -84,18 +107,18 @@ const useItemsTotals = (user_id, rucAccount) => {
   const handleItemsTotalsGet = useCallback(async () => {
     try {
       const response = await fileManagerApi.getTotals({ user_id, rucAccount });
-      setState({
-        items: response,
-      });
+
+      if (isMounted()) {
+        setState({
+          items: response.data,
+        });
+      }
     } catch (err) {
       console.error(err);
     }
-  }, [user_id, rucAccount]);
+  }, [user_id, rucAccount, isMounted]);
 
   useEffect(() => {
-    setState({
-      items: [],
-    });
     handleItemsTotalsGet();
   }, [rucAccount]);
 
@@ -106,16 +129,18 @@ const useItemsTotals = (user_id, rucAccount) => {
 };
 
 const useItemsStore = (searchState, rucAccount) => {
+  searchState['rucAccount'] = rucAccount;
+
   const isMounted = useMounted();
   const [state, setState] = useState({
     items: [],
     itemsCount: 0,
   });
-  const [params, setParams] = useState(searchState);
 
   const handleItemsGet = useCallback(async () => {
     try {
-      const response = await fileManagerApi.getFiles(params);
+      const response = await fileManagerApi.getFiles(searchState);
+
       if (isMounted()) {
         setState({
           items: response.data,
@@ -125,7 +150,7 @@ const useItemsStore = (searchState, rucAccount) => {
     } catch (err) {
       console.error(err);
     }
-  }, [params, isMounted]);
+  }, [searchState, isMounted]);
 
   const handleDelete = useCallback(async (itemId) => {
     try {
@@ -154,16 +179,12 @@ const useItemsStore = (searchState, rucAccount) => {
 
   useEffect(() => {
     handleItemsGet();
-  }, [params]);
-
-  useEffect(() => {
-    setParams((prev) => ({ ...prev, rucAccount: rucAccount }));
-  }, [rucAccount]);
+  }, [searchState, rucAccount]);
 
   return {
+    ...state,
     handleDelete,
     handleItemsGet,
-    ...state,
   };
 };
 
@@ -178,35 +199,54 @@ const useCurrentItem = (items, itemId) => {
 };
 
 const Page = () => {
+  const settings = useSettings();
+
   const user = useMockedUser();
   const selectedAccount = useSelector((state) => state.account);
-  const settings = useSettings();
+
   const itemsSearch = useItemsSearch(user?.user_id, selectedAccount);
   const itemsStore = useItemsStore(itemsSearch.state, selectedAccount);
-  const [view, setView] = useState('grid');
-  const uploadDialog = useDialog();
   const detailsDialog = useDialog();
   const pleSearchDialog = useDialog(); // Dialog state for PLE search
   const currentItem = useCurrentItem(itemsStore.items, detailsDialog.data);
   const totals = useItemsTotals(user?.user_id, selectedAccount);
   const [loading, setLoading] = useState(true);
+  const [status, setStatus] = useState('');
 
   const handleDelete = useCallback(
-    (itemId) => {
+    async (itemId) => {
+      setLoading(true);
       detailsDialog.handleClose();
-      itemsStore.handleDelete(itemId);
+      await itemsStore.handleDelete(itemId);
+      totals.handleItemsTotalsGet();
     },
     [detailsDialog, itemsStore]
   );
 
   useEffect(() => {
-    console.log('hola');
-
     setLoading(true);
     if (totals.items.length > 0) {
       setLoading(false);
     }
   }, [totals.items]);
+
+  useEffect(() => {
+    socket.emit('joinRoom', user?.user_id);
+
+    socket.on('status', (change) => {
+      setStatus(change);
+    });
+
+    return () => {
+      socket.off('status');
+    };
+  }, []);
+
+  useEffect(() => {
+    itemsStore.handleItemsGet();
+  }, [status]);
+
+  usePageView();
 
   return (
     <>
@@ -255,14 +295,20 @@ const Page = () => {
                   loading={loading}
                 />
                 <ItemSearch
+                  onFilterType={itemsSearch.handleFilterType}
+                  onFilterYear={itemsSearch.handleFilterYear}
                   onFiltersChange={itemsSearch.handleFiltersChange}
                   onSortChange={itemsSearch.handleSortChange}
-                  onViewChange={setView}
                   sortBy={itemsSearch.state.sortBy}
                   sortDir={itemsSearch.state.sortDir}
-                  view={view}
+                  year={itemsSearch.state.year}
+                  type={itemsSearch.state.type}
+                  loading={setLoading}
+                  handleItemsTotalsGet={totals.handleItemsTotalsGet}
+                  handleItemsGet={itemsStore.handleItemsGet}
                 />
                 <ItemList
+                  setLoading={setLoading}
                   count={itemsStore.itemsCount}
                   items={itemsStore.items}
                   onDelete={handleDelete}
@@ -272,7 +318,6 @@ const Page = () => {
                   onRowsPerPageChange={itemsSearch.handleRowsPerPageChange}
                   page={itemsSearch.state.page}
                   rowsPerPage={itemsSearch.state.rowsPerPage}
-                  view={view}
                   loading={loading}
                 />
               </Stack>
@@ -286,12 +331,6 @@ const Page = () => {
         onDelete={handleDelete}
         onFavorite={itemsStore.handleFavorite}
         open={detailsDialog.open}
-      />
-      <FileUploader
-        onClose={uploadDialog.handleClose}
-        open={uploadDialog.open}
-        handleItemsTotalsGet={totals.handleItemsTotalsGet}
-        handleItemsGet={itemsStore.handleItemsGet}
       />
       <PLESearchDialog
         onClose={pleSearchDialog.handleClose}
