@@ -119,7 +119,9 @@ const useItemsTotals = (user_id, rucAccount) => {
   }, [user_id, rucAccount, isMounted]);
 
   useEffect(() => {
-    handleItemsTotalsGet();
+    if (rucAccount) {
+      handleItemsTotalsGet();
+    }
   }, [rucAccount]);
 
   return {
@@ -178,7 +180,9 @@ const useItemsStore = (searchState, rucAccount) => {
   }, []);
 
   useEffect(() => {
-    handleItemsGet();
+    if (searchState && rucAccount) {
+      handleItemsGet();
+    }
   }, [searchState, rucAccount]);
 
   return {

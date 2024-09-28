@@ -218,7 +218,7 @@ ItemSearch.propTypes = {
   setLoading: PropTypes.func,
   sortBy: PropTypes.string,
   sortDir: PropTypes.oneOf(['asc', 'desc']),
-  year: PropTypes.string,
+  year: PropTypes.number,
   type: PropTypes.string,
 };
 
