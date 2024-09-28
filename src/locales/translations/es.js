@@ -57,4 +57,5 @@ export const es = {
   [tokens.nav.sunat]: 'SUNAT',
   [tokens.nav.vouching]: 'Vouching',
   [tokens.nav.pdt621]: 'PDT 621',
+  [tokens.nav.detractions]: 'Detracciones',
 };

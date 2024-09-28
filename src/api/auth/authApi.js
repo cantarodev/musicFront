@@ -2,6 +2,7 @@ import apiClient from '../apiClient';
 import { handleResponse } from 'src/utils/api-utils';
 
 export const getUser = (email, password) => {
+  console.log("META ENV: ", import.meta.env.VITE_API_URL);
   return handleResponse(
     apiClient.post(
       '/user/info',

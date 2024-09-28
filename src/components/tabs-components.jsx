@@ -7,6 +7,8 @@ import PurchasesSire from 'src/sections/dashboard/analytics/purchases-sire';
 import SalesInconsinstencies from 'src/sections/dashboard/analytics/sales-inconsistencies';
 import SalesSire from 'src/sections/dashboard/analytics/sales-sire';
 
+import PurchasesDetractions from 'src/sections/dashboard/analytics/detractions';
+
 const TabPanel = (props) => {
   const { children, value, index, ...other } = props;
 
@@ -74,7 +76,9 @@ const BasicTabs = ({ type }) => {
       <TabPanel
         value={value}
         index={3}
-      ></TabPanel>
+      >
+        {type === 'Compras' && <PurchasesDetractions type={type} />}
+      </TabPanel>
     </Box>
   );
 };

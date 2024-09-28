@@ -27,6 +27,31 @@ export const reportObservations = (
   );
 };
 
+export const getReportDetractions = (
+  user_id,
+  period,
+  queryType,
+  docType,
+  currency,
+  filters,
+  account,
+  ) => {
+  return handleResponse(
+    apiClient.post(
+      `/report/observations/detractions`, {
+        user_id,
+        period,
+        queryType,
+        docType,
+        currency,
+        filters,
+        account  
+      }
+    )
+  );
+};
+
+
 export const getReportMissings = (user_id, period, queryType, docType, currency, account) => {
   return handleResponse(
     apiClient.get(
