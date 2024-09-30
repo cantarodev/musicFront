@@ -75,10 +75,9 @@ const filterOptions = [
 
 export const PurchasesInconsistenciesFilter = (props) => {
   const { selectedParams, setSelectedParams, loading, onLoadData } = props;
-  const [selectedOptions, setSelectedOptions] = useState(['general']);
-  const [selectedFactoringStatus, setSelectedFactoringStatus] = useState([]); // Para almacenar estados seleccionados
-  const [selectedSubValidation, setSelectedSubValidation] = useState('');
-  const [subValidations, setSubValidations] = useState([]);
+  const [selectedOptions, setSelectedOptions] = useState({ general: [] });
+  const [selectedFactoringStatus, setSelectedFactoringStatus] = useState([]);
+  const [selectedCpeStatus, setSelectedCpeStatus] = useState([]);
   const [expanded, setExpanded] = useState({});
 
   const handleSelected = (event) => {
@@ -87,66 +86,134 @@ export const PurchasesInconsistenciesFilter = (props) => {
   };
 
   const handleSelectedOptions = (option) => {
-    let updatedSelection = [];
+    let updatedSelection = { ...selectedOptions };
+
+    // if (option.value === 'all') {
+    //   if (selectedOptions.includes('all')) {
+    //     updatedSelection = [];
+    //   } else {
+    //     updatedSelection = [
+    //       'all',
+    //       ...filterOptions.filter((opt) => opt.value !== 'all').map((opt) => opt.value),
+    //     ];
+    //   }
+    // } else {
+    //   updatedSelection = selectedOptions.includes(option.value)
+    //     ? selectedOptions.filter((item) => item !== option.value && item !== 'all')
+    //     : [...selectedOptions.filter((item) => item !== 'all'), option.value];
+
+    //   if (updatedSelection.length === filterOptions.length - 1) {
+    //     updatedSelection.push('all');
+    //   }
+    // }
+
+    // setSelectedOptions(updatedSelection);
 
     if (option.value === 'all') {
-      if (selectedOptions.includes('all')) {
-        updatedSelection = [];
+      // Si se selecciona "all", seleccionamos todas las opciones principales
+      if (Object.keys(updatedSelection).length === filterOptions.length) {
+        updatedSelection = {}; // Desmarcar todo
       } else {
-        updatedSelection = [
-          'all',
-          ...filterOptions.filter((opt) => opt.value !== 'all').map((opt) => opt.value),
-        ];
+        updatedSelection = filterOptions.reduce((acc, opt) => {
+          acc[opt.value] = []; // Todas las opciones seleccionadas
+          return acc;
+        }, {});
       }
+    } else if (selectedOptions[option.value]) {
+      // Si la opción ya está seleccionada, la eliminamos y sus subOptions
+      delete updatedSelection[option.value];
     } else {
-      updatedSelection = selectedOptions.includes(option.value)
-        ? selectedOptions.filter((item) => item !== option.value && item !== 'all')
-        : [...selectedOptions.filter((item) => item !== 'all'), option.value];
-
-      if (updatedSelection.length === filterOptions.length - 1) {
-        updatedSelection.push('all');
+      // Si es nueva, la añadimos y si tiene subOptions las marcamos todas
+      if (option.subOptions) {
+        updatedSelection[option.value] = option.subOptions.map((sub) => sub.value);
+      } else {
+        updatedSelection[option.value] = [];
       }
     }
-
     setSelectedOptions(updatedSelection);
-
-    if (option.subOptions) {
-      setSubValidations(option.subOptions);
-    } else {
-      setSubValidations([]);
-    }
-
     setSelectedParams((state) => ({ ...state, ['filters']: updatedSelection }));
   };
 
-  const handleSubOptionSelect = (subOption) => {
-    setSelectedFactoringStatus((prevSelected) => {
-      const alreadySelected = prevSelected.includes(subOption.value);
+  // const handleSubOptionSelect = (option, subOption) => {
+  //   if (option.value === 'facto') {
+  //     setSelectedFactoringStatus((prevSelected) => {
+  //       const alreadySelected = prevSelected.includes(subOption.value);
 
-      if (alreadySelected) {
-        return prevSelected.filter((val) => val !== subOption.value);
-      } else {
-        return [...prevSelected, subOption.value];
-      }
-    });
+  //       if (alreadySelected) {
+  //         return prevSelected.filter((val) => val !== subOption.value);
+  //       } else {
+  //         return [...prevSelected, subOption.value];
+  //       }
+  //     });
+  //   }
+
+  //   if (option.value === 'cpe') {
+  //     setSelectedCpeStatus((prevSelected) => {
+  //       const alreadySelected = prevSelected.includes(subOption.value);
+
+  //       if (alreadySelected) {
+  //         return prevSelected.filter((val) => val !== subOption.value);
+  //       } else {
+  //         return [...prevSelected, subOption.value];
+  //       }
+  //     });
+  //   }
+  // };
+
+  const handleSubOptionSelect = (parentOption, subOption) => {
+    const updatedSelection = { ...selectedOptions };
+
+    if (!updatedSelection[parentOption.value]) {
+      updatedSelection[parentOption.value] = [];
+    }
+
+    const subOptions = updatedSelection[parentOption.value];
+
+    if (subOptions.includes(subOption.value)) {
+      // Si ya está seleccionado, lo quitamos
+      updatedSelection[parentOption.value] = subOptions.filter((item) => item !== subOption.value);
+    } else {
+      // Lo añadimos si no está seleccionado
+      updatedSelection[parentOption.value].push(subOption.value);
+    }
+
+    // Si no quedan suboptions seleccionadas, desmarcamos la opción principal
+    if (updatedSelection[parentOption.value].length === 0) {
+      delete updatedSelection[parentOption.value];
+    }
+
+    setSelectedOptions(updatedSelection); // Actualizamos el estado con los subOptions
   };
 
-  console.log('PARAMS:', subValidations);
-
-  const handleSubValidationChange = (event) => {
-    setSelectedSubValidation(event.target.value);
-  };
+  // const renderValue = (selected) => {
+  //   if (selected.includes('all')) {
+  //     return 'Todos seleccionados';
+  //   }
+  //   if (selected.length > 2) {
+  //     return `${selected.length} seleccionados`;
+  //   }
+  //   return selected
+  //     .map((value) => filterOptions.find((opt) => opt.value === value)?.label)
+  //     .join(', ');
+  // };
 
   const renderValue = (selected) => {
     if (selected.includes('all')) {
       return 'Todos seleccionados';
     }
-    if (selected.length > 2) {
-      return `${selected.length} seleccionados`;
-    }
-    return selected
-      .map((value) => filterOptions.find((opt) => opt.value === value)?.label)
-      .join(', ');
+    const labels = selected.flatMap((option) => {
+      const parentOption = filterOptions.find((opt) => opt.value === option);
+      if (parentOption?.subOptions && selectedOptions[option].length > 0) {
+        return selectedOptions[option].map(
+          (subOption) =>
+            `${parentOption.label} - ${
+              parentOption.subOptions.find((sub) => sub.value === subOption)?.label
+            }`
+        );
+      }
+      return parentOption?.label || option;
+    });
+    return labels.join(', ');
   };
 
   const formatDate = (date) => {
@@ -165,10 +232,18 @@ export const PurchasesInconsistenciesFilter = (props) => {
   };
 
   const toggleSubMenu = (option) => {
-    setExpanded((prevExpanded) => ({
-      ...prevExpanded,
-      [option.value]: !prevExpanded[option.value],
-    }));
+    setExpanded((prevExpanded) => {
+      // Cerrar otros submenus
+      const newExpanded = Object.keys(prevExpanded).reduce((acc, key) => {
+        acc[key] = false;
+        return acc;
+      }, {});
+
+      // Abrir el submenu actual
+      newExpanded[option.value] = !prevExpanded[option.value];
+
+      return newExpanded;
+    });
   };
 
   useEffect(() => {
@@ -176,12 +251,13 @@ export const PurchasesInconsistenciesFilter = (props) => {
       ...state,
       filters: selectedOptions,
       factoringStatuses: selectedFactoringStatus,
+      cpeStatuses: selectedCpeStatus,
     }));
 
-    // Agregar console.log para validar los datos
     console.log('Filtros seleccionados: ', selectedOptions);
     console.log('Estados de Factoring seleccionados: ', selectedFactoringStatus);
-  }, [selectedOptions, selectedFactoringStatus, setSelectedParams]);
+  }, [selectedOptions, selectedFactoringStatus, selectedCpeStatus, setSelectedParams]);
+
   console.log('PARAMS', selectedParams);
 
   return (
@@ -275,11 +351,12 @@ export const PurchasesInconsistenciesFilter = (props) => {
               PaperProps: {
                 style: {
                   maxHeight: 600,
+                  width: 300,
                 },
               },
             },
           }}
-          value={selectedOptions}
+          value={Object.keys(selectedOptions)}
           onChange={() => {}}
           sx={{ height: 54 }}
         >
@@ -290,7 +367,7 @@ export const PurchasesInconsistenciesFilter = (props) => {
                 value={option.value}
                 onClick={() => handleSelectedOptions(option)}
               >
-                <Checkbox checked={selectedOptions.includes(option.value)} />
+                <Checkbox checked={selectedOptions[option.value] !== undefined} />
                 <ListItemText primary={option.label} />
                 {option.subOptions?.length > 0 && (
                   <IconButton
@@ -317,10 +394,12 @@ export const PurchasesInconsistenciesFilter = (props) => {
                     {option.subOptions.map((subOption) => (
                       <MenuItem
                         key={subOption.value}
-                        onClick={() => handleSubOptionSelect(subOption)}
+                        onClick={() => handleSubOptionSelect(option, subOption)}
                         sx={{ pl: 4 }} // Indent the subitems
                       >
-                        <Checkbox checked={selectedFactoringStatus.includes(subOption.value)} />
+                        <Checkbox
+                          checked={selectedOptions[option.value]?.includes(subOption.value)}
+                        />
                         <ListItemText primary={subOption.label} />
                       </MenuItem>
                     ))}
@@ -331,25 +410,6 @@ export const PurchasesInconsistenciesFilter = (props) => {
           ))}
         </TextField>
 
-        {subValidations.length > 0 && (
-          <TextField
-            select
-            label="Sub-validaciones"
-            value={selectedSubValidation}
-            onChange={handleSubValidationChange}
-            fullWidth
-            sx={{ height: 54 }}
-          >
-            {subValidations.map((sub) => (
-              <MenuItem
-                key={sub.value}
-                value={sub.value}
-              >
-                {sub.label}
-              </MenuItem>
-            ))}
-          </TextField>
-        )}
         <Button
           fullWidth
           variant="contained"
