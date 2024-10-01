@@ -92,10 +92,6 @@ export const useSections = () => {
                 title: t(tokens.nav.pdt621),
                 path: paths.dashboard.analytics.pdt621,
               },
-              {
-                title: t(tokens.nav.detractions),
-                path: paths.dashboard.analytics.detractions,
-              },
             ],
           },
           // {

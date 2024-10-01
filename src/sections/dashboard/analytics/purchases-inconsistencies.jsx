@@ -10,6 +10,7 @@ import axios from 'axios';
 import { useSelector } from 'react-redux';
 import { PurchasesInconsistenciesCards } from 'src/sections/dashboard/analytics/purchases-inconsistencies-cards';
 import { PurchasesInconsistenciesFilter } from './purchases-inconsistencies-filter';
+import toast from 'react-hot-toast';
 
 const Page = ({ type }) => {
   const selectedAccount = useSelector((state) => state.account);
@@ -54,8 +55,14 @@ const Page = ({ type }) => {
       });
 
       const data = response?.data;
+      if (data.status === 'failed') {
+        toast.error(response?.message, {
+          duration: 5000,
+          position: 'top-right',
+        });
+      }
 
-      setDetailsMain(data?.all_results);
+      setDetailsMain(data);
       setDownloadPath(data?.download_path);
       setLoading(false);
     } catch (err) {

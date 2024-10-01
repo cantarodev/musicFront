@@ -121,8 +121,6 @@ export const PurchasesInconsistenciesDetails = (props) => {
   const [order, setOrder] = useState('asc');
   const [orderBy, setOrderBy] = useState('mtoImporteTotal');
 
-  console.log('DETALLES:', details);
-
   const handleDialogOpen = () => {
     setOpen(true);
   };
@@ -907,11 +905,13 @@ export const PurchasesInconsistenciesDetails = (props) => {
                           sx={{ textAlign: 'right' }}
                         >
                           <Typography
-                            // sx={
-                            //   String(detail.observacion).includes('IGV', 'igv')
-                            //     ? { color: 'red' }
-                            //     : { color: 'inherit' }
-                            // }
+                            sx={
+                              detail.observacion['general'].some((obs) =>
+                                obs.includes('IGV', 'igv')
+                              )
+                                ? { color: 'red' }
+                                : { color: 'inherit' }
+                            }
                             style={{ fontSize: 14 }}
                           >
                             {formatNumber(detail.mtoIGV)}
@@ -934,11 +934,13 @@ export const PurchasesInconsistenciesDetails = (props) => {
                           sx={{ textAlign: 'right' }}
                         >
                           <Typography
-                            // sx={
-                            //   String(detail.observacion).includes('Importe')
-                            //     ? { color: 'red' }
-                            //     : { color: 'inherit' }
-                            // }
+                            sx={
+                              detail.observacion['general'].some((obs) =>
+                                obs.includes('Importe', 'importe')
+                              )
+                                ? { color: 'red' }
+                                : { color: 'inherit' }
+                            }
                             style={{ fontSize: 14 }}
                           >
                             {formatNumber(detail.mtoImporteTotal)}
@@ -962,11 +964,11 @@ export const PurchasesInconsistenciesDetails = (props) => {
                         >
                           <Typography
                             style={{ fontSize: 14 }}
-                            // sx={
-                            //   String(detail.observacion).includes('TC')
-                            //     ? { color: 'red' }
-                            //     : { color: 'inherit' }
-                            // }
+                            sx={
+                              detail.observacion['tc'].length > 0
+                                ? { color: 'red' }
+                                : { color: 'inherit' }
+                            }
                           >
                             {detail.mtoTipoCambio}
                           </Typography>
