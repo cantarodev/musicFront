@@ -44,15 +44,6 @@ const searchCurrencyOptions = [
   { label: 'EUR - Euros', value: 'EUR' },
 ];
 
-// Agregamos las opciones de estados de Factoring
-const factoringStatusOptions = [
-  { label: 'No válido', value: 'No válido' },
-  { label: 'Pendiente', value: 'Pendiente' },
-  { label: 'Pendiente por reinicio', value: 'Pendiente por reinicio' },
-  { label: 'Subsanado', value: 'Subsanado' },
-  { label: 'Disconforme', value: 'Disconforme' },
-];
-
 const filterOptions = [
   { label: 'Todos', value: 'all' },
   { label: 'General', value: 'general' },
@@ -68,12 +59,23 @@ const filterOptions = [
       { label: 'Disconforme', value: 'Disconforme' },
     ],
   },
+  {
+    label: 'CPE',
+    value: 'cpe',
+    subOptions: [
+      { label: 'NO EXISTE', value: 'NO EXISTE' },
+      { label: 'ACEPTADO', value: 'ACEPTADO' },
+      { label: 'ANULADO', value: 'ANULADO' },
+      { label: 'AUTORIZADO', value: 'AUTORIZADO' },
+      { label: 'NO AUTORIZADO', value: 'NO AUTORIZADO' },
+    ],
+  },
+  { label: 'Inconsistencia', value: 'incons' },
 ];
 
 export const SalesInconsistenciesFilter = (props) => {
   const { selectedParams, setSelectedParams, loading, onLoadData } = props;
-  const [selectedOptions, setSelectedOptions] = useState(['general']);
-  const [selectedFactoringStatus, setSelectedFactoringStatus] = useState([]); // Para almacenar estados seleccionados
+  const [selectedOptions, setSelectedOptions] = useState({ general: [] });
   const [expanded, setExpanded] = useState({});
 
   const handleSelected = (event) => {
@@ -82,54 +84,75 @@ export const SalesInconsistenciesFilter = (props) => {
   };
 
   const handleSelectedOptions = (option) => {
-    let updatedSelection = [];
+    let updatedSelection = { ...selectedOptions };
 
     if (option.value === 'all') {
-      if (selectedOptions.includes('all')) {
-        updatedSelection = [];
+      // Si se selecciona "all", seleccionamos todas las opciones principales
+      if (Object.keys(updatedSelection).length === filterOptions.length) {
+        updatedSelection = {}; // Desmarcar todo
       } else {
-        updatedSelection = [
-          'all',
-          ...filterOptions.filter((opt) => opt.value !== 'all').map((opt) => opt.value),
-        ];
+        updatedSelection = filterOptions.reduce((acc, opt) => {
+          acc[opt.value] = []; // Todas las opciones seleccionadas
+          return acc;
+        }, {});
       }
+    } else if (selectedOptions[option.value]) {
+      // Si la opción ya está seleccionada, la eliminamos y sus subOptions
+      delete updatedSelection[option.value];
     } else {
-      updatedSelection = selectedOptions.includes(option.value)
-        ? selectedOptions.filter((item) => item !== option.value && item !== 'all')
-        : [...selectedOptions.filter((item) => item !== 'all'), option.value];
-
-      if (updatedSelection.length === filterOptions.length - 1) {
-        updatedSelection.push('all');
+      // Si es nueva, la añadimos y si tiene subOptions las marcamos todas
+      if (option.subOptions) {
+        updatedSelection[option.value] = option.subOptions.map((sub) => sub.value);
+      } else {
+        updatedSelection[option.value] = [];
       }
     }
-
     setSelectedOptions(updatedSelection);
-
     setSelectedParams((state) => ({ ...state, ['filters']: updatedSelection }));
   };
 
-  const handleSubOptionSelect = (subOption) => {
-    setSelectedFactoringStatus((prevSelected) => {
-      const alreadySelected = prevSelected.includes(subOption.value);
+  const handleSubOptionSelect = (parentOption, subOption) => {
+    const updatedSelection = { ...selectedOptions };
 
-      if (alreadySelected) {
-        return prevSelected.filter((val) => val !== subOption.value);
-      } else {
-        return [...prevSelected, subOption.value];
-      }
-    });
+    if (!updatedSelection[parentOption.value]) {
+      updatedSelection[parentOption.value] = [];
+    }
+
+    const subOptions = updatedSelection[parentOption.value];
+
+    if (subOptions.includes(subOption.value)) {
+      // Si ya está seleccionado, lo quitamos
+      updatedSelection[parentOption.value] = subOptions.filter((item) => item !== subOption.value);
+    } else {
+      // Lo añadimos si no está seleccionado
+      updatedSelection[parentOption.value].push(subOption.value);
+    }
+
+    // Si no quedan suboptions seleccionadas, desmarcamos la opción principal
+    if (updatedSelection[parentOption.value].length === 0) {
+      delete updatedSelection[parentOption.value];
+    }
+
+    setSelectedOptions(updatedSelection); // Actualizamos el estado con los subOptions
   };
 
   const renderValue = (selected) => {
     if (selected.includes('all')) {
       return 'Todos seleccionados';
     }
-    if (selected.length > 2) {
-      return `${selected.length} seleccionados`;
-    }
-    return selected
-      .map((value) => filterOptions.find((opt) => opt.value === value)?.label)
-      .join(', ');
+    const labels = selected.flatMap((option) => {
+      const parentOption = filterOptions.find((opt) => opt.value === option);
+      if (parentOption?.subOptions && selectedOptions[option].length > 0) {
+        return selectedOptions[option].map(
+          (subOption) =>
+            `${parentOption.label} - ${
+              parentOption.subOptions.find((sub) => sub.value === subOption)?.label
+            }`
+        );
+      }
+      return parentOption?.label || option;
+    });
+    return labels.join(', ');
   };
 
   const formatDate = (date) => {
@@ -148,23 +171,29 @@ export const SalesInconsistenciesFilter = (props) => {
   };
 
   const toggleSubMenu = (option) => {
-    setExpanded((prevExpanded) => ({
-      ...prevExpanded,
-      [option.value]: !prevExpanded[option.value],
-    }));
+    setExpanded((prevExpanded) => {
+      // Cerrar otros submenus
+      const newExpanded = Object.keys(prevExpanded).reduce((acc, key) => {
+        acc[key] = false;
+        return acc;
+      }, {});
+
+      // Abrir el submenu actual
+      newExpanded[option.value] = !prevExpanded[option.value];
+
+      return newExpanded;
+    });
   };
 
   useEffect(() => {
     setSelectedParams((state) => ({
       ...state,
       filters: selectedOptions,
-      factoringStatuses: selectedFactoringStatus,
     }));
 
-    // Agregar console.log para validar los datos
     console.log('Filtros seleccionados: ', selectedOptions);
-    console.log('Estados de Factoring seleccionados: ', selectedFactoringStatus);
-  }, [selectedOptions, selectedFactoringStatus, setSelectedParams]);
+  }, [selectedOptions, setSelectedParams]);
+
   console.log('PARAMS', selectedParams);
 
   return (
@@ -258,11 +287,12 @@ export const SalesInconsistenciesFilter = (props) => {
               PaperProps: {
                 style: {
                   maxHeight: 600,
+                  width: 300,
                 },
               },
             },
           }}
-          value={selectedOptions}
+          value={Object.keys(selectedOptions)}
           onChange={() => {}}
           sx={{ height: 54 }}
         >
@@ -273,7 +303,7 @@ export const SalesInconsistenciesFilter = (props) => {
                 value={option.value}
                 onClick={() => handleSelectedOptions(option)}
               >
-                <Checkbox checked={selectedOptions.includes(option.value)} />
+                <Checkbox checked={selectedOptions[option.value] !== undefined} />
                 <ListItemText primary={option.label} />
                 {option.subOptions?.length > 0 && (
                   <IconButton
@@ -300,10 +330,12 @@ export const SalesInconsistenciesFilter = (props) => {
                     {option.subOptions.map((subOption) => (
                       <MenuItem
                         key={subOption.value}
-                        onClick={() => handleSubOptionSelect(subOption)}
+                        onClick={() => handleSubOptionSelect(option, subOption)}
                         sx={{ pl: 4 }} // Indent the subitems
                       >
-                        <Checkbox checked={selectedFactoringStatus.includes(subOption.value)} />
+                        <Checkbox
+                          checked={selectedOptions[option.value]?.includes(subOption.value)}
+                        />
                         <ListItemText primary={subOption.label} />
                       </MenuItem>
                     ))}

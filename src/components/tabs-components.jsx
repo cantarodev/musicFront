@@ -50,7 +50,7 @@ const BasicTabs = ({ type }) => {
         <Tab label="Home" />
         <Tab label="Sire" />
         <Tab label="Notas Créd. Déb." />
-        <Tab label="Detracciones" />
+        {type === 'Compras' && <Tab label="Detracciones" />}
       </Tabs>
 
       <TabPanel

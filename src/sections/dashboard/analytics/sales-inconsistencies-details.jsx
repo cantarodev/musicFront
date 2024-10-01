@@ -52,9 +52,11 @@ const columnLabels = {
   importe: 'Importe',
   importeSunat: 'Importe Sunat',
   tipoCambio: 'Tipo de Cambio',
-  resumen: 'Resumen General',
-  resumenTC: 'Resumen Tipo de Cambio',
-  resumenFactoring: 'Resumen Factoring',
+  observacion: 'Observación General',
+  observacionTC: 'Observación Tipo de Cambio',
+  observacionFactoring: 'Observación Factoring',
+  observacionIncons: 'Observación Incons.',
+  observacionCpe: 'Observación CPE',
 };
 
 function descendingComparator(a, b, orderBy) {
@@ -107,15 +109,17 @@ export const SalesInconsistenciesDetails = (props) => {
     importe: true,
     importeSunat: false,
     tipoCambio: true,
-    resumen: true,
-    resumenTC: true,
-    resumenFactoring: true,
+    observacion: true,
+    observacionTC: true,
+    observacionFactoring: true,
+    observacionIncons: true,
+    observacionCpe: true,
   });
   const [open, setOpen] = useState(false);
 
   const [order, setOrder] = useState('asc');
   const [orderBy, setOrderBy] = useState('mtoImporteTotal');
-
+  console.log('TOTAL SUMS:', totalSums);
   const handleDialogOpen = () => {
     setOpen(true);
   };
@@ -617,7 +621,7 @@ export const SalesInconsistenciesDetails = (props) => {
                     </Tooltip>
                   </TableCell>
                 )}
-                {columnVisibility.resumen && (
+                {columnVisibility.observacion && (
                   <TableCell>
                     <Typography
                       sx={{
@@ -625,11 +629,11 @@ export const SalesInconsistenciesDetails = (props) => {
                         fontWeight: 'bold',
                       }}
                     >
-                      Resumen
+                      Observación
                     </Typography>
                   </TableCell>
                 )}
-                {columnVisibility.resumenTC && (
+                {columnVisibility.observacionTC && (
                   <TableCell>
                     <Typography
                       sx={{
@@ -637,11 +641,11 @@ export const SalesInconsistenciesDetails = (props) => {
                         fontWeight: 'bold',
                       }}
                     >
-                      Resumen Tipo de Cambio
+                      Observación Tipo de Cambio
                     </Typography>
                   </TableCell>
                 )}
-                {columnVisibility.resumenFactoring && (
+                {columnVisibility.observacionFactoring && (
                   <TableCell>
                     <Typography
                       sx={{
@@ -649,7 +653,31 @@ export const SalesInconsistenciesDetails = (props) => {
                         fontWeight: 'bold',
                       }}
                     >
-                      Resumen Factoring
+                      Observación Factoring
+                    </Typography>
+                  </TableCell>
+                )}
+                {columnVisibility.observacionIncons && (
+                  <TableCell>
+                    <Typography
+                      sx={{
+                        fontSize: 12,
+                        fontWeight: 'bold',
+                      }}
+                    >
+                      Observación Incons.
+                    </Typography>
+                  </TableCell>
+                )}
+                {columnVisibility.observacionCpe && (
+                  <TableCell>
+                    <Typography
+                      sx={{
+                        fontSize: 12,
+                        fontWeight: 'bold',
+                      }}
+                    >
+                      Observación CPE.
                     </Typography>
                   </TableCell>
                 )}
@@ -659,7 +687,7 @@ export const SalesInconsistenciesDetails = (props) => {
               {loading ? (
                 <TableRow>
                   <TableCell
-                    colSpan={24}
+                    colSpan={26}
                     align="center"
                     style={{ height: 200 }}
                   >
@@ -674,7 +702,7 @@ export const SalesInconsistenciesDetails = (props) => {
               ) : isEmpty ? (
                 <TableRow>
                   <TableCell
-                    colSpan={24}
+                    colSpan={26}
                     align="center"
                     style={{ height: 200 }}
                   >
@@ -848,7 +876,9 @@ export const SalesInconsistenciesDetails = (props) => {
                         >
                           <Typography
                             sx={
-                              String(detail.observacion).includes('IGV', 'igv')
+                              detail.observacion['general'].some((obs) =>
+                                obs.includes('IGV', 'igv')
+                              )
                                 ? { color: 'red' }
                                 : { color: 'inherit' }
                             }
@@ -875,7 +905,9 @@ export const SalesInconsistenciesDetails = (props) => {
                         >
                           <Typography
                             sx={
-                              String(detail.observacion).includes('Importe')
+                              detail.observacion['general'].some((obs) =>
+                                obs.includes('Importe', 'importe')
+                              )
                                 ? { color: 'red' }
                                 : { color: 'inherit' }
                             }
@@ -903,7 +935,7 @@ export const SalesInconsistenciesDetails = (props) => {
                           <Typography
                             style={{ fontSize: 14 }}
                             sx={
-                              String(detail.observacion).includes('TC')
+                              detail.observacion['tc'].length > 0
                                 ? { color: 'red' }
                                 : { color: 'inherit' }
                             }
@@ -912,7 +944,7 @@ export const SalesInconsistenciesDetails = (props) => {
                           </Typography>
                         </TableCell>
                       )}
-                      {columnVisibility.resumen && (
+                      {columnVisibility.observacion && (
                         <TableCell className="customTableCell">
                           <Typography
                             sx={{
@@ -922,21 +954,29 @@ export const SalesInconsistenciesDetails = (props) => {
                               whiteSpace: 'nowrap',
                               overflow: 'hidden',
                               textOverflow: 'ellipsis',
-                              '&:hover': {
-                                color: 'primary.main',
-                                cursor: 'pointer',
-                              },
                             }}
-                            onClick={() => handleOpen(detail)}
                           >
-                            {String(detail.observacion)
-                              .replace(/Valor TC: [\d.]+ \(debería ser [\d.]+\)\.?/, '')
-                              .trim()
-                              .replace(/\.$/, '')}
+                            {detail.observacion['general'].length > 0 ? (
+                              <Typography
+                                color="text.secondary"
+                                fontWeight="bold"
+                                sx={{
+                                  cursor: 'pointer',
+                                  '&:hover': {
+                                    color: 'primary.main',
+                                  },
+                                }}
+                                onClick={() => handleOpen(detail.observacion['general'].join('. '))}
+                              >
+                                {detail.observacion['general'].join('. ')}
+                              </Typography>
+                            ) : (
+                              'Sin observaciones'
+                            )}
                           </Typography>
                         </TableCell>
                       )}
-                      {columnVisibility.resumenTC && (
+                      {columnVisibility.observacionTC && (
                         <TableCell className="customTableCell">
                           <Typography
                             sx={{
@@ -946,21 +986,29 @@ export const SalesInconsistenciesDetails = (props) => {
                               whiteSpace: 'nowrap',
                               overflow: 'hidden',
                               textOverflow: 'ellipsis',
-                              '&:hover': {
-                                color: 'primary.main',
-                                cursor: 'pointer',
-                              },
                             }}
-                            onClick={() => handleOpen(detail, 'TC')}
                           >
-                            {String(detail.observacion).includes('TC') &&
-                              String(detail.observacion).match(
-                                /Valor TC: [\d.]+ \(debería ser [\d.]+\)/
-                              )[0]}
+                            {detail.observacion['tc'].length > 0 ? (
+                              <Typography
+                                color="text.secondary"
+                                fontWeight="bold"
+                                sx={{
+                                  cursor: 'pointer',
+                                  '&:hover': {
+                                    color: 'primary.main',
+                                  },
+                                }}
+                                onClick={() => handleOpen(detail.observacion['tc'].join('. '))}
+                              >
+                                {detail.observacion['tc'].join('. ')}
+                              </Typography>
+                            ) : (
+                              'Sin observaciones'
+                            )}
                           </Typography>
                         </TableCell>
                       )}
-                      {columnVisibility.resumenFactoring && (
+                      {columnVisibility.observacionFactoring && (
                         <TableCell className="customTableCell">
                           <Typography
                             sx={{
@@ -970,15 +1018,84 @@ export const SalesInconsistenciesDetails = (props) => {
                               whiteSpace: 'nowrap',
                               overflow: 'hidden',
                               textOverflow: 'ellipsis',
-                              '&:hover': {
-                                color: 'primary.main',
-                                cursor: 'pointer',
-                              },
                             }}
                           >
-                            {detail.observacion_factoring
-                              ? detail.observacion_factoring
-                              : 'Sin observaciones'}
+                            {detail.observacion['facto'].length > 0 ? (
+                              <Typography
+                                color="text.secondary"
+                                fontWeight="bold"
+                                sx={{
+                                  cursor: 'pointer',
+                                  '&:hover': {
+                                    color: 'primary.main',
+                                  },
+                                }}
+                              >
+                                {detail.observacion['facto'].join('. ')}
+                              </Typography>
+                            ) : (
+                              'Sin observaciones'
+                            )}
+                          </Typography>
+                        </TableCell>
+                      )}
+                      {columnVisibility.observacionIncons && (
+                        <TableCell className="customTableCell">
+                          <Typography
+                            sx={{
+                              fontSize: 14,
+                              fontWeight: 'normal',
+                              whiteSpace: 'nowrap',
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                            }}
+                          >
+                            {detail.observacion['incons'].length > 0 ? (
+                              <Typography
+                                color="text.secondary"
+                                fontWeight="bold"
+                                sx={{
+                                  cursor: 'pointer',
+                                  '&:hover': {
+                                    color: 'primary.main',
+                                  },
+                                }}
+                              >
+                                {detail.observacion['incons'].join('. ')}
+                              </Typography>
+                            ) : (
+                              'Sin observaciones'
+                            )}
+                          </Typography>
+                        </TableCell>
+                      )}
+                      {columnVisibility.observacionCpe && (
+                        <TableCell className="customTableCell">
+                          <Typography
+                            sx={{
+                              fontSize: 14,
+                              fontWeight: 'normal',
+                              whiteSpace: 'nowrap',
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                            }}
+                          >
+                            {detail.observacion['cpe'].length > 0 ? (
+                              <Typography
+                                color="text.secondary"
+                                fontWeight="bold"
+                                sx={{
+                                  cursor: 'pointer',
+                                  '&:hover': {
+                                    color: 'primary.main',
+                                  },
+                                }}
+                              >
+                                {detail.observacion['cpe'].join('. ')}
+                              </Typography>
+                            ) : (
+                              'Sin observaciones'
+                            )}
                           </Typography>
                         </TableCell>
                       )}
@@ -1040,17 +1157,31 @@ export const SalesInconsistenciesDetails = (props) => {
                     </TableCell>
                   )}
                   {columnVisibility.tipoCambio && <TableCell></TableCell>}
-                  {columnVisibility.resumen && (
+                  {columnVisibility.observacion && (
                     <TableCell sx={{ textAlign: 'center', fontSize: 14, fontWeight: 600 }}>
-                      {totalSums.resumenGeneral}
+                      {totalSums.observacionGeneral}
                     </TableCell>
                   )}
-                  {columnVisibility.resumenTC && (
+                  {columnVisibility.observacionTC && (
                     <TableCell sx={{ textAlign: 'center', fontSize: 14, fontWeight: 600 }}>
-                      {totalSums.resumenTC}
+                      {totalSums.observacionTC}
                     </TableCell>
                   )}
-                  {columnVisibility.resumenFactoring && <TableCell></TableCell>}
+                  {columnVisibility.observacionFactoring && (
+                    <TableCell sx={{ textAlign: 'center', fontSize: 14, fontWeight: 600 }}>
+                      {totalSums.observacionFacto}
+                    </TableCell>
+                  )}
+                  {columnVisibility.observacionIncons && (
+                    <TableCell sx={{ textAlign: 'center', fontSize: 14, fontWeight: 600 }}>
+                      {totalSums.observacionIncons}
+                    </TableCell>
+                  )}
+                  {columnVisibility.observacionCpe && (
+                    <TableCell sx={{ textAlign: 'center', fontSize: 14, fontWeight: 600 }}>
+                      {totalSums.observacionCpe}
+                    </TableCell>
+                  )}
                 </TableRow>
               </TableFooter>
             )}

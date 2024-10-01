@@ -57,7 +57,7 @@ const columnLabels = {
   observacionTC: 'Observación Tipo de Cambio',
   observacionFactoring: 'Observación Factoring',
   observacionIncons: 'Observación Incons.',
-  observacionCpe: 'Observación CPE.',
+  observacionCpe: 'Observación CPE',
 };
 
 function descendingComparator(a, b, orderBy) {
@@ -1204,9 +1204,21 @@ export const PurchasesInconsistenciesDetails = (props) => {
                       {totalSums.observacionTC}
                     </TableCell>
                   )}
-                  {columnVisibility.observacionFactoring && <TableCell></TableCell>}
-                  {columnVisibility.observacionIncons && <TableCell></TableCell>}
-                  {columnVisibility.observacionCpe && <TableCell></TableCell>}
+                  {columnVisibility.observacionFactoring && (
+                    <TableCell sx={{ textAlign: 'center', fontSize: 14, fontWeight: 600 }}>
+                      {totalSums.observacionFacto}
+                    </TableCell>
+                  )}
+                  {columnVisibility.observacionIncons && (
+                    <TableCell sx={{ textAlign: 'center', fontSize: 14, fontWeight: 600 }}>
+                      {totalSums.observacionIncons}
+                    </TableCell>
+                  )}
+                  {columnVisibility.observacionCpe && (
+                    <TableCell sx={{ textAlign: 'center', fontSize: 14, fontWeight: 600 }}>
+                      {totalSums.observacionCpe}
+                    </TableCell>
+                  )}
                 </TableRow>
               </TableFooter>
             )}

@@ -76,8 +76,6 @@ const filterOptions = [
 export const PurchasesInconsistenciesFilter = (props) => {
   const { selectedParams, setSelectedParams, loading, onLoadData } = props;
   const [selectedOptions, setSelectedOptions] = useState({ general: [] });
-  const [selectedFactoringStatus, setSelectedFactoringStatus] = useState([]);
-  const [selectedCpeStatus, setSelectedCpeStatus] = useState([]);
   const [expanded, setExpanded] = useState({});
 
   const handleSelected = (event) => {
@@ -87,27 +85,6 @@ export const PurchasesInconsistenciesFilter = (props) => {
 
   const handleSelectedOptions = (option) => {
     let updatedSelection = { ...selectedOptions };
-
-    // if (option.value === 'all') {
-    //   if (selectedOptions.includes('all')) {
-    //     updatedSelection = [];
-    //   } else {
-    //     updatedSelection = [
-    //       'all',
-    //       ...filterOptions.filter((opt) => opt.value !== 'all').map((opt) => opt.value),
-    //     ];
-    //   }
-    // } else {
-    //   updatedSelection = selectedOptions.includes(option.value)
-    //     ? selectedOptions.filter((item) => item !== option.value && item !== 'all')
-    //     : [...selectedOptions.filter((item) => item !== 'all'), option.value];
-
-    //   if (updatedSelection.length === filterOptions.length - 1) {
-    //     updatedSelection.push('all');
-    //   }
-    // }
-
-    // setSelectedOptions(updatedSelection);
 
     if (option.value === 'all') {
       // Si se selecciona "all", seleccionamos todas las opciones principales
@@ -134,32 +111,6 @@ export const PurchasesInconsistenciesFilter = (props) => {
     setSelectedParams((state) => ({ ...state, ['filters']: updatedSelection }));
   };
 
-  // const handleSubOptionSelect = (option, subOption) => {
-  //   if (option.value === 'facto') {
-  //     setSelectedFactoringStatus((prevSelected) => {
-  //       const alreadySelected = prevSelected.includes(subOption.value);
-
-  //       if (alreadySelected) {
-  //         return prevSelected.filter((val) => val !== subOption.value);
-  //       } else {
-  //         return [...prevSelected, subOption.value];
-  //       }
-  //     });
-  //   }
-
-  //   if (option.value === 'cpe') {
-  //     setSelectedCpeStatus((prevSelected) => {
-  //       const alreadySelected = prevSelected.includes(subOption.value);
-
-  //       if (alreadySelected) {
-  //         return prevSelected.filter((val) => val !== subOption.value);
-  //       } else {
-  //         return [...prevSelected, subOption.value];
-  //       }
-  //     });
-  //   }
-  // };
-
   const handleSubOptionSelect = (parentOption, subOption) => {
     const updatedSelection = { ...selectedOptions };
 
@@ -184,18 +135,6 @@ export const PurchasesInconsistenciesFilter = (props) => {
 
     setSelectedOptions(updatedSelection); // Actualizamos el estado con los subOptions
   };
-
-  // const renderValue = (selected) => {
-  //   if (selected.includes('all')) {
-  //     return 'Todos seleccionados';
-  //   }
-  //   if (selected.length > 2) {
-  //     return `${selected.length} seleccionados`;
-  //   }
-  //   return selected
-  //     .map((value) => filterOptions.find((opt) => opt.value === value)?.label)
-  //     .join(', ');
-  // };
 
   const renderValue = (selected) => {
     if (selected.includes('all')) {
@@ -250,13 +189,10 @@ export const PurchasesInconsistenciesFilter = (props) => {
     setSelectedParams((state) => ({
       ...state,
       filters: selectedOptions,
-      factoringStatuses: selectedFactoringStatus,
-      cpeStatuses: selectedCpeStatus,
     }));
 
     console.log('Filtros seleccionados: ', selectedOptions);
-    console.log('Estados de Factoring seleccionados: ', selectedFactoringStatus);
-  }, [selectedOptions, selectedFactoringStatus, selectedCpeStatus, setSelectedParams]);
+  }, [selectedOptions, setSelectedParams]);
 
   console.log('PARAMS', selectedParams);
 
