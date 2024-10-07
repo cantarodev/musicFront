@@ -31,7 +31,7 @@ class FileManagerApi {
     console.log(filters);
 
     if (typeof filters !== 'undefined') {
-      data = data.filter((file) => {
+      data = data?.filter((file) => {
         if (typeof filters.query !== 'undefined' && filters.query !== '') {
           const matched = file.name.toLowerCase().includes(filters.query.toLowerCase());
 

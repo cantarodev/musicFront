@@ -10,6 +10,7 @@ import axios from 'axios';
 import { useSelector } from 'react-redux';
 import { SalesInconsistenciesCards } from 'src/sections/dashboard/analytics/sales-inconsistencies-cards';
 import { SalesInconsistenciesFilter } from './sales-inconsistencies-filter';
+import toast from 'react-hot-toast';
 
 const Page = ({ type }) => {
   const selectedAccount = useSelector((state) => state.account);
@@ -36,8 +37,11 @@ const Page = ({ type }) => {
     igvSunat: 0.0,
     importe: 0.0,
     importeSunat: 0.0,
-    resumenGeneral: 0,
-    resumenTC: 0,
+    observacionGeneral: 0,
+    observacionTC: 0,
+    observacionFacto: 0,
+    observacionIncons: 0,
+    observacionCpe: 0,
   });
 
   const handleApplyFilters = async () => {
@@ -52,9 +56,15 @@ const Page = ({ type }) => {
       });
 
       const data = response?.data;
+      if (data.status === 'failed') {
+        toast.error(response?.message, {
+          duration: 5000,
+          position: 'top-right',
+        });
+      }
 
-      setDetailsMain(data?.all_results);
-      setDownloadPath(data?.download_path);
+      setDetailsMain(data);
+      setDownloadPath(response?.download_path);
       setLoading(false);
     } catch (err) {
       console.error(err);
@@ -96,10 +106,6 @@ const Page = ({ type }) => {
   }, [selectedAccount]);
 
   useEffect(() => {
-    const tcRegex = /Valor TC: [\d.]+ \(debería ser [\d.]+\)/;
-    const importeRegex = /Valor Importe: [\d.]+ \(debería ser [\d.]+\)/;
-    const igvRegex = /Valor IGV: [\d.]+ \(debería ser [\d.]+\)/;
-
     const newTotals = detailsMain.reduce(
       (totals, detail) => {
         totals.baseIGravada += parseFloat(detail.mtoBIGravada) || 0;
@@ -108,12 +114,24 @@ const Page = ({ type }) => {
         totals.importe += parseFloat(detail.mtoImporteTotal) || 0;
         totals.importeSunat += parseFloat(detail.mtoImporteTotalSunat) || 0;
 
-        if (tcRegex.test(detail.observacion)) {
-          totals.resumenTC += 1;
+        if (detail.observacion['general'].length > 0) {
+          totals.observacionGeneral += 1;
         }
 
-        if (importeRegex.test(detail.observacion) || igvRegex.test(detail.observacion)) {
-          totals.resumenGeneral += 1;
+        if (detail.observacion['tc'].length > 0) {
+          totals.observacionTC += 1;
+        }
+
+        if (detail.observacion['facto'].length > 0) {
+          totals.observacionFacto += 1;
+        }
+
+        if (detail.observacion['incons'].length > 0) {
+          totals.observacionIncons += 1;
+        }
+
+        if (detail.observacion['cpe'].length > 0) {
+          totals.observacionCpe += 1;
         }
 
         return totals;
@@ -124,8 +142,11 @@ const Page = ({ type }) => {
         igvSunat: 0.0,
         importe: 0.0,
         importeSunat: 0.0,
-        resumenTC: 0,
-        resumenGeneral: 0,
+        observacionTC: 0,
+        observacionGeneral: 0,
+        observacionFacto: 0,
+        observacionIncons: 0,
+        observacionCpe: 0,
       }
     );
 

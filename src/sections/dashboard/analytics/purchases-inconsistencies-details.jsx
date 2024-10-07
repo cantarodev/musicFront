@@ -57,6 +57,7 @@ const columnLabels = {
   observacionTC: 'Observación Tipo de Cambio',
   observacionFactoring: 'Observación Factoring',
   observacionIncons: 'Observación Incons.',
+  observacionCpe: 'Observación CPE',
 };
 
 function descendingComparator(a, b, orderBy) {
@@ -85,8 +86,7 @@ export const PurchasesInconsistenciesDetails = (props) => {
   const { loading, details, totalSums, downloadPath, onDownload } = props;
 
   const [modalOpen, setModalOpen] = useState(false);
-  const [selectedDetail, setSelectedDetail] = useState(null);
-  const [selectedOption, setSelectedOption] = useState('');
+  const [selectedDetail, setSelectedDetail] = useState('');
 
   const [columnVisibility, setColumnVisibility] = useState({
     periodo: true,
@@ -114,6 +114,7 @@ export const PurchasesInconsistenciesDetails = (props) => {
     observacionTC: true,
     observacionFactoring: true,
     observacionIncons: true,
+    observacionCpe: true,
   });
   const [open, setOpen] = useState(false);
 
@@ -145,10 +146,9 @@ export const PurchasesInconsistenciesDetails = (props) => {
 
   const isEmpty = sortedRows.length === 0;
 
-  const handleOpen = (detail, option = '') => {
+  const handleOpen = (texto) => {
     setModalOpen(true);
-    setSelectedDetail(detail);
-    setSelectedOption(option);
+    setSelectedDetail(texto);
   };
 
   const handleClose = () => setModalOpen(false);
@@ -689,13 +689,25 @@ export const PurchasesInconsistenciesDetails = (props) => {
                     </Typography>
                   </TableCell>
                 )}
+                {columnVisibility.observacionCpe && (
+                  <TableCell>
+                    <Typography
+                      sx={{
+                        fontSize: 12,
+                        fontWeight: 'bold',
+                      }}
+                    >
+                      Observación CPE.
+                    </Typography>
+                  </TableCell>
+                )}
               </TableRow>
             </TableHead>
             <TableBody>
               {loading ? (
                 <TableRow>
                   <TableCell
-                    colSpan={25}
+                    colSpan={26}
                     align="center"
                     style={{ height: 200 }}
                   >
@@ -710,7 +722,7 @@ export const PurchasesInconsistenciesDetails = (props) => {
               ) : isEmpty ? (
                 <TableRow>
                   <TableCell
-                    colSpan={25}
+                    colSpan={26}
                     align="center"
                     style={{ height: 200 }}
                   >
@@ -894,7 +906,9 @@ export const PurchasesInconsistenciesDetails = (props) => {
                         >
                           <Typography
                             sx={
-                              String(detail.observacion).includes('IGV', 'igv')
+                              detail.observacion['general'].some((obs) =>
+                                obs.includes('IGV', 'igv')
+                              )
                                 ? { color: 'red' }
                                 : { color: 'inherit' }
                             }
@@ -921,7 +935,9 @@ export const PurchasesInconsistenciesDetails = (props) => {
                         >
                           <Typography
                             sx={
-                              String(detail.observacion).includes('Importe')
+                              detail.observacion['general'].some((obs) =>
+                                obs.includes('Importe', 'importe')
+                              )
                                 ? { color: 'red' }
                                 : { color: 'inherit' }
                             }
@@ -949,7 +965,7 @@ export const PurchasesInconsistenciesDetails = (props) => {
                           <Typography
                             style={{ fontSize: 14 }}
                             sx={
-                              String(detail.observacion).includes('TC')
+                              detail.observacion['tc'].length > 0
                                 ? { color: 'red' }
                                 : { color: 'inherit' }
                             }
@@ -962,23 +978,30 @@ export const PurchasesInconsistenciesDetails = (props) => {
                         <TableCell className="customTableCell">
                           <Typography
                             sx={{
-                              cursor: 'pointer',
                               fontSize: 14,
                               fontWeight: 'normal',
                               whiteSpace: 'nowrap',
                               overflow: 'hidden',
                               textOverflow: 'ellipsis',
-                              '&:hover': {
-                                color: 'primary.main',
-                                cursor: 'pointer',
-                              },
                             }}
-                            onClick={() => handleOpen(detail)}
                           >
-                            {String(detail.observacion)
-                              .replace(/Valor TC: [\d.]+ \(debería ser [\d.]+\)\.?/, '')
-                              .trim()
-                              .replace(/\.$/, '')}
+                            {detail.observacion['general'].length > 0 ? (
+                              <Typography
+                                color="text.secondary"
+                                fontWeight="bold"
+                                sx={{
+                                  cursor: 'pointer',
+                                  '&:hover': {
+                                    color: 'primary.main',
+                                  },
+                                }}
+                                onClick={() => handleOpen(detail.observacion['general'].join('. '))}
+                              >
+                                {detail.observacion['general'].join('. ')}
+                              </Typography>
+                            ) : (
+                              'Sin observaciones'
+                            )}
                           </Typography>
                         </TableCell>
                       )}
@@ -986,23 +1009,30 @@ export const PurchasesInconsistenciesDetails = (props) => {
                         <TableCell className="customTableCell">
                           <Typography
                             sx={{
-                              cursor: 'pointer',
                               fontSize: 14,
                               fontWeight: 'normal',
                               whiteSpace: 'nowrap',
                               overflow: 'hidden',
                               textOverflow: 'ellipsis',
-                              '&:hover': {
-                                color: 'primary.main',
-                                cursor: 'pointer',
-                              },
                             }}
-                            onClick={() => handleOpen(detail, 'TC')}
                           >
-                            {String(detail.observacion).includes('TC') &&
-                              String(detail.observacion).match(
-                                /Valor TC: [\d.]+ \(debería ser [\d.]+\)/
-                              )[0]}
+                            {detail.observacion['tc'].length > 0 ? (
+                              <Typography
+                                color="text.secondary"
+                                fontWeight="bold"
+                                sx={{
+                                  cursor: 'pointer',
+                                  '&:hover': {
+                                    color: 'primary.main',
+                                  },
+                                }}
+                                onClick={() => handleOpen(detail.observacion['tc'].join('. '))}
+                              >
+                                {detail.observacion['tc'].join('. ')}
+                              </Typography>
+                            ) : (
+                              'Sin observaciones'
+                            )}
                           </Typography>
                         </TableCell>
                       )}
@@ -1010,21 +1040,29 @@ export const PurchasesInconsistenciesDetails = (props) => {
                         <TableCell className="customTableCell">
                           <Typography
                             sx={{
-                              cursor: 'pointer',
                               fontSize: 14,
                               fontWeight: 'normal',
                               whiteSpace: 'nowrap',
                               overflow: 'hidden',
                               textOverflow: 'ellipsis',
-                              '&:hover': {
-                                color: 'primary.main',
-                                cursor: 'pointer',
-                              },
                             }}
                           >
-                            {detail.observacion_factoring
-                              ? detail.observacion_factoring
-                              : 'Sin observaciones'}
+                            {detail.observacion['facto'].length > 0 ? (
+                              <Typography
+                                color="text.secondary"
+                                fontWeight="bold"
+                                sx={{
+                                  cursor: 'pointer',
+                                  '&:hover': {
+                                    color: 'primary.main',
+                                  },
+                                }}
+                              >
+                                {detail.observacion['facto'].join('. ')}
+                              </Typography>
+                            ) : (
+                              'Sin observaciones'
+                            )}
                           </Typography>
                         </TableCell>
                       )}
@@ -1032,19 +1070,59 @@ export const PurchasesInconsistenciesDetails = (props) => {
                         <TableCell className="customTableCell">
                           <Typography
                             sx={{
-                              cursor: 'pointer',
                               fontSize: 14,
                               fontWeight: 'normal',
                               whiteSpace: 'nowrap',
                               overflow: 'hidden',
                               textOverflow: 'ellipsis',
-                              '&:hover': {
-                                color: 'primary.main',
-                                cursor: 'pointer',
-                              },
                             }}
                           >
-                            {detail.observacion}
+                            {detail.observacion['incons'].length > 0 ? (
+                              <Typography
+                                color="text.secondary"
+                                fontWeight="bold"
+                                sx={{
+                                  cursor: 'pointer',
+                                  '&:hover': {
+                                    color: 'primary.main',
+                                  },
+                                }}
+                              >
+                                {detail.observacion['incons'].join('. ')}
+                              </Typography>
+                            ) : (
+                              'Sin observaciones'
+                            )}
+                          </Typography>
+                        </TableCell>
+                      )}
+                      {columnVisibility.observacionCpe && (
+                        <TableCell className="customTableCell">
+                          <Typography
+                            sx={{
+                              fontSize: 14,
+                              fontWeight: 'normal',
+                              whiteSpace: 'nowrap',
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                            }}
+                          >
+                            {detail.observacion['cpe'].length > 0 ? (
+                              <Typography
+                                color="text.secondary"
+                                fontWeight="bold"
+                                sx={{
+                                  cursor: 'pointer',
+                                  '&:hover': {
+                                    color: 'primary.main',
+                                  },
+                                }}
+                              >
+                                {detail.observacion['cpe'].join('. ')}
+                              </Typography>
+                            ) : (
+                              'Sin observaciones'
+                            )}
                           </Typography>
                         </TableCell>
                       )}
@@ -1126,8 +1204,21 @@ export const PurchasesInconsistenciesDetails = (props) => {
                       {totalSums.observacionTC}
                     </TableCell>
                   )}
-                  {columnVisibility.observacionFactoring && <TableCell></TableCell>}
-                  {columnVisibility.observacionIncons && <TableCell></TableCell>}
+                  {columnVisibility.observacionFactoring && (
+                    <TableCell sx={{ textAlign: 'center', fontSize: 14, fontWeight: 600 }}>
+                      {totalSums.observacionFacto}
+                    </TableCell>
+                  )}
+                  {columnVisibility.observacionIncons && (
+                    <TableCell sx={{ textAlign: 'center', fontSize: 14, fontWeight: 600 }}>
+                      {totalSums.observacionIncons}
+                    </TableCell>
+                  )}
+                  {columnVisibility.observacionCpe && (
+                    <TableCell sx={{ textAlign: 'center', fontSize: 14, fontWeight: 600 }}>
+                      {totalSums.observacionCpe}
+                    </TableCell>
+                  )}
                 </TableRow>
               </TableFooter>
             )}
@@ -1139,7 +1230,6 @@ export const PurchasesInconsistenciesDetails = (props) => {
         open={modalOpen}
         handleClose={handleClose}
         data={selectedDetail}
-        option={selectedOption}
       />
     </Card>
   );
