@@ -53,9 +53,9 @@ const PurchasesCreditDebitNotes = ({ type }) => {
       setDownloadPath(data?.download_path);
       
       // Cálculo de los totales
-      const totalBase = data?.all_results.reduce((sum, row) => sum + parseFloat(row.mtoImporteTotal || 0), 0);
-      const totalIgv = data?.all_results.reduce((sum, row) => sum + parseFloat(row.igv || 0), 0);
-      const totalImporte = data?.all_results.reduce((sum, row) => sum + parseFloat(row.sunat_monto_dep || 0), 0);
+      const totalBase = data?.all_results.reduce((sum, row) => sum + Math.abs(parseFloat(row.mtoImporteTotal) || 0), 0);
+      const totalIgv = data?.all_results.reduce((sum, row) => sum + Math.abs(parseFloat(row.igv) || 0), 0);
+      const totalImporte = data?.all_results.reduce((sum, row) => sum + Math.abs(parseFloat(row.sunat_monto_dep) || 0), 0);
       
       setTotalSums({
         baseIGravadaDG: totalBase,
@@ -102,7 +102,7 @@ const PurchasesCreditDebitNotes = ({ type }) => {
               <TableCell sx={{ width: '5%' }}>Moneda</TableCell>
               <TableCell sx={{ width: '7%' }}>Tipo de Cambio</TableCell>
               <TableCell sx={{ width: '10%' }}>Monto Importe Total</TableCell>
-              <TableCell sx={{ width: '60%' }}>Observación</TableCell>
+              <TableCell sx={{ maxWidth: '90%' }}>Observación</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -118,7 +118,7 @@ const PurchasesCreditDebitNotes = ({ type }) => {
                   <TableCell>{row.codMoneda}</TableCell>
                   <TableCell>{row.mtoTipoCambio}</TableCell>
                   <TableCell>{row.mtoImporteTotal}</TableCell>
-                  <TableCell sx={{ whiteSpace: 'normal', wordBreak: 'break-word' }}>
+                  <TableCell sx={{ maxWidth: '90%'}}>
                     <Typography variant="body2" style={{ wordWrap: 'break-word' }}>
                       {row.observacion}
                     </Typography>
