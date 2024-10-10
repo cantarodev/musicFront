@@ -1,4 +1,4 @@
-import { reportObservations, getReportMissings, downloadObservations, getReportDetractions } from './reportApi';
+import { reportObservations, getReportMissings, downloadObservations, getReportDetractions, getReportDebitCreditNotes } from './reportApi';
 
 class ReportApi {
   async reportObservations(request) {
@@ -21,6 +21,20 @@ class ReportApi {
     const { user_id, period, queryType, docType, currency, filters, account } = request;
 
     return await getReportDetractions(
+      user_id,
+      period,
+      queryType,
+      docType,
+      currency,
+      filters,
+      account
+    );
+  }
+
+  async getReportDebitCreditNotes(request) {
+    const { user_id, period, queryType, docType, currency, filters, account } = request;
+
+    return await getReportDebitCreditNotes(
       user_id,
       period,
       queryType,

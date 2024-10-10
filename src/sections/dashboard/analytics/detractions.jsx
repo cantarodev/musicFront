@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Box, Button, Typography } from '@mui/material';
-import FilterListIcon from '@mui/icons-material/FilterList';
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Box, Typography } from '@mui/material';
 import { DetractionsInconsistenciesFilter } from 'src/sections/dashboard/analytics/detractions-inconsistencies-filter.jsx';
 import { useMockedUser } from 'src/hooks/use-mocked-user';
 import { reportApi } from 'src/api/reports/reportService';
 import { useSelector } from 'react-redux';
+import { PurchasesInconsistenciesCards } from 'src/sections/dashboard/analytics/purchases-inconsistencies-cards';
 
 const PurchasesDetractions = ({ type }) => {
   const selectedAccount = useSelector((state) => state.account); // Usar useSelector para obtener el valor de la cuenta
@@ -20,6 +20,12 @@ const PurchasesDetractions = ({ type }) => {
     docType: 'all',
     currency: 'all',
     filters: [],
+  });
+
+  const [totalSums, setTotalSums] = useState({
+    baseIGravadaDG: 0.0,
+    igv: 0.0,
+    importe: 0.0,
   });
 
   // Este useEffect escucha cualquier cambio en selectedAccount y actualiza selectedParams
@@ -47,6 +53,14 @@ const PurchasesDetractions = ({ type }) => {
 
       setDetailsMain(data?.all_results); // Actualizamos los resultados
       setDownloadPath(data?.download_path); // Actualizamos la ruta de descarga
+
+      // Actualizar los totales (ejemplo, dependerá de cómo esté estructurada la respuesta)
+      setTotalSums({
+        baseIGravadaDG: data?.total_base || 0.0,
+        igv: data?.total_igv || 0.0,
+        importe: data?.total_importe || 0.0,
+      });
+
       setLoading(false); // Finalizamos la carga
     } catch (err) {
       console.error(err);
@@ -56,8 +70,6 @@ const PurchasesDetractions = ({ type }) => {
 
   return (
     <div>
-      <h1>Detracciones</h1>
-
       {/* Componente de filtro */}
       <DetractionsInconsistenciesFilter
         selectedParams={selectedParams}
@@ -65,6 +77,20 @@ const PurchasesDetractions = ({ type }) => {
         loading={loading}
         onLoadData={onLoadData}
       />
+
+      {/* Componente de tarjetas (entre el filtro y la tabla) */}
+      <Box sx={{ mt: 2 }}> {/* Margen superior de 4 unidades para crear espacio */}
+        <PurchasesInconsistenciesCards
+          title="Resumen detracciones"
+          loading={loading}
+          totalInconsistencies={0} // Valores simulados, actualiza con los datos correctos
+          totalSums={{
+            baseIGravadaDG: 0,
+            igv: 0,
+            importe: 0,
+          }}
+        />
+      </Box>
 
       {/* Tabla de datos */}
       <TableContainer component={Paper} sx={{ marginTop: 2 }}>
@@ -85,7 +111,6 @@ const PurchasesDetractions = ({ type }) => {
               <TableCell>D. Tasa (SUNAT)</TableCell>
               <TableCell>Fecha detraccion</TableCell>
               <TableCell>D. Fecha pago (SUNAT)</TableCell>
-
               <TableCell sx={{ width: '30%' }}>Observación</TableCell> {/* Aumentar el ancho de la columna Observación */}
             </TableRow>
           </TableHead>
@@ -107,7 +132,6 @@ const PurchasesDetractions = ({ type }) => {
                   <TableCell>{row.sunat_rate_csv}</TableCell>
                   <TableCell>{row.fecEmisionCDD}</TableCell> {/* fecha detraccion */}
                   <TableCell>{row.fecha_pago_sunat}</TableCell>
-                  
                   <TableCell sx={{ whiteSpace: 'normal', wordBreak: 'break-word' }}>
                     {/* Esto asegura que el texto largo se ajuste en varias líneas */}
                     <Typography variant="body2" style={{ wordWrap: 'break-word' }}>

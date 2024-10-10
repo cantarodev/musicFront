@@ -31,8 +31,6 @@ const customEnLocale = {
 
 const searchTypeOptions = [
   { label: 'Todos', value: 'all' },
-  { label: '01 - Factura', value: '01' },
-  { label: '03 - Boleta de venta', value: '03' },
   { label: '07 - Nota de crédito', value: 'F7' },
   { label: '08 - Nota de débito', value: 'F8' },
 ];
@@ -55,13 +53,13 @@ const factoringStatusOptions = [
 
 const filterOptions = [
   { label: 'Todos', value: 'all' },
-  { label: 'Fecha de Pago', value: 'fecha_pago' },
-  { label: 'Tasa Detracción', value: 'tasa_detraction' },
-  { label: 'N° Constancia', value: 'pend_num_constancia' },
-  { label: 'F. Constancia', value: 'pend_fec_constancia' },
+  { label: 'Fecha Emision', value: 'fecha_emision' },
+  { label: 'Importe Total', value: 'importe_total' },
+  { label: 'NC Sin F/B', value: 'nc_sin_f_b' },
+  { label: 'NC Negativo / ND Positivo NC', value: 'nc_nd_valor' },
 ];
 
-export const DetractionsInconsistenciesFilter = (props) => {
+export const CreditDebitInconsistenciesFilter = (props) => {
   const { selectedParams, setSelectedParams, loading, onLoadData } = props;
   const [selectedOptions, setSelectedOptions] = useState(['general']);
   const [selectedFactoringStatus, setSelectedFactoringStatus] = useState([]); // Para almacenar estados seleccionados
@@ -320,7 +318,7 @@ export const DetractionsInconsistenciesFilter = (props) => {
   );
 };
 
-DetractionsInconsistenciesFilter.propTypes = {
+CreditDebitInconsistenciesFilter.propTypes = {
   loading: PropTypes.bool,
   selectedParams: PropTypes.object,
   setSelectedParams: PropTypes.func,

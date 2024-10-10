@@ -28,5 +28,6 @@ export const downloadFile = async (user_id, file_id) => {
 };
 
 export const searchComprobante = async (user_id, file_id, comprobante) => {
+  console.log(".............:  ", user_id, file_id, comprobante);
   return handleResponse(apiClient.get(`/file/search/${user_id}/${file_id}/${comprobante}`));
 };

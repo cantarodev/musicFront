@@ -68,6 +68,7 @@ class FileManagerApi {
 
   async searchComprobante(request = {}) {
     const { user_id, file_id, comprobante } = request;
+    console.log("FILE SERVICE: ", user_id, file_id, comprobante);
     return searchComprobante(user_id, file_id, comprobante);
   }
 }
