@@ -53,11 +53,11 @@ const columnLabels = {
   importe: 'Importe',
   importeSunat: 'Importe Sunat',
   tipoCambio: 'Tipo de Cambio',
-  observacion: 'Observación General',
   observacionTC: 'Observación Tipo de Cambio',
   observacionFactoring: 'Observación Factoring',
   observacionIncons: 'Observación Incons.',
   observacionCpe: 'Observación CPE',
+  observacionCond: 'Observación Cond.',
 };
 
 function descendingComparator(a, b, orderBy) {
@@ -96,7 +96,7 @@ export const PurchasesInconsistenciesDetails = (props) => {
     tipoComprobante: true,
     numeroComprobante: true,
     moneda: true,
-    mtoBIGravadaDG: true,
+    mtoBIGravada: true,
     mtoBIGravadaDGNG: false,
     mtoIgvIpmDGNG: false,
     mtoBIGravadaDNG: false,
@@ -110,16 +110,16 @@ export const PurchasesInconsistenciesDetails = (props) => {
     importe: true,
     importeSunat: false,
     tipoCambio: true,
-    observacion: true,
     observacionTC: true,
     observacionFactoring: true,
     observacionIncons: true,
     observacionCpe: true,
+    observacionCond: true,
   });
   const [open, setOpen] = useState(false);
 
   const [order, setOrder] = useState('asc');
-  const [orderBy, setOrderBy] = useState('mtoImporteTotal');
+  const [orderBy, setOrderBy] = useState('importeTotal');
 
   const handleDialogOpen = () => {
     setOpen(true);
@@ -589,9 +589,9 @@ export const PurchasesInconsistenciesDetails = (props) => {
                 {columnVisibility.importe && (
                   <TableCell sx={{ textAlign: 'right' }}>
                     <TableSortLabel
-                      active={orderBy === 'mtoImporteTotal'}
-                      direction={orderBy === 'mtoImporteTotal' ? order : 'asc'}
-                      onClick={() => handleRequestSort('mtoImporteTotal')}
+                      active={orderBy === 'importeTotal'}
+                      direction={orderBy === 'importeTotal' ? order : 'asc'}
+                      onClick={() => handleRequestSort('importeTotal')}
                     >
                       <Typography sx={{ fontSize: 12, fontWeight: 'bold' }}>Importe</Typography>
                     </TableSortLabel>
@@ -641,18 +641,7 @@ export const PurchasesInconsistenciesDetails = (props) => {
                     </Tooltip>
                   </TableCell>
                 )}
-                {columnVisibility.observacion && (
-                  <TableCell>
-                    <Typography
-                      sx={{
-                        fontSize: 12,
-                        fontWeight: 'bold',
-                      }}
-                    >
-                      Observación
-                    </Typography>
-                  </TableCell>
-                )}
+
                 {columnVisibility.observacionTC && (
                   <TableCell>
                     <Typography
@@ -701,13 +690,25 @@ export const PurchasesInconsistenciesDetails = (props) => {
                     </Typography>
                   </TableCell>
                 )}
+                {columnVisibility.observacionCond && (
+                  <TableCell>
+                    <Typography
+                      sx={{
+                        fontSize: 12,
+                        fontWeight: 'bold',
+                      }}
+                    >
+                      Observación Cond.
+                    </Typography>
+                  </TableCell>
+                )}
               </TableRow>
             </TableHead>
             <TableBody>
               {loading ? (
                 <TableRow>
                   <TableCell
-                    colSpan={26}
+                    colSpan={25}
                     align="center"
                     style={{ height: 200 }}
                   >
@@ -722,7 +723,7 @@ export const PurchasesInconsistenciesDetails = (props) => {
               ) : isEmpty ? (
                 <TableRow>
                   <TableCell
-                    colSpan={26}
+                    colSpan={25}
                     align="center"
                     style={{ height: 200 }}
                   >
@@ -895,7 +896,7 @@ export const PurchasesInconsistenciesDetails = (props) => {
                           sx={{ textAlign: 'right' }}
                         >
                           <Typography sx={{ fontSize: 14 }}>
-                            {formatNumber(detail.mtoBIGravadaDG)}
+                            {formatNumber(detail.mtoBIGravada)}
                           </Typography>
                         </TableCell>
                       )}
@@ -906,9 +907,7 @@ export const PurchasesInconsistenciesDetails = (props) => {
                         >
                           <Typography
                             sx={
-                              detail.observacion['general'].some((obs) =>
-                                obs.includes('IGV', 'igv')
-                              )
+                              detail.observacion['cpe'].some((obs) => obs.includes('IGV', 'igv'))
                                 ? { color: 'red' }
                                 : { color: 'inherit' }
                             }
@@ -924,7 +923,7 @@ export const PurchasesInconsistenciesDetails = (props) => {
                           sx={{ textAlign: 'right' }}
                         >
                           <Typography sx={{ fontSize: 14 }}>
-                            {formatNumber(detail.mtoIGVSunat)}
+                            {formatNumber(detail.igvSunat)}
                           </Typography>
                         </TableCell>
                       )}
@@ -935,7 +934,7 @@ export const PurchasesInconsistenciesDetails = (props) => {
                         >
                           <Typography
                             sx={
-                              detail.observacion['general'].some((obs) =>
+                              detail.observacion['cpe'].some((obs) =>
                                 obs.includes('Importe', 'importe')
                               )
                                 ? { color: 'red' }
@@ -943,7 +942,7 @@ export const PurchasesInconsistenciesDetails = (props) => {
                             }
                             style={{ fontSize: 14 }}
                           >
-                            {formatNumber(detail.mtoImporteTotal)}
+                            {formatNumber(detail.importeTotal)}
                           </Typography>
                         </TableCell>
                       )}
@@ -953,7 +952,7 @@ export const PurchasesInconsistenciesDetails = (props) => {
                           sx={{ textAlign: 'right' }}
                         >
                           <Typography sx={{ fontSize: 14 }}>
-                            {formatNumber(detail.mtoImporteTotalSunat)}
+                            {formatNumber(detail.importeTotalSunat)}
                           </Typography>
                         </TableCell>
                       )}
@@ -970,41 +969,11 @@ export const PurchasesInconsistenciesDetails = (props) => {
                                 : { color: 'inherit' }
                             }
                           >
-                            {detail.mtoTipoCambio}
+                            {detail.tipoCambio}
                           </Typography>
                         </TableCell>
                       )}
-                      {columnVisibility.observacion && (
-                        <TableCell className="customTableCell">
-                          <Typography
-                            sx={{
-                              fontSize: 14,
-                              fontWeight: 'normal',
-                              whiteSpace: 'nowrap',
-                              overflow: 'hidden',
-                              textOverflow: 'ellipsis',
-                            }}
-                          >
-                            {detail.observacion['general'].length > 0 ? (
-                              <Typography
-                                color="text.secondary"
-                                fontWeight="bold"
-                                sx={{
-                                  cursor: 'pointer',
-                                  '&:hover': {
-                                    color: 'primary.main',
-                                  },
-                                }}
-                                onClick={() => handleOpen(detail.observacion['general'].join('. '))}
-                              >
-                                {detail.observacion['general'].join('. ')}
-                              </Typography>
-                            ) : (
-                              'Sin observaciones'
-                            )}
-                          </Typography>
-                        </TableCell>
-                      )}
+
                       {columnVisibility.observacionTC && (
                         <TableCell className="customTableCell">
                           <Typography
@@ -1126,6 +1095,36 @@ export const PurchasesInconsistenciesDetails = (props) => {
                           </Typography>
                         </TableCell>
                       )}
+                      {columnVisibility.observacionCond && (
+                        <TableCell className="customTableCell">
+                          <Typography
+                            sx={{
+                              fontSize: 14,
+                              fontWeight: 'normal',
+                              whiteSpace: 'nowrap',
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                            }}
+                          >
+                            {detail.observacion['cond'].length > 0 ? (
+                              <Typography
+                                color="text.secondary"
+                                fontWeight="bold"
+                                sx={{
+                                  cursor: 'pointer',
+                                  '&:hover': {
+                                    color: 'primary.main',
+                                  },
+                                }}
+                              >
+                                {detail.observacion['cond'].join('. ')}
+                              </Typography>
+                            ) : (
+                              'Sin observaciones'
+                            )}
+                          </Typography>
+                        </TableCell>
+                      )}
                     </TableRow>
                   );
                 })
@@ -1140,12 +1139,7 @@ export const PurchasesInconsistenciesDetails = (props) => {
                 }}
               >
                 <TableRow>
-                  {columnVisibility.periodo && (
-                    <TableCell sx={{ textAlign: 'center', fontSize: 14, fontWeight: 600 }}>
-                      {details.length}
-                    </TableCell>
-                  )}
-
+                  {columnVisibility.periodo && <TableCell></TableCell>}
                   {columnVisibility.ruc && <TableCell></TableCell>}
                   {columnVisibility.razonSocial && <TableCell></TableCell>}
                   {columnVisibility.fechaEmision && <TableCell></TableCell>}
@@ -1168,37 +1162,20 @@ export const PurchasesInconsistenciesDetails = (props) => {
                   {columnVisibility.mtoISC && <TableCell></TableCell>}
                   {columnVisibility.mtoIcbp && <TableCell></TableCell>}
                   {columnVisibility.mtoOtrosTrib && <TableCell></TableCell>}
-                  {columnVisibility.mtoBIGravadaDG && (
-                    <TableCell sx={{ textAlign: 'right', fontSize: 14, fontWeight: 600 }}>
-                      {totalSums.baseIGravadaDG.toLocaleString('en-US')}
-                    </TableCell>
-                  )}
-                  {columnVisibility.igv && (
-                    <TableCell sx={{ textAlign: 'right', fontSize: 14, fontWeight: 600 }}>
-                      {totalSums.igv.toLocaleString('en-US')}
-                    </TableCell>
-                  )}
+                  {/* {columnVisibility.mtoBIGravada && <TableCell></TableCell>} */}
+                  {columnVisibility.igv && <TableCell></TableCell>}
                   {columnVisibility.igvSunat && (
                     <TableCell sx={{ textAlign: 'right', fontSize: 14, fontWeight: 600 }}>
                       {totalSums.igvSunat.toLocaleString('en-US')}
                     </TableCell>
                   )}
-                  {columnVisibility.importe && (
-                    <TableCell sx={{ textAlign: 'right', fontSize: 14, fontWeight: 600 }}>
-                      {totalSums.importe.toLocaleString('en-US')}
-                    </TableCell>
-                  )}
+                  {columnVisibility.importe && <TableCell></TableCell>}
                   {columnVisibility.importeSunat && (
                     <TableCell sx={{ textAlign: 'right', fontSize: 14, fontWeight: 600 }}>
                       {totalSums.importeSunat.toLocaleString('en-US')}
                     </TableCell>
                   )}
                   {columnVisibility.tipoCambio && <TableCell></TableCell>}
-                  {columnVisibility.observacion && (
-                    <TableCell sx={{ textAlign: 'center', fontSize: 14, fontWeight: 600 }}>
-                      {totalSums.observacionGeneral}
-                    </TableCell>
-                  )}
                   {columnVisibility.observacionTC && (
                     <TableCell sx={{ textAlign: 'center', fontSize: 14, fontWeight: 600 }}>
                       {totalSums.observacionTC}
@@ -1217,6 +1194,11 @@ export const PurchasesInconsistenciesDetails = (props) => {
                   {columnVisibility.observacionCpe && (
                     <TableCell sx={{ textAlign: 'center', fontSize: 14, fontWeight: 600 }}>
                       {totalSums.observacionCpe}
+                    </TableCell>
+                  )}
+                  {columnVisibility.observacionCond && (
+                    <TableCell sx={{ textAlign: 'center', fontSize: 14, fontWeight: 600 }}>
+                      {totalSums.observacionCond}
                     </TableCell>
                   )}
                 </TableRow>

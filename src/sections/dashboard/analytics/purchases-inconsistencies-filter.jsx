@@ -14,7 +14,8 @@ import {
 } from '@mui/material';
 import { useEffect, useState } from 'react';
 import FilterListIcon from '@mui/icons-material/FilterList';
-import { ExpandMore, ExpandLess } from '@mui/icons-material';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+import NavigateBeforeIcon from '@mui/icons-material/NavigateBefore';
 
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { LocalizationProvider, DatePicker } from '@mui/x-date-pickers';
@@ -46,7 +47,6 @@ const searchCurrencyOptions = [
 
 const filterOptions = [
   { label: 'Todos', value: 'all' },
-  { label: 'General', value: 'general' },
   { label: 'Tipo de Cambio', value: 'tc' },
   {
     label: 'Factoring',
@@ -63,19 +63,22 @@ const filterOptions = [
     label: 'CPE',
     value: 'cpe',
     subOptions: [
+      { label: 'EMITIDO A OTRO RUC', value: 'EMITIDO A OTRO RUC' },
+      { label: 'NRO SERIE INCORRECTO', value: 'NRO SERIE INCORRECTO' },
       { label: 'NO EXISTE', value: 'NO EXISTE' },
-      { label: 'ACEPTADO', value: 'ACEPTADO' },
       { label: 'ANULADO', value: 'ANULADO' },
-      { label: 'AUTORIZADO', value: 'AUTORIZADO' },
       { label: 'NO AUTORIZADO', value: 'NO AUTORIZADO' },
     ],
   },
   { label: 'Inconsistencia', value: 'incons' },
+  { label: 'Condición', value: 'cond' },
 ];
 
 export const PurchasesInconsistenciesFilter = (props) => {
   const { selectedParams, setSelectedParams, loading, onLoadData } = props;
-  const [selectedOptions, setSelectedOptions] = useState({ general: [] });
+  const [selectedOptions, setSelectedOptions] = useState({ incons: [] });
+  const [selectedDetails, setSelectedDetails] = useState([]);
+  const [detailOptions, setDetailOptions] = useState([]);
   const [expanded, setExpanded] = useState({});
 
   const handleSelected = (event) => {
@@ -83,57 +86,118 @@ export const PurchasesInconsistenciesFilter = (props) => {
     setSelectedParams((state) => ({ ...state, [name]: value }));
   };
 
+  // const handleSelectedOptions = (option) => {
+  //   let updatedSelection = { ...selectedOptions };
+
+  //   if (option.value === 'all') {
+  //     // Si se selecciona "all", seleccionamos todas las opciones principales
+  //     if (Object.keys(updatedSelection).length === filterOptions.length) {
+  //       updatedSelection = {}; // Desmarcar todo
+  //     } else {
+  //       updatedSelection = filterOptions.reduce((acc, opt) => {
+  //         if (opt.subOptions) {
+  //           acc[opt.value] = opt.subOptions.map((sub) => sub.value); // Seleccionar todas las subopciones
+  //         } else {
+  //           acc[opt.value] = [];
+  //         }
+  //         return acc;
+  //       }, {});
+  //     }
+  //   } else if (selectedOptions[option.value]) {
+  //     // Si la opción ya está seleccionada, la eliminamos y sus subOptions
+  //     delete updatedSelection[option.value];
+  //   } else {
+  //     // Si es nueva, la añadimos y si tiene subOptions las marcamos todas
+  //     if (option.subOptions) {
+  //       updatedSelection[option.value] = option.subOptions.map((sub) => sub.value);
+  //       setDetailOptions(option.subOptions); // Mostrar suboptions en el menú de detalles
+  //       setSelectedDetails(option.subOptions.map((subOption) => subOption.value));
+  //     } else {
+  //       updatedSelection[option.value] = [];
+  //     }
+  //   }
+  //   setSelectedOptions(updatedSelection);
+  //   setSelectedParams((state) => ({ ...state, ['filters']: updatedSelection }));
+  // };
+
   const handleSelectedOptions = (option) => {
     let updatedSelection = { ...selectedOptions };
 
     if (option.value === 'all') {
-      // Si se selecciona "all", seleccionamos todas las opciones principales
       if (Object.keys(updatedSelection).length === filterOptions.length) {
         updatedSelection = {}; // Desmarcar todo
       } else {
         updatedSelection = filterOptions.reduce((acc, opt) => {
-          acc[opt.value] = []; // Todas las opciones seleccionadas
+          acc[opt.value] = opt.subOptions ? opt.subOptions.map((sub) => sub.value) : [];
           return acc;
         }, {});
       }
-    } else if (selectedOptions[option.value]) {
-      // Si la opción ya está seleccionada, la eliminamos y sus subOptions
+    } else if (updatedSelection[option.value]) {
+      // Si la opción ya está seleccionada, eliminarla
       delete updatedSelection[option.value];
     } else {
       // Si es nueva, la añadimos y si tiene subOptions las marcamos todas
       if (option.subOptions) {
-        updatedSelection[option.value] = option.subOptions.map((sub) => sub.value);
+        const previouslySelected = selectedOptions[option.value] || []; // Recuperar las seleccionadas previamente
+        const allSubOptions = option.subOptions.map((sub) => sub.value);
+
+        // Si no hay suboptions previas seleccionadas, seleccionamos todas
+        if (previouslySelected.length === 0) {
+          updatedSelection[option.value] = allSubOptions;
+        } else {
+          updatedSelection[option.value] = previouslySelected; // Dejar las seleccionadas previamente
+        }
       } else {
         updatedSelection[option.value] = [];
       }
     }
+
     setSelectedOptions(updatedSelection);
-    setSelectedParams((state) => ({ ...state, ['filters']: updatedSelection }));
+    setSelectedParams((state) => ({ ...state, filters: updatedSelection }));
   };
 
-  const handleSubOptionSelect = (parentOption, subOption) => {
-    const updatedSelection = { ...selectedOptions };
+  const handleSelectedDetails = (subOption) => {
+    const parentOption = detailOptions[0].parent;
+    const updatedSelectedOptions = { ...selectedOptions };
 
-    if (!updatedSelection[parentOption.value]) {
-      updatedSelection[parentOption.value] = [];
+    if (!updatedSelectedOptions[parentOption]) {
+      updatedSelectedOptions[parentOption] = [];
     }
 
-    const subOptions = updatedSelection[parentOption.value];
+    const currentSubOptions = updatedSelectedOptions[parentOption];
 
-    if (subOptions.includes(subOption.value)) {
-      // Si ya está seleccionado, lo quitamos
-      updatedSelection[parentOption.value] = subOptions.filter((item) => item !== subOption.value);
+    // Si la subopción ya está seleccionada, la eliminamos
+    if (currentSubOptions.includes(subOption.value)) {
+      updatedSelectedOptions[parentOption] = currentSubOptions.filter(
+        (item) => item !== subOption.value
+      );
     } else {
-      // Lo añadimos si no está seleccionado
-      updatedSelection[parentOption.value].push(subOption.value);
+      // Si no está seleccionada, la añadimos
+      updatedSelectedOptions[parentOption].push(subOption.value);
     }
 
-    // Si no quedan suboptions seleccionadas, desmarcamos la opción principal
-    if (updatedSelection[parentOption.value].length === 0) {
-      delete updatedSelection[parentOption.value];
+    // Verificar si quedan suboptions, si no quedan, eliminar el parentOption
+    if (updatedSelectedOptions[parentOption].length === 0) {
+      delete updatedSelectedOptions[parentOption];
     }
 
-    setSelectedOptions(updatedSelection); // Actualizamos el estado con los subOptions
+    setSelectedOptions(updatedSelectedOptions); // Actualizar el estado de las subOptions
+    setSelectedParams((state) => ({ ...state, filters: updatedSelectedOptions })); // Actualizar el estado de los parámetros
+  };
+
+  const toggleSubMenu = (option) => {
+    if (option.subOptions) {
+      // Obtener las subopciones ya seleccionadas del estado o inicializar una lista vacía
+      const selectedSubOptions = selectedOptions[option.value] || [];
+      setDetailOptions(option.subOptions.map((sub) => ({ ...sub, parent: option.value }))); // Añadimos la referencia al padre (option)
+      setSelectedDetails(selectedSubOptions); // Reflejar el estado de las suboptions ya seleccionadas
+    } else {
+      setDetailOptions([]);
+    }
+  };
+
+  const handleBackToMainMenu = () => {
+    setDetailOptions([]);
   };
 
   const renderValue = (selected) => {
@@ -170,21 +234,6 @@ export const PurchasesInconsistenciesFilter = (props) => {
     setSelectedParams((state) => ({ ...state, period: value }));
   };
 
-  const toggleSubMenu = (option) => {
-    setExpanded((prevExpanded) => {
-      // Cerrar otros submenus
-      const newExpanded = Object.keys(prevExpanded).reduce((acc, key) => {
-        acc[key] = false;
-        return acc;
-      }, {});
-
-      // Abrir el submenu actual
-      newExpanded[option.value] = !prevExpanded[option.value];
-
-      return newExpanded;
-    });
-  };
-
   useEffect(() => {
     setSelectedParams((state) => ({
       ...state,
@@ -193,6 +242,11 @@ export const PurchasesInconsistenciesFilter = (props) => {
 
     console.log('Filtros seleccionados: ', selectedOptions);
   }, [selectedOptions, setSelectedParams]);
+
+  useEffect(() => {
+    console.log('Opciones seleccionadas: ', selectedOptions);
+    console.log('Detalles seleccionados: ', selectedDetails);
+  }, [selectedOptions, selectedDetails]);
 
   console.log('PARAMS', selectedParams);
 
@@ -286,64 +340,53 @@ export const PurchasesInconsistenciesFilter = (props) => {
             MenuProps: {
               PaperProps: {
                 style: {
-                  maxHeight: 600,
-                  width: 300,
+                  maxHeight: 400,
                 },
               },
             },
           }}
           value={Object.keys(selectedOptions)}
-          onChange={() => {}}
-          sx={{ height: 54 }}
+          onChange={() => {}} // Vacío porque manejamos onClick
         >
-          {filterOptions.map((option) => (
-            <div key={option.value}>
-              <MenuItem
-                key={option.value}
-                value={option.value}
-                onClick={() => handleSelectedOptions(option)}
-              >
-                <Checkbox checked={selectedOptions[option.value] !== undefined} />
-                <ListItemText primary={option.label} />
-                {option.subOptions?.length > 0 && (
-                  <IconButton
-                    size="small"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      toggleSubMenu(option);
-                    }}
-                  >
-                    {expanded[option.value] ? <ExpandLess /> : <ExpandMore />}
-                  </IconButton>
-                )}
-              </MenuItem>
-              {option.subOptions?.length > 0 && (
-                <Collapse
-                  in={expanded[option.value]}
-                  timeout="auto"
-                  unmountOnExit
+          {!detailOptions.length
+            ? filterOptions.map((option) => (
+                <MenuItem
+                  key={option.value}
+                  value={option.value}
+                  onClick={() => handleSelectedOptions(option)}
                 >
-                  <List
-                    component="div"
-                    disablePadding
+                  <Checkbox checked={selectedOptions[option.value] !== undefined} />
+                  <ListItemText primary={option.label} />
+                  {option.subOptions?.length > 0 && (
+                    <IconButton
+                      size="small"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleSubMenu(option); // Mostrar suboptions al hacer click
+                      }}
+                    >
+                      <ChevronRightIcon />
+                    </IconButton>
+                  )}
+                </MenuItem>
+              ))
+            : // Mostrar solo las suboptions
+              [
+                <MenuItem onClick={handleBackToMainMenu}>
+                  <NavigateBeforeIcon />
+                  <ListItemText primary="Volver al menú principal" />
+                </MenuItem>,
+                detailOptions.map((subOption) => (
+                  <MenuItem
+                    key={subOption.value}
+                    value={subOption.value}
+                    onClick={() => handleSelectedDetails(subOption)}
                   >
-                    {option.subOptions.map((subOption) => (
-                      <MenuItem
-                        key={subOption.value}
-                        onClick={() => handleSubOptionSelect(option, subOption)}
-                        sx={{ pl: 4 }} // Indent the subitems
-                      >
-                        <Checkbox
-                          checked={selectedOptions[option.value]?.includes(subOption.value)}
-                        />
-                        <ListItemText primary={subOption.label} />
-                      </MenuItem>
-                    ))}
-                  </List>
-                </Collapse>
-              )}
-            </div>
-          ))}
+                    <Checkbox checked={selectedDetails.includes(subOption.value)} />
+                    <ListItemText primary={subOption.label} />
+                  </MenuItem>
+                )),
+              ]}
         </TextField>
 
         <Button
@@ -353,7 +396,7 @@ export const PurchasesInconsistenciesFilter = (props) => {
           onClick={onLoadData}
           startIcon={<FilterListIcon />}
           disabled={loading ? true : false}
-          sx={{ height: '56px' }}
+          sx={{ height: '56px', maxWidth: 120 }}
         >
           Filtrar
         </Button>

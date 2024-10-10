@@ -110,9 +110,9 @@ const Page = ({ type }) => {
       (totals, detail) => {
         totals.baseIGravada += parseFloat(detail.mtoBIGravada) || 0;
         totals.igv += parseFloat(detail.mtoIGV) || 0;
-        totals.igvSunat += parseFloat(detail.mtoIGVSunat) || 0;
-        totals.importe += parseFloat(detail.mtoImporteTotal) || 0;
-        totals.importeSunat += parseFloat(detail.mtoImporteTotalSunat) || 0;
+        totals.igvSunat += parseFloat(detail.igvSunat) || 0;
+        totals.importe += parseFloat(detail.importeTotal) || 0;
+        totals.importeSunat += parseFloat(detail.importeTotalSunat) || 0;
 
         if (detail.observacion['general'].length > 0) {
           totals.observacionGeneral += 1;

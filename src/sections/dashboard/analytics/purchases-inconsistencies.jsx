@@ -32,18 +32,18 @@ const Page = ({ type }) => {
   });
 
   const [totalSums, setTotalSums] = useState({
-    baseIGravadaDG: 0.0,
+    baseIGravada: 0.0,
     baseIGravadaDGNG: 0.0,
     baseIGravadaDNG: 0.0,
     igv: 0.0,
     igvSunat: 0.0,
     importe: 0.0,
     importeSunat: 0.0,
-    observacionGeneral: 0,
     observacionTC: 0,
     observacionFacto: 0,
     observacionIncons: 0,
     observacionCpe: 0,
+    observacionCond: 0,
   });
 
   const handleApplyFilters = async () => {
@@ -58,7 +58,7 @@ const Page = ({ type }) => {
       });
 
       const data = response?.data;
-      if (data.status === 'failed') {
+      if (response?.status === 'failed') {
         toast.error(response?.message, {
           duration: 5000,
           position: 'top-right',
@@ -110,17 +110,13 @@ const Page = ({ type }) => {
   useEffect(() => {
     const newTotals = detailsMain.reduce(
       (totals, detail) => {
-        totals.baseIGravadaDG += parseFloat(detail.mtoBIGravadaDG) || 0;
+        totals.baseIGravada += parseFloat(detail.mtoBIGravada) || 0;
         totals.baseIGravadaDGNG += parseFloat(detail.mtoBIGravadaDGNG) || 0;
         totals.baseIGravadaDNG += parseFloat(detail.mtoBIGravadaDNG) || 0;
         totals.igv += parseFloat(detail.mtoIGV) || 0;
-        totals.igvSunat += parseFloat(detail.mtoIGVSunat) || 0;
-        totals.importe += parseFloat(detail.mtoImporteTotal) || 0;
-        totals.importeSunat += parseFloat(detail.mtoImporteTotalSunat) || 0;
-
-        if (detail.observacion['general'].length > 0) {
-          totals.observacionGeneral += 1;
-        }
+        totals.igvSunat += parseFloat(detail.igvSunat) || 0;
+        totals.importe += parseFloat(detail.importeTotal) || 0;
+        totals.importeSunat += parseFloat(detail.importeTotalSunat) || 0;
 
         if (detail.observacion['tc'].length > 0) {
           totals.observacionTC += 1;
@@ -138,21 +134,25 @@ const Page = ({ type }) => {
           totals.observacionCpe += 1;
         }
 
+        if (detail.observacion['cond'].length > 0) {
+          totals.observacionCond += 1;
+        }
+
         return totals;
       },
       {
-        baseIGravadaDG: 0.0,
+        baseIGravada: 0.0,
         baseIGravadaDGNG: 0.0,
         baseIGravadaDNG: 0.0,
         igv: 0.0,
         igvSunat: 0.0,
         importe: 0.0,
         importeSunat: 0.0,
-        observacionGeneral: 0,
         observacionTC: 0,
         observacionFacto: 0,
         observacionIncons: 0,
         observacionCpe: 0,
+        observacionCond: 0,
       }
     );
 

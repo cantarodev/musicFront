@@ -63,10 +63,10 @@ const filterOptions = [
     label: 'CPE',
     value: 'cpe',
     subOptions: [
+      { label: 'EMITIDO A OTRO RUC', value: 'EMITIDO A OTRO RUC' },
+      { label: 'NRO SERIE INCORRECTO', value: 'NRO SERIE INCORRECTO' },
       { label: 'NO EXISTE', value: 'NO EXISTE' },
-      { label: 'ACEPTADO', value: 'ACEPTADO' },
       { label: 'ANULADO', value: 'ANULADO' },
-      { label: 'AUTORIZADO', value: 'AUTORIZADO' },
       { label: 'NO AUTORIZADO', value: 'NO AUTORIZADO' },
     ],
   },

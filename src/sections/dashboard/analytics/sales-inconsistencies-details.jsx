@@ -940,7 +940,7 @@ export const SalesInconsistenciesDetails = (props) => {
                                 : { color: 'inherit' }
                             }
                           >
-                            {detail.mtoTipoCambio}
+                            {detail.tipoCambio}
                           </Typography>
                         </TableCell>
                       )}
