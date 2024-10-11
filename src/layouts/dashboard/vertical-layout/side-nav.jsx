@@ -221,6 +221,7 @@ export const SideNav = (props) => {
           const response = await claveSolAccountsApi.getClaveSolAccounts({
             user_id: user?.user_id,
           });
+          console.log('ACCOUNTS:', response.data);
 
           const items = response.data;
           const uniqueItems = items.filter(

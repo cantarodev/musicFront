@@ -11,7 +11,15 @@ import Typography from '@mui/material/Typography';
 
 import { MultiSelect } from 'src/components/multi-select';
 import { useUpdateEffect } from 'src/hooks/use-update-effect';
-import { Autocomplete, TextField } from '@mui/material';
+import {
+  Autocomplete,
+  Checkbox,
+  InputAdornment,
+  ListItemText,
+  MenuItem,
+  OutlinedInput,
+  TextField,
+} from '@mui/material';
 
 import { usersApi } from 'src/api/users/userService';
 
@@ -33,10 +41,8 @@ const statusOptions = [
 export const SunKeyListSearch = (props) => {
   const { onFiltersChange, ...other } = props;
   const queryRef = useRef(null);
-  const autocompleteRef = useRef(null);
   const [chips, setChips] = useState([]);
   const [users, setUsers] = useState([]);
-  const [selectedUser, setSelectedUser] = useState(null);
 
   const getUsers = async () => {
     const response = await usersApi.getUsers();
@@ -100,7 +106,8 @@ export const SunKeyListSearch = (props) => {
           if (chip.field === 'user_id') {
             return {
               ...chip,
-              value: user_id || '',
+              value: value || '',
+              displayValue: label || '',
             };
           }
           return chip;
@@ -169,9 +176,10 @@ export const SunKeyListSearch = (props) => {
   }, []);
 
   const handleStatusChange = useCallback((values) => {
+    values = values.target.value;
     setChips((prevChips) => {
       const valuesFound = [];
-      // First cleanup the previous chips
+
       const newChips = prevChips.filter((chip) => {
         if (chip.field !== 'status') {
           return true;
@@ -186,7 +194,6 @@ export const SunKeyListSearch = (props) => {
         return found;
       });
 
-      // Nothing changed
       if (values.length === valuesFound.length) {
         return newChips;
       }
@@ -229,39 +236,71 @@ export const SunKeyListSearch = (props) => {
         spacing={1}
         sx={{ p: 1 }}
       >
-        <Stack
-          alignItems="center"
+        <Box
           component="form"
-          direction="row"
           onSubmit={handleQueryChange}
-          spacing={2}
-          sx={{ p: 2 }}
+          sx={{ flexGrow: 1 }}
         >
-          <SvgIcon>
-            <SearchMdIcon />
-          </SvgIcon>
-          <Input
+          <OutlinedInput
             defaultValue=""
-            disableUnderline
             fullWidth
             inputProps={{ ref: queryRef }}
             placeholder="Filtrar por nombre o ruc ..."
-            sx={{ flexGrow: 1 }}
+            startAdornment={
+              <InputAdornment position="start">
+                <SvgIcon>
+                  <SearchMdIcon />
+                </SvgIcon>
+              </InputAdornment>
+            }
+          />
+        </Box>
+        <Stack
+          alignItems="center"
+          direction="row"
+          columnGap={2}
+        >
+          <TextField
+            select
+            label="Estados"
+            value={statusValues}
+            onChange={handleStatusChange}
+            sx={{ width: 300, height: 54 }}
+            SelectProps={{
+              multiple: true,
+              renderValue: (selected) =>
+                selected
+                  .map((value) => {
+                    const option = statusOptions.find((opt) => opt.value === value);
+                    return option ? option.label : value;
+                  })
+                  .join(', '),
+            }}
+          >
+            {statusOptions.map((option) => (
+              <MenuItem
+                key={option.value}
+                value={option.value}
+              >
+                <Checkbox checked={statusValues.indexOf(option.value) > -1} />
+                <ListItemText primary={option.label} />
+              </MenuItem>
+            ))}
+          </TextField>
+
+          <Autocomplete
+            disablePortal
+            options={users}
+            sx={{ width: 300, height: 54 }}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                label="Usuarios"
+              />
+            )}
+            onChange={handleAutocompleteChange}
           />
         </Stack>
-        <Autocomplete
-          disablePortal
-          id="combo-box"
-          options={users}
-          sx={{ width: 300 }}
-          renderInput={(params) => (
-            <TextField
-              {...params}
-              label="Usuarios"
-            />
-          )}
-          onChange={handleAutocompleteChange}
-        />
       </Stack>
       <Divider />
       {showChips ? (
@@ -305,21 +344,6 @@ export const SunKeyListSearch = (props) => {
           </Typography>
         </Box>
       )}
-      <Divider />
-      <Stack
-        alignItems="center"
-        direction="row"
-        flexWrap="wrap"
-        spacing={1}
-        sx={{ p: 1 }}
-      >
-        <MultiSelect
-          label="Estados"
-          onChange={handleStatusChange}
-          options={statusOptions}
-          value={statusValues}
-        />
-      </Stack>
     </div>
   );
 };

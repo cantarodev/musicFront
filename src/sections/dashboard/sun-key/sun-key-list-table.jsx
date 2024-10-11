@@ -34,7 +34,7 @@ export const SunKeyListTable = (props) => {
   const [currentClaveSol, setCurrentClaveSol] = useState(null);
   const [enableBulkActions, setEnableBulkActions] = useState(false);
   const rootMap = new Map();
-  console.log(items);
+
   useEffect(() => {
     setEnableBulkActions(selected.length > 0);
   }, [selected]);

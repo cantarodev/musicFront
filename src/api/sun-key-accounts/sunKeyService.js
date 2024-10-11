@@ -14,6 +14,7 @@ class ClaveSolAccountsApi {
     const { filters, page, rowsPerPage, user_id } = request;
 
     let { data } = await getClaveSolAccounts(user_id);
+
     let count = data.length;
 
     if (filters) {
