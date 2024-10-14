@@ -3,6 +3,7 @@ import { Tabs, Tab, Box, Typography } from '@mui/material';
 
 import PurchasesInconsinstencies from 'src/sections/dashboard/analytics/purchases-inconsistencies';
 import PurchasesSire from 'src/sections/dashboard/analytics/purchases-sire';
+import Correlativity from 'src/sections/dashboard/analytics/sales-inconsistencies-correlativity';
 
 import SalesInconsinstencies from 'src/sections/dashboard/analytics/sales-inconsistencies';
 import SalesSire from 'src/sections/dashboard/analytics/sales-sire';
@@ -52,6 +53,7 @@ const BasicTabs = ({ type }) => {
         <Tab label="Sire" />
         <Tab label="Notas Créd. Déb." />
         {type === 'Compras' && <Tab label="Detracciones" />}
+        {type === 'Ventas' && <Tab label="Correlatividad" />}
       </Tabs>
 
       <TabPanel
@@ -82,6 +84,12 @@ const BasicTabs = ({ type }) => {
         index={3}
       >
         {type === 'Compras' && <PurchasesDetractions type={type} />}
+      </TabPanel>
+      <TabPanel
+        value={value}
+        index={3}
+      >
+        {type === 'Ventas' && <Correlativity type={type} />}
       </TabPanel>
     </Box>
   );
