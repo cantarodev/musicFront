@@ -9,7 +9,7 @@ import Skeleton from '@mui/material/Skeleton';
 
 export const PurchasesInconsistenciesCards = (props) => {
   const { title, loading, totalInconsistencies, totalSums } = props;
-  console.log("REPORTE: TOTAL SUMS", totalSums, "TOTAL INCONSISTENCIAS", totalInconsistencies);
+  console.log('REPORTE: TOTAL SUMS', totalSums, 'TOTAL INCONSISTENCIAS', totalInconsistencies);
   return (
     <Card>
       <CardHeader
@@ -62,7 +62,7 @@ export const PurchasesInconsistenciesCards = (props) => {
                 {loading ? (
                   <Skeleton variant="text" />
                 ) : (
-                  'S/ ' + parseFloat(totalSums.baseIGravada.toLocaleString('en-US')).toFixed(2)
+                  'S/ ' + parseFloat(totalSums?.baseIGravada.toLocaleString('en-US')).toFixed(2)
                 )}
               </Typography>
             </Stack>

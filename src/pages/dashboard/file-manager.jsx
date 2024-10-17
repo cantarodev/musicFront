@@ -141,18 +141,20 @@ const useItemsStore = (searchState, rucAccount) => {
 
   const handleItemsGet = useCallback(async () => {
     try {
-      const response = await fileManagerApi.getFiles(searchState);
+      if (rucAccount) {
+        const response = await fileManagerApi.getFiles(searchState);
 
-      if (isMounted()) {
-        setState({
-          items: response.data,
-          itemsCount: response.count,
-        });
+        if (isMounted()) {
+          setState({
+            items: response.data,
+            itemsCount: response.count,
+          });
+        }
       }
     } catch (err) {
       console.error(err);
     }
-  }, [searchState, isMounted]);
+  }, [searchState, rucAccount, isMounted]);
 
   const handleDelete = useCallback(async (itemId) => {
     try {
@@ -180,9 +182,7 @@ const useItemsStore = (searchState, rucAccount) => {
   }, []);
 
   useEffect(() => {
-    if (searchState && String(rucAccount)?.trim()) {
-      handleItemsGet();
-    }
+    handleItemsGet();
   }, [searchState, rucAccount]);
 
   return {

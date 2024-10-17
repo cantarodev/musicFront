@@ -72,6 +72,7 @@ const filterOptions = [
   },
   { label: 'Inconsistencia', value: 'incons' },
   { label: 'Condición', value: 'cond' },
+  { label: 'Obligados CPE', value: 'obligado' },
 ];
 
 export const PurchasesInconsistenciesFilter = (props) => {

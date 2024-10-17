@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import PropTypes from 'prop-types';
 import isEqual from 'lodash.isequal';
 import { SettingsContext, initialState, defaultSettings } from './settings-context';
+import { settings } from 'nprogress';
 
 const STORAGE_KEY = 'app.settings';
 
@@ -63,26 +64,29 @@ export const SettingsProvider = (props) => {
     }));
   }, []);
 
-  const handleUpdate = useCallback((settings) => {
-    setState((prevState) => {
-      storeSettings({
-        colorPreset: prevState.colorPreset,
-        contrast: prevState.contrast,
-        direction: prevState.direction,
-        layout: prevState.layout,
-        navColor: prevState.navColor,
-        paletteMode: prevState.paletteMode,
-        responsiveFontSizes: prevState.responsiveFontSizes,
-        stretch: prevState.stretch,
-        ...settings,
-      });
+  const handleUpdate = useCallback(
+    (settings) => {
+      setState((prevState) => {
+        storeSettings({
+          colorPreset: prevState.colorPreset,
+          contrast: prevState.contrast,
+          direction: prevState.direction,
+          layout: prevState.layout,
+          navColor: prevState.navColor,
+          paletteMode: prevState.paletteMode,
+          responsiveFontSizes: prevState.responsiveFontSizes,
+          stretch: prevState.stretch,
+          ...settings,
+        });
 
-      return {
-        ...prevState,
-        ...settings,
-      };
-    });
-  }, []);
+        return {
+          ...prevState,
+          ...settings,
+        };
+      });
+    },
+    [settings]
+  );
 
   const handleDrawerOpen = useCallback(() => {
     setState((prevState) => ({

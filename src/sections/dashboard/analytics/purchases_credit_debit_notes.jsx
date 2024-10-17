@@ -1,5 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Box, Typography } from '@mui/material';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  Box,
+  Typography,
+} from '@mui/material';
 import { CreditDebitInconsistenciesFilter } from 'src/sections/dashboard/analytics/credit-debit-notes-filter.jsx';
 import { useMockedUser } from 'src/hooks/use-mocked-user';
 import { reportApi } from 'src/api/reports/reportService';
@@ -10,7 +20,7 @@ const PurchasesCreditDebitNotes = ({ type }) => {
   const selectedAccount = useSelector((state) => state.account);
   const [loading, setLoading] = useState(false);
   const [detailsMain, setDetailsMain] = useState([]);
-  const [totalSums, setTotalSums] = useState({ baseIGravadaDG: 0, igv: 0, importe: 0 });
+  const [totalSums, setTotalSums] = useState({ baseIGravada: 0, igv: 0, importe: 0 });
   const [downloadPath, setDownloadPath] = useState('');
   const user = useMockedUser();
 
@@ -23,7 +33,7 @@ const PurchasesCreditDebitNotes = ({ type }) => {
     filters: [],
   });
 
-  console.log("QUERY TYPE: ", selectedParams);
+  console.log('QUERY TYPE: ', selectedParams);
 
   useEffect(() => {
     if (selectedAccount) {
@@ -39,31 +49,40 @@ const PurchasesCreditDebitNotes = ({ type }) => {
     setDetailsMain([]);
     setLoading(true);
     console.log('Parámetros seleccionados para filtrar: ', selectedParams);
-    
+
     try {
       const response = await reportApi.getReportDebitCreditNotes({
         ...selectedParams,
         user_id,
       });
 
-      console.log("######### RESPONSE: ", response);
+      console.log('######### RESPONSE: ', response);
       const data = response?.data;
 
       setDetailsMain(data?.all_results);
       setDownloadPath(data?.download_path);
-      
+
       // Cálculo de los totales
-      const totalBase = data?.all_results.reduce((sum, row) => sum + Math.abs(parseFloat(row.mtoImporteTotal) || 0), 0);
-      const totalIgv = data?.all_results.reduce((sum, row) => sum + Math.abs(parseFloat(row.igv) || 0), 0);
-      const totalImporte = data?.all_results.reduce((sum, row) => sum + Math.abs(parseFloat(row.sunat_monto_dep) || 0), 0);
-      
+      const totalBase = data?.all_results.reduce(
+        (sum, row) => sum + Math.abs(parseFloat(row.mtoImporteTotal) || 0),
+        0
+      );
+      const totalIgv = data?.all_results.reduce(
+        (sum, row) => sum + Math.abs(parseFloat(row.igv) || 0),
+        0
+      );
+      const totalImporte = data?.all_results.reduce(
+        (sum, row) => sum + Math.abs(parseFloat(row.sunat_monto_dep) || 0),
+        0
+      );
+
       setTotalSums({
-        baseIGravadaDG: totalBase,
+        baseIGravada: totalBase,
         igv: totalIgv,
         importe: totalImporte,
       });
 
-      setLoading(false); 
+      setLoading(false);
     } catch (err) {
       console.error(err);
       setLoading(false);
@@ -89,7 +108,10 @@ const PurchasesCreditDebitNotes = ({ type }) => {
       </Box>
 
       {/* Tabla de datos con scroll horizontal */}
-      <TableContainer component={Paper} sx={{ marginTop: 2, overflowX: 'auto' }}>
+      <TableContainer
+        component={Paper}
+        sx={{ marginTop: 2, overflowX: 'auto' }}
+      >
         <Table>
           <TableHead>
             <TableRow>
@@ -118,8 +140,11 @@ const PurchasesCreditDebitNotes = ({ type }) => {
                   <TableCell>{row.codMoneda}</TableCell>
                   <TableCell>{row.mtoTipoCambio}</TableCell>
                   <TableCell>{row.mtoImporteTotal}</TableCell>
-                  <TableCell sx={{ maxWidth: '90%'}}>
-                    <Typography variant="body2" style={{ wordWrap: 'break-word' }}>
+                  <TableCell sx={{ maxWidth: '90%' }}>
+                    <Typography
+                      variant="body2"
+                      style={{ wordWrap: 'break-word' }}
+                    >
                       {row.observacion}
                     </Typography>
                   </TableCell>
@@ -127,7 +152,10 @@ const PurchasesCreditDebitNotes = ({ type }) => {
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={10} align="center">
+                <TableCell
+                  colSpan={10}
+                  align="center"
+                >
                   No hay datos disponibles
                 </TableCell>
               </TableRow>

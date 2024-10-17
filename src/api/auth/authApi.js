@@ -2,7 +2,6 @@ import apiClient from '../apiClient';
 import { handleResponse } from 'src/utils/api-utils';
 
 export const getUser = (email, password) => {
-  console.log("META ENV: ", import.meta.env.VITE_API_URL);
   return handleResponse(
     apiClient.post(
       '/user/info',
@@ -32,6 +31,14 @@ export const createUser = (name, lastname, dni, phone, business_name, ruc, email
 
 export const me = () => {
   return handleResponse(apiClient.get(`/user/me`));
+};
+
+export const refreshToken = (accessToken) => {
+  return handleResponse(
+    apiClient.post(`/auth/refresh-token`, {
+      lastToken: accessToken,
+    })
+  );
 };
 
 export const verifyAccount = (user_id, token) => {

@@ -1,5 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Box, Typography } from '@mui/material';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  Box,
+  Typography,
+} from '@mui/material';
 import { DetractionsInconsistenciesFilter } from 'src/sections/dashboard/analytics/detractions-inconsistencies-filter.jsx';
 import { useMockedUser } from 'src/hooks/use-mocked-user';
 import { reportApi } from 'src/api/reports/reportService';
@@ -23,7 +33,7 @@ const PurchasesDetractions = ({ type }) => {
   });
 
   const [totalSums, setTotalSums] = useState({
-    baseIGravadaDG: 0.0,
+    baseIGravada: 0.0,
     igv: 0.0,
     importe: 0.0,
   });
@@ -48,7 +58,7 @@ const PurchasesDetractions = ({ type }) => {
         ...selectedParams,
         user_id,
       });
-      console.log("######### RESPONSE: ", response);
+      console.log('######### RESPONSE: ', response);
       const data = response?.data;
 
       setDetailsMain(data?.all_results); // Actualizamos los resultados
@@ -56,7 +66,7 @@ const PurchasesDetractions = ({ type }) => {
 
       // Actualizar los totales (ejemplo, dependerá de cómo esté estructurada la respuesta)
       setTotalSums({
-        baseIGravadaDG: data?.total_base || 0.0,
+        baseIGravada: data?.total_base || 0.0,
         igv: data?.total_igv || 0.0,
         importe: data?.total_importe || 0.0,
       });
@@ -79,13 +89,15 @@ const PurchasesDetractions = ({ type }) => {
       />
 
       {/* Componente de tarjetas (entre el filtro y la tabla) */}
-      <Box sx={{ mt: 2 }}> {/* Margen superior de 4 unidades para crear espacio */}
+      <Box sx={{ mt: 2 }}>
+        {' '}
+        {/* Margen superior de 4 unidades para crear espacio */}
         <PurchasesInconsistenciesCards
           title="Resumen detracciones"
           loading={loading}
           totalInconsistencies={0} // Valores simulados, actualiza con los datos correctos
           totalSums={{
-            baseIGravadaDG: 0,
+            baseIGravada: 0,
             igv: 0,
             importe: 0,
           }}
@@ -93,7 +105,10 @@ const PurchasesDetractions = ({ type }) => {
       </Box>
 
       {/* Tabla de datos */}
-      <TableContainer component={Paper} sx={{ marginTop: 2 }}>
+      <TableContainer
+        component={Paper}
+        sx={{ marginTop: 2 }}
+      >
         <Table>
           <TableHead>
             <TableRow>
@@ -111,7 +126,8 @@ const PurchasesDetractions = ({ type }) => {
               <TableCell>D. Tasa (SUNAT)</TableCell>
               <TableCell>Fecha detraccion</TableCell>
               <TableCell>D. Fecha pago (SUNAT)</TableCell>
-              <TableCell sx={{ width: '30%' }}>Observación</TableCell> {/* Aumentar el ancho de la columna Observación */}
+              <TableCell sx={{ width: '30%' }}>Observación</TableCell>{' '}
+              {/* Aumentar el ancho de la columna Observación */}
             </TableRow>
           </TableHead>
           <TableBody>
@@ -134,7 +150,10 @@ const PurchasesDetractions = ({ type }) => {
                   <TableCell>{row.fecha_pago_sunat}</TableCell>
                   <TableCell sx={{ whiteSpace: 'normal', wordBreak: 'break-word' }}>
                     {/* Esto asegura que el texto largo se ajuste en varias líneas */}
-                    <Typography variant="body2" style={{ wordWrap: 'break-word' }}>
+                    <Typography
+                      variant="body2"
+                      style={{ wordWrap: 'break-word' }}
+                    >
                       {row.observacion}
                     </Typography>
                   </TableCell>
@@ -142,7 +161,10 @@ const PurchasesDetractions = ({ type }) => {
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={10} align="center">
+                <TableCell
+                  colSpan={10}
+                  align="center"
+                >
                   No hay datos disponibles
                 </TableCell>
               </TableRow>
