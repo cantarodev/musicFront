@@ -119,7 +119,7 @@ export const SalesInconsistenciesDetails = (props) => {
 
   const [order, setOrder] = useState('asc');
   const [orderBy, setOrderBy] = useState('mtoImporteTotal');
-  console.log('TOTAL SUMS:', totalSums);
+
   const handleDialogOpen = () => {
     setOpen(true);
   };
@@ -162,7 +162,6 @@ export const SalesInconsistenciesDetails = (props) => {
 
     return formattedNumber;
   };
-  console.log(totalSums);
 
   return (
     <Card>

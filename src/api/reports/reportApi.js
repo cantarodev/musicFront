@@ -11,8 +11,6 @@ export const reportObservations = (
   account,
   factoringStatuses
 ) => {
-  console.log(account);
-
   return handleResponse(
     apiClient.post('/report/observations/show/', {
       user_id,
@@ -22,7 +20,7 @@ export const reportObservations = (
       currency,
       filters,
       account,
-      factoringStatuses
+      factoringStatuses,
     })
   );
 };
@@ -34,23 +32,20 @@ export const getReportDetractions = (
   docType,
   currency,
   filters,
-  account,
-  ) => {
+  account
+) => {
   return handleResponse(
-    apiClient.post(
-      `/report/observations/detractions`, {
-        user_id,
-        period,
-        queryType,
-        docType,
-        currency,
-        filters,
-        account  
-      }
-    )
+    apiClient.post(`/report/observations/detractions`, {
+      user_id,
+      period,
+      queryType,
+      docType,
+      currency,
+      filters,
+      account,
+    })
   );
 };
-
 
 export const getReportDebitCreditNotes = (
   user_id,
@@ -59,23 +54,20 @@ export const getReportDebitCreditNotes = (
   docType,
   currency,
   filters,
-  account,
-  ) => {
+  account
+) => {
   return handleResponse(
-    apiClient.post(
-      `/report/observations/notes`, {
-        user_id,
-        period,
-        queryType,
-        docType,
-        currency,
-        filters,
-        account  
-      }
-    )
+    apiClient.post(`/report/observations/notes`, {
+      user_id,
+      period,
+      queryType,
+      docType,
+      currency,
+      filters,
+      account,
+    })
   );
 };
-
 
 export const getReportCorrelativity = (
   user_id,
@@ -84,23 +76,20 @@ export const getReportCorrelativity = (
   docType,
   currency,
   filters,
-  account,
-  ) => {
+  account
+) => {
   return handleResponse(
-    apiClient.post(
-      `/report/observations/correlativity`, {
-        user_id,
-        period,
-        queryType,
-        docType,
-        currency,
-        filters,
-        account  
-      }
-    )
+    apiClient.post(`/report/observations/correlativity`, {
+      user_id,
+      period,
+      queryType,
+      docType,
+      currency,
+      filters,
+      account,
+    })
   );
 };
-
 
 export const getReportMissings = (user_id, period, queryType, docType, currency, account) => {
   return handleResponse(
