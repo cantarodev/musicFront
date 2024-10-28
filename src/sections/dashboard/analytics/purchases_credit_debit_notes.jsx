@@ -1,18 +1,21 @@
 import React, { useState, useEffect } from 'react';
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Box, Typography } from '@mui/material';
-import { CreditDebitInconsistenciesFilter } from 'src/sections/dashboard/analytics/credit-debit-notes-filter.jsx';
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Box, Typography, Card, CardHeader } from '@mui/material';
+import { DetractionsInconsistenciesFilter } from 'src/sections/dashboard/analytics/detractions-inconsistencies-filter.jsx';
 import { useMockedUser } from 'src/hooks/use-mocked-user';
 import { reportApi } from 'src/api/reports/reportService';
 import { useSelector } from 'react-redux';
-import { PurchasesInconsistenciesCards } from 'src/sections/dashboard/analytics/purchases-inconsistencies-cards';
+import Grid from '@mui/material/Grid';
+import Stack from '@mui/material/Stack';
+import Skeleton from '@mui/material/Skeleton';
 
-const PurchasesCreditDebitNotes = ({ type }) => {
-  const selectedAccount = useSelector((state) => state.account);
+const PurchasesDetractions = ({ type }) => {
+  const selectedAccount = useSelector((state) => state.account); 
   const [loading, setLoading] = useState(false);
-  const [detailsMain, setDetailsMain] = useState([]);
+  const [detailsMain, setDetailsMain] = useState([]); 
   const [totalSums, setTotalSums] = useState({ baseIGravadaDG: 0, igv: 0, importe: 0 });
-  const [downloadPath, setDownloadPath] = useState('');
-  const user = useMockedUser();
+  const [totalInconsistencies, setTotalInconsistencies] = useState(0); 
+  const [downloadPath, setDownloadPath] = useState(''); 
+  const user = useMockedUser(); 
 
   const [selectedParams, setSelectedParams] = useState({
     period: '',
@@ -22,8 +25,6 @@ const PurchasesCreditDebitNotes = ({ type }) => {
     currency: 'all',
     filters: [],
   });
-
-  console.log("QUERY TYPE: ", selectedParams);
 
   useEffect(() => {
     if (selectedAccount) {
@@ -38,31 +39,28 @@ const PurchasesCreditDebitNotes = ({ type }) => {
     const user_id = user?.user_id;
     setDetailsMain([]);
     setLoading(true);
-    console.log('Parámetros seleccionados para filtrar: ', selectedParams);
-    
     try {
-      const response = await reportApi.getReportDebitCreditNotes({
+      const response = await reportApi.getReportDetractions({
         ...selectedParams,
         user_id,
       });
 
-      console.log("######### RESPONSE: ", response);
       const data = response?.data;
-
       setDetailsMain(data?.all_results);
       setDownloadPath(data?.download_path);
-      
+
       // Cálculo de los totales
       const totalBase = data?.all_results.reduce((sum, row) => sum + Math.abs(parseFloat(row.mtoImporteTotal) || 0), 0);
-      const totalIgv = data?.all_results.reduce((sum, row) => sum + Math.abs(parseFloat(row.igv) || 0), 0);
-      const totalImporte = data?.all_results.reduce((sum, row) => sum + Math.abs(parseFloat(row.sunat_monto_dep) || 0), 0);
-      
+      const totalIgv = data?.all_results.reduce((sum, row) => sum + Math.abs(parseFloat(row.sunat_monto_dep) || 0), 0);
+      const totalImporte = data?.all_results.reduce((sum, row) => sum + Math.abs(parseFloat(row.sunat_rate_csv) || 0), 0);
+
       setTotalSums({
         baseIGravadaDG: totalBase,
         igv: totalIgv,
         importe: totalImporte,
       });
 
+      setTotalInconsistencies(data?.all_results.length || 0); 
       setLoading(false); 
     } catch (err) {
       console.error(err);
@@ -72,37 +70,98 @@ const PurchasesCreditDebitNotes = ({ type }) => {
 
   return (
     <div>
-      <CreditDebitInconsistenciesFilter
+      <DetractionsInconsistenciesFilter
         selectedParams={selectedParams}
         setSelectedParams={setSelectedParams}
         loading={loading}
         onLoadData={onLoadData}
       />
 
-      <Box sx={{ mt: 2 }}>
-        <PurchasesInconsistenciesCards
-          title="Resumen de notas de crédito y débito"
-          loading={loading}
-          totalInconsistencies={detailsMain.length || 0} // Aquí pasamos el número de inconsistencias
-          totalSums={totalSums} // Aquí pasamos los totales calculados
-        />
-      </Box>
+      {/* Tarjeta con el título "Compras" y los totales */}
+      <Card sx={{ marginTop: 2 }}>
+        <CardHeader title="Compras" sx={{ p: 2, pb: 0 }} />
+        <Box sx={{ p: 2 }}>
+          <Grid container spacing={2}>
+            <Grid item xs={12} sm={3}>
+              <Stack
+                sx={{
+                  backgroundColor: (theme) => theme.palette.mode === 'dark' ? 'neutral.800' : 'error.lightest',
+                  height: 70,
+                  borderRadius: 1.5,
+                  p: 1.5,
+                  width: '100%',
+                }}
+              >
+                <Typography color="text.secondary" variant="body2">Inconsistencias</Typography>
+                <Typography variant="h5">{loading ? <Skeleton variant="text" /> : totalInconsistencies}</Typography>
+              </Stack>
+            </Grid>
+            <Grid item xs={12} sm={3}>
+              <Stack
+                sx={{
+                  backgroundColor: (theme) => theme.palette.mode === 'dark' ? 'neutral.800' : 'error.lightest',
+                  height: 70,
+                  borderRadius: 1.5,
+                  p: 1.5,
+                  width: '100%',
+                }}
+              >
+                <Typography color="text.secondary" variant="body2">Base Imponible</Typography>
+                <Typography variant="h5">{loading ? <Skeleton variant="text" /> : 'S/ ' + parseFloat(totalSums.baseIGravadaDG.toLocaleString('en-US')).toFixed(2)}</Typography>
+              </Stack>
+            </Grid>
+            <Grid item xs={12} sm={3}>
+              <Stack
+                sx={{
+                  backgroundColor: (theme) => theme.palette.mode === 'dark' ? 'neutral.800' : 'error.lightest',
+                  height: 70,
+                  borderRadius: 1.5,
+                  p: 1.5,
+                  width: '100%',
+                }}
+              >
+                <Typography color="text.secondary" variant="body2">IGV</Typography>
+                <Typography variant="h5">{loading ? <Skeleton variant="text" /> : 'S/ ' + parseFloat(totalSums.igv.toLocaleString('en-US')).toFixed(2)}</Typography>
+              </Stack>
+            </Grid>
+            <Grid item xs={12} sm={3}>
+              <Stack
+                sx={{
+                  backgroundColor: (theme) => theme.palette.mode === 'dark' ? 'neutral.800' : 'error.lightest',
+                  height: 70,
+                  borderRadius: 1.5,
+                  p: 1.5,
+                  width: '100%',
+                }}
+              >
+                <Typography color="text.secondary" variant="body2">Importe</Typography>
+                <Typography variant="h5">{loading ? <Skeleton variant="text" /> : 'S/ ' + parseFloat(totalSums.importe.toLocaleString('en-US')).toFixed(2)}</Typography>
+              </Stack>
+            </Grid>
+          </Grid>
+        </Box>
+      </Card>
 
-      {/* Tabla de datos con scroll horizontal */}
-      <TableContainer component={Paper} sx={{ marginTop: 2, overflowX: 'auto' }}>
+      {/* Tabla de datos */}
+      <TableContainer component={Paper} sx={{ marginTop: 2 }}>
         <Table>
           <TableHead>
             <TableRow>
-              <TableCell sx={{ width: '7%' }}>Período</TableCell>
-              <TableCell sx={{ width: '10%' }}>RUC</TableCell>
-              <TableCell sx={{ width: '15%' }}>Razón Social</TableCell>
-              <TableCell sx={{ width: '10%' }}>Fecha Emisión</TableCell>
-              <TableCell sx={{ width: '10%' }}>Tipo Comprobante</TableCell>
-              <TableCell sx={{ width: '10%' }}>Número Comprobante</TableCell>
-              <TableCell sx={{ width: '5%' }}>Moneda</TableCell>
-              <TableCell sx={{ width: '7%' }}>Tipo de Cambio</TableCell>
-              <TableCell sx={{ width: '10%' }}>Monto Importe Total</TableCell>
-              <TableCell sx={{ maxWidth: '90%' }}>Observación</TableCell>
+              <TableCell>Período</TableCell>
+              <TableCell>RUC</TableCell>
+              <TableCell>Razón Social</TableCell>
+              <TableCell>Fecha Emisión</TableCell>
+              <TableCell>Tipo Comprobante</TableCell>
+              <TableCell>Número Comprobante</TableCell>
+              <TableCell>Moneda</TableCell>
+              <TableCell>Tipo de Cambio</TableCell>
+              <TableCell>Numero detracción</TableCell>
+              <TableCell>Monto Importe Total</TableCell>
+              <TableCell>D. Pago (SUNAT)</TableCell>
+              <TableCell>D. Tasa (SUNAT)</TableCell>
+              <TableCell>Fecha detracción</TableCell>
+              <TableCell>D. Fecha pago (SUNAT)</TableCell>
+              <TableCell sx={{ width: '30%' }}>Observación</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -117,8 +176,13 @@ const PurchasesCreditDebitNotes = ({ type }) => {
                   <TableCell>{row.numCpe}</TableCell>
                   <TableCell>{row.codMoneda}</TableCell>
                   <TableCell>{row.mtoTipoCambio}</TableCell>
+                  <TableCell>{row.numCDD}</TableCell>
                   <TableCell>{row.mtoImporteTotal}</TableCell>
-                  <TableCell sx={{ maxWidth: '90%'}}>
+                  <TableCell>{row.sunat_monto_dep}</TableCell>
+                  <TableCell>{row.sunat_rate_csv}</TableCell>
+                  <TableCell>{row.fecEmisionCDD}</TableCell>
+                  <TableCell>{row.fecha_pago_sunat}</TableCell>
+                  <TableCell sx={{ whiteSpace: 'normal', wordBreak: 'break-word' }}>
                     <Typography variant="body2" style={{ wordWrap: 'break-word' }}>
                       {row.observacion}
                     </Typography>
@@ -127,7 +191,7 @@ const PurchasesCreditDebitNotes = ({ type }) => {
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={10} align="center">
+                <TableCell colSpan={15} align="center">
                   No hay datos disponibles
                 </TableCell>
               </TableRow>
@@ -139,4 +203,4 @@ const PurchasesCreditDebitNotes = ({ type }) => {
   );
 };
 
-export default PurchasesCreditDebitNotes;
+export default PurchasesDetractions;

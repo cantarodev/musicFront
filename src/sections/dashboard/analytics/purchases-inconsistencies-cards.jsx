@@ -9,7 +9,8 @@ import Skeleton from '@mui/material/Skeleton';
 
 export const PurchasesInconsistenciesCards = (props) => {
   const { title, loading, totalInconsistencies, totalSums } = props;
-  console.log("REPORTE: TOTAL SUMS", totalSums, "TOTAL INCONSISTENCIAS", totalInconsistencies);
+  console.log("-----------------------")
+  console.log("titulo", title, "loading", loading, "totalInconsistencies", totalInconsistencies, "totalSums", totalSums);
   return (
     <Card>
       <CardHeader
