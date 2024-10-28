@@ -72,6 +72,7 @@ const filterOptions = [
   },
   { label: 'Inconsistencia', value: 'incons' },
   { label: 'Condición', value: 'cond' },
+  { label: 'Obligados CPE', value: 'obligado' },
 ];
 
 export const PurchasesInconsistenciesFilter = (props) => {
@@ -239,16 +240,12 @@ export const PurchasesInconsistenciesFilter = (props) => {
       ...state,
       filters: selectedOptions,
     }));
-
-    console.log('Filtros seleccionados: ', selectedOptions);
   }, [selectedOptions, setSelectedParams]);
 
   useEffect(() => {
     console.log('Opciones seleccionadas: ', selectedOptions);
     console.log('Detalles seleccionados: ', selectedDetails);
   }, [selectedOptions, selectedDetails]);
-
-  console.log('PARAMS', selectedParams);
 
   return (
     <Box

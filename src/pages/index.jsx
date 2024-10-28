@@ -1,3 +1,4 @@
+import ProtectedRoute from 'src/components/protected-route';
 import { Seo } from 'src/components/seo';
 import { usePageView } from 'src/hooks/use-page-view';
 import LoginPage from 'src/pages/auth/login';
@@ -9,7 +10,9 @@ const Page = () => {
     <>
       <Seo />
       <main>
-        <LoginPage />
+        <ProtectedRoute redirectTo="/dashboard/file-manager">
+          <LoginPage />
+        </ProtectedRoute>
       </main>
     </>
   );

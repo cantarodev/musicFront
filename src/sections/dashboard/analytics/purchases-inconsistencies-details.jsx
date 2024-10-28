@@ -58,6 +58,7 @@ const columnLabels = {
   observacionIncons: 'Observación Incons.',
   observacionCpe: 'Observación CPE',
   observacionCond: 'Observación Cond.',
+  observacionObligado: 'Observación Obligados CPE.',
 };
 
 function descendingComparator(a, b, orderBy) {
@@ -115,6 +116,7 @@ export const PurchasesInconsistenciesDetails = (props) => {
     observacionIncons: true,
     observacionCpe: true,
     observacionCond: true,
+    observacionObligado: true,
   });
   const [open, setOpen] = useState(false);
 
@@ -702,6 +704,18 @@ export const PurchasesInconsistenciesDetails = (props) => {
                     </Typography>
                   </TableCell>
                 )}
+                {columnVisibility.observacionObligado && (
+                  <TableCell>
+                    <Typography
+                      sx={{
+                        fontSize: 12,
+                        fontWeight: 'bold',
+                      }}
+                    >
+                      Observación Obligados.
+                    </Typography>
+                  </TableCell>
+                )}
               </TableRow>
             </TableHead>
             <TableBody>
@@ -1125,6 +1139,36 @@ export const PurchasesInconsistenciesDetails = (props) => {
                           </Typography>
                         </TableCell>
                       )}
+                      {columnVisibility.observacionObligado && (
+                        <TableCell className="customTableCell">
+                          <Typography
+                            sx={{
+                              fontSize: 14,
+                              fontWeight: 'normal',
+                              whiteSpace: 'nowrap',
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                            }}
+                          >
+                            {detail.observacion['obligado'].length > 0 ? (
+                              <Typography
+                                color="text.secondary"
+                                fontWeight="bold"
+                                sx={{
+                                  cursor: 'pointer',
+                                  '&:hover': {
+                                    color: 'primary.main',
+                                  },
+                                }}
+                              >
+                                {detail.observacion['obligado'].join('. ')}
+                              </Typography>
+                            ) : (
+                              'Sin observaciones'
+                            )}
+                          </Typography>
+                        </TableCell>
+                      )}
                     </TableRow>
                   );
                 })
@@ -1199,6 +1243,11 @@ export const PurchasesInconsistenciesDetails = (props) => {
                   {columnVisibility.observacionCond && (
                     <TableCell sx={{ textAlign: 'center', fontSize: 14, fontWeight: 600 }}>
                       {totalSums.observacionCond}
+                    </TableCell>
+                  )}
+                  {columnVisibility.observacionObligado && (
+                    <TableCell sx={{ textAlign: 'center', fontSize: 14, fontWeight: 600 }}>
+                      {totalSums.observacionObligado}
                     </TableCell>
                   )}
                 </TableRow>

@@ -1,5 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Box, Typography } from '@mui/material';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  Box,
+  Typography,
+} from '@mui/material';
 import { DetractionsInconsistenciesFilter } from 'src/sections/dashboard/analytics/detractions-inconsistencies-filter.jsx';
 import { useMockedUser } from 'src/hooks/use-mocked-user';
 import { reportApi } from 'src/api/reports/reportService';
@@ -47,7 +57,6 @@ const PurchasesDetractions = ({ type }) => {
         ...selectedParams,
         user_id,
       });
-
       const data = response?.data;
       setDetailsMain(data?.all_results);
       setDownloadPath(data?.download_path);
@@ -148,7 +157,10 @@ const PurchasesDetractions = ({ type }) => {
       </Box>
 
       {/* Tabla de datos */}
-      <TableContainer component={Paper} sx={{ marginTop: 2 }}>
+      <TableContainer
+        component={Paper}
+        sx={{ marginTop: 2 }}
+      >
         <Table>
           <TableHead>
             <TableRow>

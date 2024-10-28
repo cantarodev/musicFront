@@ -35,6 +35,25 @@ const getMonthInSpanish = (period) => {
   return monthName;
 };
 
+const status = {
+  pending: {
+    label: 'Pendiente',
+    color: 'warning',
+  },
+  error: {
+    label: 'Error',
+    color: 'error',
+  },
+  validating: {
+    label: 'Validando',
+    color: 'info',
+  },
+  processed: {
+    label: 'Procesado',
+    color: 'success',
+  },
+};
+
 export const ItemListRow = (props) => {
   const { item, onDelete } = props;
   const popover = usePopover();
@@ -50,26 +69,14 @@ export const ItemListRow = (props) => {
   const createdAtFormat = createDate && format(createDate, 'MMMM dd, yyyy HH:mm', { locale: es });
   const fieldYear = item.period && String(item.period).substring(0, 4);
 
-  const statusFormat =
-    item.cpe_validation_status === 'pending'
-      ? 'Pendiente'
-      : item.cpe_validation_status === 'validating'
-        ? 'Validando'
-        : 'Procesado';
-
-  const statusColor =
-    item.cpe_validation_status === 'pending'
-      ? 'warning'
-      : item.cpe_validation_status === 'validating'
-        ? 'info'
-        : 'success';
-
   return (
     <>
       <TableRow key={item._id}>
         <TableCell>
           <Typography variant="subtitle2">
-            <SeverityPill color={statusColor}>{statusFormat}</SeverityPill>
+            <SeverityPill color={status[item.cpe_validation_status].color}>
+              {status[item.cpe_validation_status].label}
+            </SeverityPill>
           </Typography>
         </TableCell>
         <TableCell>

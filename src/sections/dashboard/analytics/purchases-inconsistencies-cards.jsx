@@ -63,7 +63,7 @@ export const PurchasesInconsistenciesCards = (props) => {
                 {loading ? (
                   <Skeleton variant="text" />
                 ) : (
-                  'S/ ' + parseFloat(totalSums.baseIGravada.toLocaleString('en-US')).toFixed(2)
+                  'S/ ' + totalSums.baseIGravada.toLocaleString('en-US')
                 )}
               </Typography>
             </Stack>
@@ -88,7 +88,7 @@ export const PurchasesInconsistenciesCards = (props) => {
                 {loading ? (
                   <Skeleton variant="text" />
                 ) : (
-                  'S/ ' + parseFloat(totalSums.igv.toLocaleString('en-US')).toFixed(2)
+                  'S/ ' + totalSums.igv.toLocaleString('en-US')
                 )}
               </Typography>
             </Stack>
@@ -113,7 +113,7 @@ export const PurchasesInconsistenciesCards = (props) => {
                 {loading ? (
                   <Skeleton variant="text" />
                 ) : (
-                  'S/ ' + parseFloat(totalSums.importe.toLocaleString('en-US')).toFixed(2)
+                  'S/ ' + totalSums.importe.toLocaleString('en-US')
                 )}
               </Typography>
             </Stack>

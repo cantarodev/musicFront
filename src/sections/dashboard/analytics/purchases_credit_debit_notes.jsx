@@ -55,7 +55,7 @@ const PurchasesDetractions = ({ type }) => {
       const totalImporte = data?.all_results.reduce((sum, row) => sum + Math.abs(parseFloat(row.sunat_rate_csv) || 0), 0);
 
       setTotalSums({
-        baseIGravadaDG: totalBase,
+        baseIGravada: totalBase,
         igv: totalIgv,
         importe: totalImporte,
       });

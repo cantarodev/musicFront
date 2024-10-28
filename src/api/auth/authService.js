@@ -1,6 +1,4 @@
-import { decode } from 'src/utils/jwt';
-
-import { getUser, createUser, me } from './authApi';
+import { getUser, createUser, me, refreshToken } from './authApi';
 
 class AuthApi {
   async signIn(request) {
@@ -29,6 +27,11 @@ class AuthApi {
       lastname: data.lastname,
       role_id: data.role_id,
     };
+  }
+
+  async refreshToken(request) {
+    const { accessToken } = request;
+    return await refreshToken(accessToken);
   }
 }
 
