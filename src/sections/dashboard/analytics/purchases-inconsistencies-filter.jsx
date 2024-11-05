@@ -1,26 +1,17 @@
 import PropTypes from 'prop-types';
-import Grid from '@mui/material/Grid2';
 import TextField from '@mui/material/TextField';
-import {
-  Box,
-  Button,
-  Checkbox,
-  Collapse,
-  Container,
-  IconButton,
-  List,
-  ListItemText,
-  MenuItem,
-} from '@mui/material';
-import { useEffect, useState } from 'react';
-import FilterListIcon from '@mui/icons-material/FilterList';
-import ChevronRightIcon from '@mui/icons-material/ChevronRight';
-import NavigateBeforeIcon from '@mui/icons-material/NavigateBefore';
+import { Box, Checkbox, IconButton, ListItemText, MenuItem, Tooltip } from '@mui/material';
+import { useEffect, useMemo, useState } from 'react';
+import RestoreIcon from '@mui/icons-material/Restore';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
 
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { LocalizationProvider, DatePicker } from '@mui/x-date-pickers';
 import { format, parse } from 'date-fns';
 import esES from 'date-fns/locale/es';
+import { useSelector } from 'react-redux';
+import { useLocalStorage } from 'src/hooks/use-local-storage';
 
 const customEnLocale = {
   ...esES,
@@ -30,175 +21,250 @@ const customEnLocale = {
   },
 };
 
-const searchTypeOptions = [
+const validations = [
   { label: 'Todos', value: 'all' },
-  { label: '01 - Factura', value: '01' },
-  { label: '03 - Boleta de venta', value: '03' },
-  { label: '07 - Nota de crédito', value: 'F7' },
-  { label: '08 - Nota de débito', value: 'F8' },
-];
-
-const searchCurrencyOptions = [
-  { label: 'Todos', value: 'all' },
-  { label: 'USD - Dólares', value: 'USD' },
-  { label: 'PEN- Soles', value: 'PEN' },
-  { label: 'EUR - Euros', value: 'EUR' },
-];
-
-const filterOptions = [
-  { label: 'Todos', value: 'all' },
-  { label: 'Tipo de Cambio', value: 'tc' },
-  {
-    label: 'Factoring',
-    value: 'facto',
-    subOptions: [
-      { label: 'No válido', value: 'No válido' },
-      { label: 'Pendiente', value: 'Pendiente' },
-      { label: 'Pendiente por reinicio', value: 'Pendiente por reinicio' },
-      { label: 'Subsanado', value: 'Subsanado' },
-      { label: 'Disconforme', value: 'Disconforme' },
-    ],
-  },
+  { label: 'Tipo de Cambio', value: 'tipoCambio' },
   {
     label: 'CPE',
     value: 'cpe',
     subOptions: [
-      { label: 'EMITIDO A OTRO RUC', value: 'EMITIDO A OTRO RUC' },
-      { label: 'NRO SERIE INCORRECTO', value: 'NRO SERIE INCORRECTO' },
-      { label: 'NO EXISTE', value: 'NO EXISTE' },
-      { label: 'ANULADO', value: 'ANULADO' },
-      { label: 'NO AUTORIZADO', value: 'NO AUTORIZADO' },
+      { label: 'EMITIDO A OTRO RUC', value: 'emitido a otro contribuyente' },
+      { label: 'NRO SERIE INCORRECTO', value: 'serie es incorrecta' },
+      { label: 'F. EMISION INCORRECTA', value: 'emisión es incorrecta' },
+      { label: 'NO EXISTE', value: 'no existe' },
+      { label: 'ANULADO', value: 'anulado' },
+      { label: 'NO AUTORIZADO', value: 'no autorizado' },
     ],
   },
-  { label: 'Inconsistencia', value: 'incons' },
-  { label: 'Condición', value: 'cond' },
+  { label: 'Inconsistencias', value: 'inconsistencias' },
+  { label: 'Condición', value: 'condicion' },
   { label: 'Obligados CPE', value: 'obligado' },
 ];
 
 export const PurchasesInconsistenciesFilter = (props) => {
   const { selectedParams, setSelectedParams, loading, onLoadData } = props;
-  const [selectedOptions, setSelectedOptions] = useState({ incons: [] });
-  const [selectedDetails, setSelectedDetails] = useState([]);
-  const [detailOptions, setDetailOptions] = useState([]);
-  const [expanded, setExpanded] = useState({});
+  const results = useSelector((state) => state.report);
+  const [filters, setFilters] = useLocalStorage('filters');
+
+  const [activeSubOptions, setActiveSubOptions] = useState(null);
+  const [clean, setClean] = useState(false);
+
+  const getLabel = (value) => {
+    const option = validations.find((opt) => opt.value === value);
+    return option ? option.label : null;
+  };
+
+  const getSubLabel = (list) => {
+    const cpeOption = validations.find((option) => option.value === 'cpe');
+
+    for (let str of list) {
+      for (let subOption of cpeOption.subOptions) {
+        if (String(str).toLocaleLowerCase().includes(subOption.value)) {
+          return { label: subOption.label, value: subOption.value };
+        }
+      }
+    }
+
+    return null;
+  };
+
+  const getUniqueByLabelAndValue = (array) => {
+    const uniqueSet = new Set();
+    const uniqueArray = [];
+
+    array.forEach((item) => {
+      const identifier = JSON.stringify({ label: item.label, value: item.value });
+      if (!uniqueSet.has(identifier)) {
+        uniqueSet.add(identifier);
+        uniqueArray.push(item);
+      }
+    });
+
+    return uniqueArray;
+  };
+
+  const handleSubOptionClick = (option) => {
+    setActiveSubOptions(option);
+  };
+
+  const handleBackToMainMenu = () => {
+    setActiveSubOptions(null);
+  };
+
+  useEffect(() => {
+    setSelectedParams((state) => ({
+      ...state,
+      currency: 'all',
+      filters: { all: [] },
+    }));
+  }, [selectedParams.docType]);
+
+  useEffect(() => {
+    setSelectedParams((state) => ({
+      ...state,
+      filters: { all: [] },
+    }));
+  }, [selectedParams.currency]);
+
+  useEffect(() => {
+    if (selectedParams.period !== filters.period && selectedParams.period) {
+      onLoadData();
+    }
+  }, [selectedParams.period]);
+
+  const searchTypeOptions = useMemo(
+    () => [
+      { label: 'Todos', value: 'all' },
+      ...Array.from(
+        new Map(results?.map((doc) => [doc.codComp, doc.tipoComprobante])).entries()
+      ).map(([codComp, tipoComprobante]) => ({
+        label: tipoComprobante,
+        value: codComp,
+      })),
+    ],
+    [results]
+  );
+
+  const searchCurrencyOptions = useMemo(() => {
+    const currencyMap = new Map(
+      results
+        ?.map((doc) => {
+          if (selectedParams.docType === 'all' || doc.codComp === selectedParams.docType) {
+            return [doc.codMoneda, doc.tipoMoneda];
+          }
+        })
+        .filter(Boolean)
+    );
+
+    return [
+      { label: 'Todos', value: 'all' },
+      ...Array.from(currencyMap.entries()).map(([codMoneda, tipoMoneda]) => ({
+        label: tipoMoneda,
+        value: codMoneda,
+      })),
+    ];
+  }, [results, selectedParams.docType]);
+
+  const filterOptions = useMemo(() => {
+    const uniqueObservationKeys = new Set();
+    const subOptions = [];
+
+    results
+      ?.filter(
+        (item) =>
+          (selectedParams.docType === 'all' || item.codComp === selectedParams.docType) &&
+          (selectedParams.currency === 'all' || item.codMoneda === selectedParams.currency)
+      )
+      .forEach((item) => {
+        if (item.observaciones) {
+          const keys = Object.keys(item.observaciones);
+          keys.forEach((key) => uniqueObservationKeys.add(key));
+          if (item.observaciones.hasOwnProperty('cpe')) {
+            const result = getSubLabel(item.observaciones.cpe);
+            if (result) {
+              subOptions.push(result);
+            }
+          }
+        }
+      });
+
+    let uniqueSubOptions = [];
+    if (subOptions.length) {
+      uniqueSubOptions = getUniqueByLabelAndValue(subOptions);
+    }
+
+    return [
+      { label: 'Todos', value: 'all' },
+      ...Array.from(uniqueObservationKeys).map((key) => {
+        const hasSubOptions = key === 'cpe' && uniqueSubOptions.length > 0;
+
+        return {
+          label: getLabel(key),
+          value: key,
+          subOptions: hasSubOptions ? uniqueSubOptions : undefined,
+        };
+      }),
+    ];
+  }, [results, selectedParams.docType, selectedParams.currency, clean]);
 
   const handleSelected = (event) => {
     const { name, value } = event.target;
     setSelectedParams((state) => ({ ...state, [name]: value }));
   };
 
-  // const handleSelectedOptions = (option) => {
-  //   let updatedSelection = { ...selectedOptions };
-
-  //   if (option.value === 'all') {
-  //     // Si se selecciona "all", seleccionamos todas las opciones principales
-  //     if (Object.keys(updatedSelection).length === filterOptions.length) {
-  //       updatedSelection = {}; // Desmarcar todo
-  //     } else {
-  //       updatedSelection = filterOptions.reduce((acc, opt) => {
-  //         if (opt.subOptions) {
-  //           acc[opt.value] = opt.subOptions.map((sub) => sub.value); // Seleccionar todas las subopciones
-  //         } else {
-  //           acc[opt.value] = [];
-  //         }
-  //         return acc;
-  //       }, {});
-  //     }
-  //   } else if (selectedOptions[option.value]) {
-  //     // Si la opción ya está seleccionada, la eliminamos y sus subOptions
-  //     delete updatedSelection[option.value];
-  //   } else {
-  //     // Si es nueva, la añadimos y si tiene subOptions las marcamos todas
-  //     if (option.subOptions) {
-  //       updatedSelection[option.value] = option.subOptions.map((sub) => sub.value);
-  //       setDetailOptions(option.subOptions); // Mostrar suboptions en el menú de detalles
-  //       setSelectedDetails(option.subOptions.map((subOption) => subOption.value));
-  //     } else {
-  //       updatedSelection[option.value] = [];
-  //     }
-  //   }
-  //   setSelectedOptions(updatedSelection);
-  //   setSelectedParams((state) => ({ ...state, ['filters']: updatedSelection }));
-  // };
-
-  const handleSelectedOptions = (option) => {
-    let updatedSelection = { ...selectedOptions };
+  const handleSelectedOptions = (option, subOption = null) => {
+    let updatedSelection = { ...selectedParams.filters };
 
     if (option.value === 'all') {
-      if (Object.keys(updatedSelection).length === filterOptions.length) {
-        updatedSelection = {}; // Desmarcar todo
+      if (updatedSelection.all) {
+        updatedSelection = {};
       } else {
         updatedSelection = filterOptions.reduce((acc, opt) => {
-          acc[opt.value] = opt.subOptions ? opt.subOptions.map((sub) => sub.value) : [];
+          if (opt.value !== 'all') {
+            acc[opt.value] = opt.subOptions ? opt.subOptions.map((subOpt) => subOpt.value) : [];
+          }
           return acc;
         }, {});
+        updatedSelection.all = [];
       }
-    } else if (updatedSelection[option.value]) {
-      // Si la opción ya está seleccionada, eliminarla
-      delete updatedSelection[option.value];
-    } else {
-      // Si es nueva, la añadimos y si tiene subOptions las marcamos todas
-      if (option.subOptions) {
-        const previouslySelected = selectedOptions[option.value] || []; // Recuperar las seleccionadas previamente
-        const allSubOptions = option.subOptions.map((sub) => sub.value);
+    } else if (subOption) {
+      const mainOptionValue = option.value;
 
-        // Si no hay suboptions previas seleccionadas, seleccionamos todas
-        if (previouslySelected.length === 0) {
-          updatedSelection[option.value] = allSubOptions;
+      if (!updatedSelection[mainOptionValue]) {
+        updatedSelection[mainOptionValue] = [];
+      }
+
+      if (updatedSelection[mainOptionValue].includes(subOption.value)) {
+        updatedSelection[mainOptionValue] = updatedSelection[mainOptionValue].filter(
+          (val) => val !== subOption.value
+        );
+      } else {
+        updatedSelection[mainOptionValue].push(subOption.value);
+      }
+
+      if (updatedSelection[mainOptionValue].length === 0) {
+        delete updatedSelection[mainOptionValue];
+      }
+    } else {
+      if (option.subOptions && option.subOptions.length > 0) {
+        if (updatedSelection[option.value]) {
+          delete updatedSelection[option.value];
         } else {
-          updatedSelection[option.value] = previouslySelected; // Dejar las seleccionadas previamente
+          updatedSelection[option.value] = option.subOptions.map((subOpt) => subOpt.value);
         }
       } else {
-        updatedSelection[option.value] = [];
+        if (updatedSelection[option.value]) {
+          delete updatedSelection[option.value];
+        } else {
+          updatedSelection[option.value] = [];
+        }
       }
     }
 
-    setSelectedOptions(updatedSelection);
+    const allOptionsSelected = filterOptions.every(
+      (opt) =>
+        opt.value === 'all' ||
+        (updatedSelection[opt.value] &&
+          (!opt.subOptions ||
+            opt.subOptions.every((subOpt) => updatedSelection[opt.value].includes(subOpt.value))))
+    );
+    if (allOptionsSelected) {
+      updatedSelection.all = [];
+    } else {
+      delete updatedSelection.all;
+    }
+
     setSelectedParams((state) => ({ ...state, filters: updatedSelection }));
   };
 
-  const handleSelectedDetails = (subOption) => {
-    const parentOption = detailOptions[0].parent;
-    const updatedSelectedOptions = { ...selectedOptions };
-
-    if (!updatedSelectedOptions[parentOption]) {
-      updatedSelectedOptions[parentOption] = [];
-    }
-
-    const currentSubOptions = updatedSelectedOptions[parentOption];
-
-    // Si la subopción ya está seleccionada, la eliminamos
-    if (currentSubOptions.includes(subOption.value)) {
-      updatedSelectedOptions[parentOption] = currentSubOptions.filter(
-        (item) => item !== subOption.value
-      );
-    } else {
-      // Si no está seleccionada, la añadimos
-      updatedSelectedOptions[parentOption].push(subOption.value);
-    }
-
-    // Verificar si quedan suboptions, si no quedan, eliminar el parentOption
-    if (updatedSelectedOptions[parentOption].length === 0) {
-      delete updatedSelectedOptions[parentOption];
-    }
-
-    setSelectedOptions(updatedSelectedOptions); // Actualizar el estado de las subOptions
-    setSelectedParams((state) => ({ ...state, filters: updatedSelectedOptions })); // Actualizar el estado de los parámetros
-  };
-
-  const toggleSubMenu = (option) => {
-    if (option.subOptions) {
-      // Obtener las subopciones ya seleccionadas del estado o inicializar una lista vacía
-      const selectedSubOptions = selectedOptions[option.value] || [];
-      setDetailOptions(option.subOptions.map((sub) => ({ ...sub, parent: option.value }))); // Añadimos la referencia al padre (option)
-      setSelectedDetails(selectedSubOptions); // Reflejar el estado de las suboptions ya seleccionadas
-    } else {
-      setDetailOptions([]);
-    }
-  };
-
-  const handleBackToMainMenu = () => {
-    setDetailOptions([]);
+  const handleCleanFilters = () => {
+    setSelectedParams((state) => ({
+      ...state,
+      docType: 'all',
+      currency: 'all',
+      filters: { all: [] },
+    }));
+    setClean(!clean);
   };
 
   const renderValue = (selected) => {
@@ -207,16 +273,13 @@ export const PurchasesInconsistenciesFilter = (props) => {
     }
     const labels = selected.flatMap((option) => {
       const parentOption = filterOptions.find((opt) => opt.value === option);
-      if (parentOption?.subOptions && selectedOptions[option].length > 0) {
-        return selectedOptions[option].map(
-          (subOption) =>
-            `${parentOption.label} - ${
-              parentOption.subOptions.find((sub) => sub.value === subOption)?.label
-            }`
-        );
-      }
       return parentOption?.label || option;
     });
+
+    if (labels.length > 2) {
+      return `${labels.slice(0, 2).join(', ')}, ...`;
+    }
+
     return labels.join(', ');
   };
 
@@ -236,16 +299,36 @@ export const PurchasesInconsistenciesFilter = (props) => {
   };
 
   useEffect(() => {
-    setSelectedParams((state) => ({
-      ...state,
-      filters: selectedOptions,
-    }));
-  }, [selectedOptions, setSelectedParams]);
+    setFilters({ searchTypeOptions, searchCurrencyOptions, period: selectedParams.period });
+  }, [searchTypeOptions, searchCurrencyOptions, selectedParams.period]);
 
   useEffect(() => {
-    console.log('Opciones seleccionadas: ', selectedOptions);
-    console.log('Detalles seleccionados: ', selectedDetails);
-  }, [selectedOptions, selectedDetails]);
+    if (results?.length <= 0) {
+      setSelectedParams((state) => ({ ...state, period: null }));
+    }
+  }, []);
+
+  useEffect(() => {
+    const allFilterKeys = filterOptions.map((option) => option.value);
+    const newFilters = allFilterKeys.reduce((acc, key) => {
+      const option = filterOptions.find((opt) => opt.value === key);
+
+      if (option && option.subOptions) {
+        acc[key] = option.subOptions.map((subOption) => subOption.value);
+      } else {
+        acc[key] = [];
+      }
+
+      return acc;
+    }, {});
+
+    setSelectedParams((state) => ({
+      ...state,
+      filters: {
+        ...newFilters,
+      },
+    }));
+  }, [filterOptions, selectedParams.periodo, selectedParams.docType, selectedParams.currency]);
 
   return (
     <Box
@@ -275,11 +358,12 @@ export const PurchasesInconsistenciesFilter = (props) => {
             label="Periodo"
             views={['year', 'month']}
             openTo="month"
-            value={parseDateFromYYYYMM(selectedParams.period)}
+            value={parseDateFromYYYYMM(selectedParams.period || filters.period)}
             onChange={handleDateChange}
             textField={(params) => (
               <TextField
                 {...params}
+                placeholder="Selecciona un período"
                 fullWidth
                 margin="normal"
               />
@@ -342,61 +426,74 @@ export const PurchasesInconsistenciesFilter = (props) => {
               },
             },
           }}
-          value={Object.keys(selectedOptions)}
-          onChange={() => {}} // Vacío porque manejamos onClick
+          value={Object.keys(selectedParams.filters)}
+          onChange={() => {}}
         >
-          {!detailOptions.length
-            ? filterOptions.map((option) => (
+          {activeSubOptions
+            ? [
+                <MenuItem
+                  onClick={handleBackToMainMenu}
+                  key="back"
+                >
+                  <IconButton size="small">
+                    <ArrowBackIcon />
+                  </IconButton>
+                  <ListItemText primary="Volver al menú principal" />
+                </MenuItem>,
+                activeSubOptions.subOptions.map((subOption) => (
+                  <MenuItem
+                    key={subOption.value}
+                    value={subOption.value}
+                    onClick={() => handleSelectedOptions(activeSubOptions, subOption)}
+                    sx={{ pl: 4 }}
+                  >
+                    <Checkbox
+                      checked={Boolean(
+                        selectedParams.filters[activeSubOptions.value]?.includes(subOption.value)
+                      )}
+                    />
+                    <ListItemText primary={subOption.label} />
+                  </MenuItem>
+                )),
+              ]
+            : filterOptions.map((option) => (
                 <MenuItem
                   key={option.value}
                   value={option.value}
                   onClick={() => handleSelectedOptions(option)}
                 >
-                  <Checkbox checked={selectedOptions[option.value] !== undefined} />
+                  <Checkbox
+                    checked={Boolean(selectedParams.filters[option.value])}
+                    indeterminate={
+                      option.subOptions &&
+                      selectedParams.filters[option.value] &&
+                      selectedParams.filters[option.value].length > 0 &&
+                      selectedParams.filters[option.value].length < option.subOptions.length
+                    }
+                  />
                   <ListItemText primary={option.label} />
                   {option.subOptions?.length > 0 && (
                     <IconButton
                       size="small"
                       onClick={(e) => {
-                        e.stopPropagation();
-                        toggleSubMenu(option); // Mostrar suboptions al hacer click
+                        e.stopPropagation(); // Detener la propagación para evitar la selección de la opción principal
+                        handleSubOptionClick(option); // Mostrar suboptions al hacer click en el icono
                       }}
                     >
-                      <ChevronRightIcon />
+                      <KeyboardArrowRightIcon />
                     </IconButton>
                   )}
                 </MenuItem>
-              ))
-            : // Mostrar solo las suboptions
-              [
-                <MenuItem onClick={handleBackToMainMenu}>
-                  <NavigateBeforeIcon />
-                  <ListItemText primary="Volver al menú principal" />
-                </MenuItem>,
-                detailOptions.map((subOption) => (
-                  <MenuItem
-                    key={subOption.value}
-                    value={subOption.value}
-                    onClick={() => handleSelectedDetails(subOption)}
-                  >
-                    <Checkbox checked={selectedDetails.includes(subOption.value)} />
-                    <ListItemText primary={subOption.label} />
-                  </MenuItem>
-                )),
-              ]}
+              ))}
         </TextField>
-
-        <Button
-          fullWidth
-          variant="contained"
-          color="primary"
-          onClick={onLoadData}
-          startIcon={<FilterListIcon />}
-          disabled={loading ? true : false}
-          sx={{ height: '56px', maxWidth: 120 }}
-        >
-          Filtrar
-        </Button>
+        <Tooltip title="Restablecer filtros">
+          <IconButton
+            onClick={handleCleanFilters}
+            size="large"
+          >
+            <RestoreIcon fontSize="large" />
+          </IconButton>
+        </Tooltip>
       </Box>
     </Box>
   );
@@ -406,6 +503,5 @@ PurchasesInconsistenciesFilter.propTypes = {
   loading: PropTypes.bool,
   selectedParams: PropTypes.object,
   setSelectedParams: PropTypes.func,
-  onApplyFilters: PropTypes.func,
   onLoadData: PropTypes.func,
 };

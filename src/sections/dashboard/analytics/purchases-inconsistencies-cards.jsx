@@ -6,9 +6,11 @@ import Grid from '@mui/material/Grid2';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import Skeleton from '@mui/material/Skeleton';
+import { useSelector } from 'react-redux';
 
 export const PurchasesInconsistenciesCards = (props) => {
-  const { title, loading, totalInconsistencies, totalSums } = props;
+  const { title, loading } = props;
+  const { results, totals } = useSelector((state) => state.filteredResults);
 
   return (
     <Card>
@@ -35,10 +37,10 @@ export const PurchasesInconsistenciesCards = (props) => {
                 color="text.secondary"
                 variant="body2"
               >
-                Inconsistencias
+                Observaciones
               </Typography>
               <Typography variant="h5">
-                {loading ? <Skeleton variant="text" /> : totalInconsistencies}
+                {loading ? <Skeleton variant="text" /> : totals?.observaciones || 0}
               </Typography>
             </Stack>
           </Grid>
@@ -62,7 +64,7 @@ export const PurchasesInconsistenciesCards = (props) => {
                 {loading ? (
                   <Skeleton variant="text" />
                 ) : (
-                  'S/ ' + totalSums.baseIGravada.toLocaleString('en-US')
+                  'S/ ' + (totals?.baseIGravada?.toLocaleString('en-US') || '0.00')
                 )}
               </Typography>
             </Stack>
@@ -87,7 +89,7 @@ export const PurchasesInconsistenciesCards = (props) => {
                 {loading ? (
                   <Skeleton variant="text" />
                 ) : (
-                  'S/ ' + totalSums.igv.toLocaleString('en-US')
+                  'S/ ' + (totals?.igv?.toLocaleString('en-US') || '0.00')
                 )}
               </Typography>
             </Stack>
@@ -112,7 +114,7 @@ export const PurchasesInconsistenciesCards = (props) => {
                 {loading ? (
                   <Skeleton variant="text" />
                 ) : (
-                  'S/ ' + totalSums.importe.toLocaleString('en-US')
+                  'S/ ' + (totals?.importe?.toLocaleString('en-US') || '0.00')
                 )}
               </Typography>
             </Stack>
@@ -126,6 +128,4 @@ export const PurchasesInconsistenciesCards = (props) => {
 PurchasesInconsistenciesCards.propTypes = {
   title: PropTypes.string,
   loading: PropTypes.bool,
-  totalInconsistencies: PropTypes.number,
-  totalSums: PropTypes.object,
 };

@@ -24,12 +24,17 @@ import {
   DialogContent,
   Stack,
   TableSortLabel,
+  Paper,
 } from '@mui/material';
 
 import { ModalDetail } from './modal-detail';
-import { useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 import ViewColumnIcon from '@mui/icons-material/ViewColumn';
+import { useSelector } from 'react-redux';
+
+import { setFilteredResultsAndTotals } from 'src/slices/filtered-results';
+import { useDispatch } from 'react-redux';
 
 const columnLabels = {
   periodo: 'Período',
@@ -39,7 +44,7 @@ const columnLabels = {
   tipoComprobante: 'Tipo Comprobante',
   numeroComprobante: 'Número Comprobante',
   moneda: 'Moneda',
-  mtoBIGravadaDG: 'Base Imponible',
+  mtoBIGravada: 'Base Imponible',
   mtoBIGravadaDGNG: 'B.I / Gravada - No Grav.',
   mtoIgvIpmDGNG: 'IGV / Gravada - No Grav.',
   mtoBIGravadaDNG: 'B.I / No Gravada',
@@ -54,20 +59,24 @@ const columnLabels = {
   importeSunat: 'Importe Sunat',
   tipoCambio: 'Tipo de Cambio',
   observacionTC: 'Observación Tipo de Cambio',
-  observacionFactoring: 'Observación Factoring',
-  observacionIncons: 'Observación Incons.',
   observacionCpe: 'Observación CPE',
+  observacionIncons: 'Observación Incons.',
   observacionCond: 'Observación Cond.',
   observacionObligado: 'Observación Obligados CPE.',
 };
 
 function descendingComparator(a, b, orderBy) {
-  if (parseFloat(b[orderBy]) < parseFloat(a[orderBy])) return -1;
-  if (parseFloat(b[orderBy]) > parseFloat(a[orderBy])) return 1;
+  const aValue = orderBy.split('.').reduce((obj, key) => obj[key], a);
+  const bValue = orderBy.split('.').reduce((obj, key) => obj[key], b);
+
+  if (parseFloat(bValue) < parseFloat(aValue)) return -1;
+  if (parseFloat(bValue) > parseFloat(aValue)) return 1;
   return 0;
 }
 
 function getComparator(order, orderBy) {
+  console.log(order, orderBy);
+
   return order === 'desc'
     ? (a, b) => descendingComparator(a, b, orderBy)
     : (a, b) => -descendingComparator(a, b, orderBy);
@@ -75,6 +84,7 @@ function getComparator(order, orderBy) {
 
 function sortRows(array, comparator) {
   const stabilizedRows = array.map((el, index) => [el, index]);
+  console.log(stabilizedRows);
   stabilizedRows.sort((a, b) => {
     const order = comparator(a[0], b[0]);
     if (order !== 0) return order;
@@ -84,10 +94,18 @@ function sortRows(array, comparator) {
 }
 
 export const PurchasesInconsistenciesDetails = (props) => {
-  const { loading, details, totalSums, downloadPath, onDownload } = props;
+  const { loading, downloadPath, onDownload, params } = props;
 
+  const dispatch = useDispatch();
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedDetail, setSelectedDetail] = useState('');
+
+  const results = useSelector((state) => state.report);
+
+  const [displayedRows, setDisplayedRows] = useState([]);
+  const [page, setPage] = useState(0);
+  const rowsPerPage = 20;
+  const containerRef = useRef();
 
   const [columnVisibility, setColumnVisibility] = useState({
     periodo: true,
@@ -112,16 +130,116 @@ export const PurchasesInconsistenciesDetails = (props) => {
     importeSunat: false,
     tipoCambio: true,
     observacionTC: true,
-    observacionFactoring: true,
-    observacionIncons: true,
     observacionCpe: true,
+    observacionIncons: true,
     observacionCond: true,
     observacionObligado: true,
   });
   const [open, setOpen] = useState(false);
 
   const [order, setOrder] = useState('asc');
-  const [orderBy, setOrderBy] = useState('importeTotal');
+  const [orderBy, setOrderBy] = useState('monto');
+
+  const { filteredResults, totals } = useMemo(() => {
+    let filteredResults =
+      results?.filter((item) => {
+        const matchesDocType = params.docType === 'all' || item.codComp === params.docType;
+
+        const matchesCurrency = params.currency === 'all' || item.codMoneda === params.currency;
+
+        const matchesFilters = Object.keys(params.filters).some((key) => {
+          if (key === 'all') {
+            return true;
+          }
+
+          if (params.filters[key].length) {
+            return params.filters[key]?.some((filter) =>
+              item.observaciones[key]?.some((str) =>
+                String(str).toLowerCase().includes(String(filter).toLowerCase())
+              )
+            );
+          } else {
+            return item.observaciones && item.observaciones.hasOwnProperty(key);
+          }
+        });
+
+        return matchesDocType && matchesCurrency && matchesFilters;
+      }) || [];
+
+    const totals = filteredResults.reduce(
+      (totals, detail) => {
+        totals.baseIGravada += parseFloat(detail.mtos.mtoBIGravada) || 0;
+        totals.baseIGravadaDGNG += parseFloat(detail.mtos.mtoBIGravadaDGNG) || 0;
+        totals.baseIGravadaDNG += parseFloat(detail.mtos.mtoBIGravadaDNG) || 0;
+        totals.igv += parseFloat(detail.mtos.mtoIGV) || 0;
+        totals.igvSunat += parseFloat(detail.mtoIGV) || 0;
+        totals.importe += parseFloat(detail.monto) || 0;
+        totals.importeSunat += parseFloat(detail.mtoImporteTotal) || 0;
+
+        if (detail.observaciones) {
+          if (
+            detail.observaciones['tipoCambio']?.length > 0 &&
+            params?.filters?.hasOwnProperty('tipoCambio')
+          ) {
+            totals.observacionTC += 1;
+            totals.observaciones += 1;
+          }
+
+          if (detail.observaciones['cpe']?.length > 0 && params?.filters?.hasOwnProperty('cpe')) {
+            totals.observacionCpe += 1;
+            totals.observaciones += 1;
+          }
+
+          if (
+            detail.observaciones['inconsistencias']?.length > 0 &&
+            params?.filters?.hasOwnProperty('inconsistencias')
+          ) {
+            totals.observacionIncons += 1;
+            totals.observaciones += 1;
+          }
+
+          if (
+            detail.observaciones['condicion']?.length > 0 &&
+            params?.filters?.hasOwnProperty('condicion')
+          ) {
+            totals.observacionCond += 1;
+            totals.observaciones += 1;
+          }
+
+          if (
+            detail.observaciones['obligado']?.length > 0 &&
+            params?.filters?.hasOwnProperty('obligado')
+          ) {
+            totals.observacionObligado += 1;
+            totals.observaciones += 1;
+          }
+        }
+
+        return totals;
+      },
+      {
+        baseIGravada: 0.0,
+        baseIGravadaDGNG: 0.0,
+        baseIGravadaDNG: 0.0,
+        igv: 0.0,
+        igvSunat: 0.0,
+        importe: 0.0,
+        importeSunat: 0.0,
+        observacionTC: 0,
+        observacionCpe: 0,
+        observacionIncons: 0,
+        observacionCond: 0,
+        observacionObligado: 0,
+        observaciones: 0,
+      }
+    );
+
+    return { filteredResults, totals };
+  }, [results, params.docType, params.currency, params.filters]);
+
+  const sortedResults = useMemo(() => {
+    return sortRows(filteredResults, getComparator(order, orderBy));
+  }, [filteredResults, order, orderBy]);
 
   const handleDialogOpen = () => {
     setOpen(true);
@@ -144,10 +262,6 @@ export const PurchasesInconsistenciesDetails = (props) => {
     setOrderBy(property);
   };
 
-  const sortedRows = sortRows(details, getComparator(order, orderBy));
-
-  const isEmpty = sortedRows.length === 0;
-
   const handleOpen = (texto) => {
     setModalOpen(true);
     setSelectedDetail(texto);
@@ -165,10 +279,30 @@ export const PurchasesInconsistenciesDetails = (props) => {
     return formattedNumber;
   };
 
+  useEffect(() => {
+    const newRows = sortedResults.slice(0, (page + 1) * rowsPerPage);
+    setDisplayedRows(newRows);
+  }, [page, filteredResults, order, orderBy]);
+
+  const isEmpty = filteredResults.length === 0;
+
+  const handleScroll = () => {
+    if (containerRef.current) {
+      const { scrollTop, scrollHeight, clientHeight } = containerRef.current;
+      if (scrollTop + clientHeight >= scrollHeight - 5) {
+        setPage((prevPage) => prevPage + 1);
+      }
+    }
+  };
+
+  useEffect(() => {
+    dispatch(setFilteredResultsAndTotals({ results: filteredResults, totals }));
+  }, [filteredResults, totals, dispatch]);
+
   return (
     <Card>
       <CardHeader
-        title="Inconsistencias"
+        title="Observaciones"
         sx={{ p: 2, pb: 0 }}
         action={
           <Stack
@@ -236,7 +370,12 @@ export const PurchasesInconsistenciesDetails = (props) => {
         maxHeight="500px"
         p={2}
       >
-        <TableContainer sx={{ flex: 1, overflowY: 'auto', position: 'relative' }}>
+        <TableContainer
+          component={Paper}
+          ref={containerRef}
+          onScroll={handleScroll}
+          sx={{ flex: 1, overflowY: 'auto', position: 'relative' }}
+        >
           <Table stickyHeader>
             <TableHead>
               <TableRow>
@@ -298,7 +437,7 @@ export const PurchasesInconsistenciesDetails = (props) => {
                           whiteSpace: 'nowrap',
                           overflow: 'hidden',
                           textOverflow: 'ellipsis',
-                          maxWidth: '100px',
+                          maxWidth: '120px',
                         }}
                       >
                         Tipo Comprobante
@@ -320,7 +459,7 @@ export const PurchasesInconsistenciesDetails = (props) => {
                           whiteSpace: 'nowrap',
                           overflow: 'hidden',
                           textOverflow: 'ellipsis',
-                          maxWidth: '100px',
+                          maxWidth: '120px',
                         }}
                       >
                         Número Comprobante
@@ -526,12 +665,12 @@ export const PurchasesInconsistenciesDetails = (props) => {
                     </Tooltip>
                   </TableCell>
                 )}
-                {columnVisibility.mtoBIGravadaDG && (
+                {columnVisibility.mtoBIGravada && (
                   <TableCell sx={{ textAlign: 'right' }}>
                     <TableSortLabel
-                      active={orderBy === 'mtoBIGravadaDG'}
-                      direction={orderBy === 'mtoBIGravadaDG' ? order : 'asc'}
-                      onClick={() => handleRequestSort('mtoBIGravadaDG')}
+                      active={orderBy === 'mtos.mtoBIGravada'}
+                      direction={orderBy === 'mtos.mtoBIGravada' ? order : 'asc'}
+                      onClick={() => handleRequestSort('mtos.mtoBIGravada')}
                     >
                       <Tooltip
                         title="Base Imponible"
@@ -557,9 +696,9 @@ export const PurchasesInconsistenciesDetails = (props) => {
                 {columnVisibility.igv && (
                   <TableCell sx={{ textAlign: 'right' }}>
                     <TableSortLabel
-                      active={orderBy === 'mtoIGV'}
-                      direction={orderBy === 'mtoIGV' ? order : 'asc'}
-                      onClick={() => handleRequestSort('mtoIGV')}
+                      active={orderBy === 'mtos.mtoIGV'}
+                      direction={orderBy === 'mtos.mtoIGV' ? order : 'asc'}
+                      onClick={() => handleRequestSort('mtos.mtoIGV')}
                     >
                       <Typography sx={{ fontSize: 12, fontWeight: 'bold' }}>IGV</Typography>
                     </TableSortLabel>
@@ -591,9 +730,9 @@ export const PurchasesInconsistenciesDetails = (props) => {
                 {columnVisibility.importe && (
                   <TableCell sx={{ textAlign: 'right' }}>
                     <TableSortLabel
-                      active={orderBy === 'importeTotal'}
-                      direction={orderBy === 'importeTotal' ? order : 'asc'}
-                      onClick={() => handleRequestSort('importeTotal')}
+                      active={orderBy === 'monto'}
+                      direction={orderBy === 'monto' ? order : 'asc'}
+                      onClick={() => handleRequestSort('monto')}
                     >
                       <Typography sx={{ fontSize: 12, fontWeight: 'bold' }}>Importe</Typography>
                     </TableSortLabel>
@@ -644,7 +783,7 @@ export const PurchasesInconsistenciesDetails = (props) => {
                   </TableCell>
                 )}
 
-                {columnVisibility.observacionTC && (
+                {columnVisibility.observacionTC && params.filters.hasOwnProperty('tipoCambio') && (
                   <TableCell>
                     <Typography
                       sx={{
@@ -656,7 +795,7 @@ export const PurchasesInconsistenciesDetails = (props) => {
                     </Typography>
                   </TableCell>
                 )}
-                {columnVisibility.observacionFactoring && (
+                {columnVisibility.observacionCpe && params.filters.hasOwnProperty('cpe') && (
                   <TableCell>
                     <Typography
                       sx={{
@@ -664,35 +803,24 @@ export const PurchasesInconsistenciesDetails = (props) => {
                         fontWeight: 'bold',
                       }}
                     >
-                      Observación Factoring
+                      Observación CPE
                     </Typography>
                   </TableCell>
                 )}
-                {columnVisibility.observacionIncons && (
-                  <TableCell>
-                    <Typography
-                      sx={{
-                        fontSize: 12,
-                        fontWeight: 'bold',
-                      }}
-                    >
-                      Observación Incons.
-                    </Typography>
-                  </TableCell>
-                )}
-                {columnVisibility.observacionCpe && (
-                  <TableCell>
-                    <Typography
-                      sx={{
-                        fontSize: 12,
-                        fontWeight: 'bold',
-                      }}
-                    >
-                      Observación CPE.
-                    </Typography>
-                  </TableCell>
-                )}
-                {columnVisibility.observacionCond && (
+                {columnVisibility.observacionIncons &&
+                  params.filters.hasOwnProperty('inconsistencias') && (
+                    <TableCell>
+                      <Typography
+                        sx={{
+                          fontSize: 12,
+                          fontWeight: 'bold',
+                        }}
+                      >
+                        Observación Incons.
+                      </Typography>
+                    </TableCell>
+                  )}
+                {columnVisibility.observacionCond && params.filters.hasOwnProperty('condicion') && (
                   <TableCell>
                     <Typography
                       sx={{
@@ -704,18 +832,19 @@ export const PurchasesInconsistenciesDetails = (props) => {
                     </Typography>
                   </TableCell>
                 )}
-                {columnVisibility.observacionObligado && (
-                  <TableCell>
-                    <Typography
-                      sx={{
-                        fontSize: 12,
-                        fontWeight: 'bold',
-                      }}
-                    >
-                      Observación Obligados.
-                    </Typography>
-                  </TableCell>
-                )}
+                {columnVisibility.observacionObligado &&
+                  params.filters.hasOwnProperty('obligado') && (
+                    <TableCell>
+                      <Typography
+                        sx={{
+                          fontSize: 12,
+                          fontWeight: 'bold',
+                        }}
+                      >
+                        Observación Obligados.
+                      </Typography>
+                    </TableCell>
+                  )}
               </TableRow>
             </TableHead>
             <TableBody>
@@ -750,7 +879,7 @@ export const PurchasesInconsistenciesDetails = (props) => {
                   </TableCell>
                 </TableRow>
               ) : (
-                sortedRows?.map((detail, index) => {
+                displayedRows?.map((detail, index) => {
                   return (
                     <TableRow
                       key={index}
@@ -758,12 +887,15 @@ export const PurchasesInconsistenciesDetails = (props) => {
                     >
                       {columnVisibility.periodo && (
                         <TableCell className="customTableCell">
-                          <Typography sx={{ fontSize: 14 }}>{detail.periodo}</Typography>
+                          <Typography sx={{ fontSize: 14 }}>
+                            {String(detail.periodoPle).substring(0, 6)}
+                          </Typography>
                         </TableCell>
                       )}
+
                       {columnVisibility.ruc && (
                         <TableCell className="customTableCell">
-                          <Typography sx={{ fontSize: 14 }}>{detail.ruc}</Typography>
+                          <Typography sx={{ fontSize: 14 }}>{detail.numDocRecep}</Typography>
                         </TableCell>
                       )}
                       {columnVisibility.razonSocial && (
@@ -795,16 +927,19 @@ export const PurchasesInconsistenciesDetails = (props) => {
                       )}
                       {columnVisibility.tipoComprobante && (
                         <TableCell className="customTableCell">
-                          <Tooltip title={detail.tipoComprobante}>
+                          <Tooltip
+                            title={detail.tipoComprobante}
+                            arrow
+                          >
                             <Typography
                               sx={{
                                 cursor: 'pointer',
-                                fontSize: 14,
-                                fontWeight: 'normal',
+                                fontSize: 12,
+                                fontWeight: 'bold',
                                 whiteSpace: 'nowrap',
                                 overflow: 'hidden',
                                 textOverflow: 'ellipsis',
-                                maxWidth: '100px',
+                                maxWidth: '120px',
                               }}
                             >
                               {detail.tipoComprobante}
@@ -815,7 +950,9 @@ export const PurchasesInconsistenciesDetails = (props) => {
                       {columnVisibility.numeroComprobante && (
                         <TableCell className="customTableCell">
                           <Typography sx={{ fontSize: 14 }}>
-                            {detail.numSerie}-{detail.numCpe}
+                            {String(detail.numeroSerie).trim() !== '-'
+                              ? detail.numeroSerie + ' - ' + Number(detail.numero)
+                              : Number(detail.numero)}
                           </Typography>
                         </TableCell>
                       )}
@@ -830,7 +967,7 @@ export const PurchasesInconsistenciesDetails = (props) => {
                           sx={{ textAlign: 'right' }}
                         >
                           <Typography sx={{ fontSize: 14 }}>
-                            {formatNumber(detail.mtoBIGravadaDGNG)}
+                            {formatNumber(detail.mtos.mtoBIGravadaDGNG)}
                           </Typography>
                         </TableCell>
                       )}
@@ -840,7 +977,7 @@ export const PurchasesInconsistenciesDetails = (props) => {
                           sx={{ textAlign: 'right' }}
                         >
                           <Typography sx={{ fontSize: 14 }}>
-                            {formatNumber(detail.mtoIgvIpmDGNG)}
+                            {formatNumber(detail.mtos.mtoIgvIpmDGNG)}
                           </Typography>
                         </TableCell>
                       )}
@@ -850,7 +987,7 @@ export const PurchasesInconsistenciesDetails = (props) => {
                           sx={{ textAlign: 'right' }}
                         >
                           <Typography sx={{ fontSize: 14 }}>
-                            {formatNumber(detail.mtoBIGravadaDNG)}
+                            {formatNumber(detail.mtos.mtoBIGravadaDNG)}
                           </Typography>
                         </TableCell>
                       )}
@@ -860,7 +997,7 @@ export const PurchasesInconsistenciesDetails = (props) => {
                           sx={{ textAlign: 'right' }}
                         >
                           <Typography sx={{ fontSize: 14 }}>
-                            {formatNumber(detail.mtoIgvIpmDNG)}
+                            {formatNumber(detail.mtos.mtoIgvIpmDNG)}
                           </Typography>
                         </TableCell>
                       )}
@@ -870,7 +1007,7 @@ export const PurchasesInconsistenciesDetails = (props) => {
                           sx={{ textAlign: 'right' }}
                         >
                           <Typography sx={{ fontSize: 14 }}>
-                            {formatNumber(detail.mtoValorAdqNG)}
+                            {formatNumber(detail.mtos.mtoValorAdqNG)}
                           </Typography>
                         </TableCell>
                       )}
@@ -880,7 +1017,7 @@ export const PurchasesInconsistenciesDetails = (props) => {
                           sx={{ textAlign: 'right' }}
                         >
                           <Typography sx={{ fontSize: 14 }}>
-                            {formatNumber(detail.mtoISC)}
+                            {formatNumber(detail.mtos.mtoISC)}
                           </Typography>
                         </TableCell>
                       )}
@@ -890,7 +1027,7 @@ export const PurchasesInconsistenciesDetails = (props) => {
                           sx={{ textAlign: 'right' }}
                         >
                           <Typography sx={{ fontSize: 14 }}>
-                            {formatNumber(detail.mtoIcbp)}
+                            {formatNumber(detail.mtos.mtoIcbp)}
                           </Typography>
                         </TableCell>
                       )}
@@ -900,17 +1037,17 @@ export const PurchasesInconsistenciesDetails = (props) => {
                           sx={{ textAlign: 'right' }}
                         >
                           <Typography sx={{ fontSize: 14 }}>
-                            {formatNumber(detail.mtoOtrosTrib)}
+                            {formatNumber(detail.mtos.mtoOtrosTrib)}
                           </Typography>
                         </TableCell>
                       )}
-                      {columnVisibility.mtoBIGravadaDG && (
+                      {columnVisibility.mtoBIGravada && (
                         <TableCell
                           className="customTableCell"
                           sx={{ textAlign: 'right' }}
                         >
                           <Typography sx={{ fontSize: 14 }}>
-                            {formatNumber(detail.mtoBIGravada)}
+                            {formatNumber(detail.mtos.mtoBIGravada)}
                           </Typography>
                         </TableCell>
                       )}
@@ -920,14 +1057,14 @@ export const PurchasesInconsistenciesDetails = (props) => {
                           sx={{ textAlign: 'right' }}
                         >
                           <Typography
-                            sx={
-                              detail.observacion['cpe'].some((obs) => obs.includes('IGV', 'igv'))
-                                ? { color: 'red' }
-                                : { color: 'inherit' }
-                            }
+                            // sx={
+                            //   detail.observacion['cpe'].some((obs) => obs.includes('IGV', 'igv'))
+                            //     ? { color: 'red' }
+                            //     : { color: 'inherit' }
+                            // }
                             style={{ fontSize: 14 }}
                           >
-                            {formatNumber(detail.mtoIGV)}
+                            {formatNumber(detail.mtos.mtoIGV)}
                           </Typography>
                         </TableCell>
                       )}
@@ -937,7 +1074,7 @@ export const PurchasesInconsistenciesDetails = (props) => {
                           sx={{ textAlign: 'right' }}
                         >
                           <Typography sx={{ fontSize: 14 }}>
-                            {formatNumber(detail.igvSunat)}
+                            {formatNumber(detail.mtoIGV)}
                           </Typography>
                         </TableCell>
                       )}
@@ -947,16 +1084,16 @@ export const PurchasesInconsistenciesDetails = (props) => {
                           sx={{ textAlign: 'right' }}
                         >
                           <Typography
-                            sx={
-                              detail.observacion['cpe'].some((obs) =>
-                                obs.includes('Importe', 'importe')
-                              )
-                                ? { color: 'red' }
-                                : { color: 'inherit' }
-                            }
+                            // sx={
+                            //   detail.observacion['cpe'].some((obs) =>
+                            //     obs.includes('Importe', 'importe')
+                            //   )
+                            //     ? { color: 'red' }
+                            //     : { color: 'inherit' }
+                            // }
                             style={{ fontSize: 14 }}
                           >
-                            {formatNumber(detail.importeTotal)}
+                            {formatNumber(detail.monto)}
                           </Typography>
                         </TableCell>
                       )}
@@ -966,7 +1103,7 @@ export const PurchasesInconsistenciesDetails = (props) => {
                           sx={{ textAlign: 'right' }}
                         >
                           <Typography sx={{ fontSize: 14 }}>
-                            {formatNumber(detail.importeTotalSunat)}
+                            {formatNumber(detail.mtoImporteTotal)}
                           </Typography>
                         </TableCell>
                       )}
@@ -976,205 +1113,181 @@ export const PurchasesInconsistenciesDetails = (props) => {
                           sx={{ textAlign: 'right' }}
                         >
                           <Typography
+                            // sx={
+                            //   detail.observacion['tc'].length > 0
+                            //     ? { color: 'red' }
+                            //     : { color: 'inherit' }
+                            // }
                             style={{ fontSize: 14 }}
-                            sx={
-                              detail.observacion['tc'].length > 0
-                                ? { color: 'red' }
-                                : { color: 'inherit' }
-                            }
                           >
                             {detail.tipoCambio}
                           </Typography>
                         </TableCell>
                       )}
+                      {columnVisibility.observacionTC &&
+                        params.filters.hasOwnProperty('tipoCambio') && (
+                          <TableCell className="customTableCell">
+                            <Typography
+                              sx={{
+                                fontSize: 14,
+                                fontWeight: 'normal',
+                                whiteSpace: 'nowrap',
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
+                              }}
+                            >
+                              {detail.observaciones['tipoCambio']?.length > 0 ? (
+                                <Typography
+                                  color="text.secondary"
+                                  fontWeight="bold"
+                                  sx={{
+                                    cursor: 'pointer',
+                                    '&:hover': {
+                                      color: 'primary.main',
+                                    },
+                                  }}
+                                  onClick={() =>
+                                    handleOpen(detail.observaciones['tipoCambio'].join('. '))
+                                  }
+                                >
+                                  {detail.observaciones['tipoCambio'].join('. ')}
+                                </Typography>
+                              ) : (
+                                'Sin observaciones'
+                              )}
+                            </Typography>
+                          </TableCell>
+                        )}
+                      {columnVisibility.observacionCpe && params.filters.hasOwnProperty('cpe') && (
+                        <TableCell className="customTableCell">
+                          <Typography
+                            sx={{
+                              fontSize: 14,
+                              fontWeight: 'normal',
+                              whiteSpace: 'nowrap',
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                            }}
+                          >
+                            {detail.observaciones['cpe']?.length > 0 ? (
+                              <Typography
+                                color="text.secondary"
+                                fontWeight="bold"
+                                sx={{
+                                  cursor: 'pointer',
+                                  '&:hover': {
+                                    color: 'primary.main',
+                                  },
+                                }}
+                              >
+                                {detail.observaciones['cpe'].join('. ')}
+                              </Typography>
+                            ) : (
+                              'Sin observaciones'
+                            )}
+                          </Typography>
+                        </TableCell>
+                      )}
+                      {columnVisibility.observacionIncons &&
+                        params.filters.hasOwnProperty('inconsistencias') && (
+                          <TableCell className="customTableCell">
+                            <Typography
+                              sx={{
+                                fontSize: 14,
+                                fontWeight: 'normal',
+                                whiteSpace: 'nowrap',
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
+                              }}
+                            >
+                              {detail.observaciones['inconsistencias']?.length > 0 ? (
+                                <Typography
+                                  color="text.secondary"
+                                  fontWeight="bold"
+                                  sx={{
+                                    cursor: 'pointer',
+                                    '&:hover': {
+                                      color: 'primary.main',
+                                    },
+                                  }}
+                                >
+                                  {detail.observaciones['inconsistencias'].join('. ')}
+                                </Typography>
+                              ) : (
+                                'Sin observaciones'
+                              )}
+                            </Typography>
+                          </TableCell>
+                        )}
 
-                      {columnVisibility.observacionTC && (
-                        <TableCell className="customTableCell">
-                          <Typography
-                            sx={{
-                              fontSize: 14,
-                              fontWeight: 'normal',
-                              whiteSpace: 'nowrap',
-                              overflow: 'hidden',
-                              textOverflow: 'ellipsis',
-                            }}
-                          >
-                            {detail.observacion['tc'].length > 0 ? (
-                              <Typography
-                                color="text.secondary"
-                                fontWeight="bold"
-                                sx={{
-                                  cursor: 'pointer',
-                                  '&:hover': {
-                                    color: 'primary.main',
-                                  },
-                                }}
-                                onClick={() => handleOpen(detail.observacion['tc'].join('. '))}
-                              >
-                                {detail.observacion['tc'].join('. ')}
-                              </Typography>
-                            ) : (
-                              'Sin observaciones'
-                            )}
-                          </Typography>
-                        </TableCell>
-                      )}
-                      {columnVisibility.observacionFactoring && (
-                        <TableCell className="customTableCell">
-                          <Typography
-                            sx={{
-                              fontSize: 14,
-                              fontWeight: 'normal',
-                              whiteSpace: 'nowrap',
-                              overflow: 'hidden',
-                              textOverflow: 'ellipsis',
-                            }}
-                          >
-                            {detail.observacion['facto'].length > 0 ? (
-                              <Typography
-                                color="text.secondary"
-                                fontWeight="bold"
-                                sx={{
-                                  cursor: 'pointer',
-                                  '&:hover': {
-                                    color: 'primary.main',
-                                  },
-                                }}
-                              >
-                                {detail.observacion['facto'].join('. ')}
-                              </Typography>
-                            ) : (
-                              'Sin observaciones'
-                            )}
-                          </Typography>
-                        </TableCell>
-                      )}
-                      {columnVisibility.observacionIncons && (
-                        <TableCell className="customTableCell">
-                          <Typography
-                            sx={{
-                              fontSize: 14,
-                              fontWeight: 'normal',
-                              whiteSpace: 'nowrap',
-                              overflow: 'hidden',
-                              textOverflow: 'ellipsis',
-                            }}
-                          >
-                            {detail.observacion['incons'].length > 0 ? (
-                              <Typography
-                                color="text.secondary"
-                                fontWeight="bold"
-                                sx={{
-                                  cursor: 'pointer',
-                                  '&:hover': {
-                                    color: 'primary.main',
-                                  },
-                                }}
-                              >
-                                {detail.observacion['incons'].join('. ')}
-                              </Typography>
-                            ) : (
-                              'Sin observaciones'
-                            )}
-                          </Typography>
-                        </TableCell>
-                      )}
-                      {columnVisibility.observacionCpe && (
-                        <TableCell className="customTableCell">
-                          <Typography
-                            sx={{
-                              fontSize: 14,
-                              fontWeight: 'normal',
-                              whiteSpace: 'nowrap',
-                              overflow: 'hidden',
-                              textOverflow: 'ellipsis',
-                            }}
-                          >
-                            {detail.observacion['cpe'].length > 0 ? (
-                              <Typography
-                                color="text.secondary"
-                                fontWeight="bold"
-                                sx={{
-                                  cursor: 'pointer',
-                                  '&:hover': {
-                                    color: 'primary.main',
-                                  },
-                                }}
-                              >
-                                {detail.observacion['cpe'].join('. ')}
-                              </Typography>
-                            ) : (
-                              'Sin observaciones'
-                            )}
-                          </Typography>
-                        </TableCell>
-                      )}
-                      {columnVisibility.observacionCond && (
-                        <TableCell className="customTableCell">
-                          <Typography
-                            sx={{
-                              fontSize: 14,
-                              fontWeight: 'normal',
-                              whiteSpace: 'nowrap',
-                              overflow: 'hidden',
-                              textOverflow: 'ellipsis',
-                            }}
-                          >
-                            {detail.observacion['cond'].length > 0 ? (
-                              <Typography
-                                color="text.secondary"
-                                fontWeight="bold"
-                                sx={{
-                                  cursor: 'pointer',
-                                  '&:hover': {
-                                    color: 'primary.main',
-                                  },
-                                }}
-                              >
-                                {detail.observacion['cond'].join('. ')}
-                              </Typography>
-                            ) : (
-                              'Sin observaciones'
-                            )}
-                          </Typography>
-                        </TableCell>
-                      )}
-                      {columnVisibility.observacionObligado && (
-                        <TableCell className="customTableCell">
-                          <Typography
-                            sx={{
-                              fontSize: 14,
-                              fontWeight: 'normal',
-                              whiteSpace: 'nowrap',
-                              overflow: 'hidden',
-                              textOverflow: 'ellipsis',
-                            }}
-                          >
-                            {detail.observacion['obligado'].length > 0 ? (
-                              <Typography
-                                color="text.secondary"
-                                fontWeight="bold"
-                                sx={{
-                                  cursor: 'pointer',
-                                  '&:hover': {
-                                    color: 'primary.main',
-                                  },
-                                }}
-                              >
-                                {detail.observacion['obligado'].join('. ')}
-                              </Typography>
-                            ) : (
-                              'Sin observaciones'
-                            )}
-                          </Typography>
-                        </TableCell>
-                      )}
+                      {columnVisibility.observacionCond &&
+                        params.filters.hasOwnProperty('condicion') && (
+                          <TableCell className="customTableCell">
+                            <Typography
+                              sx={{
+                                fontSize: 14,
+                                fontWeight: 'normal',
+                                whiteSpace: 'nowrap',
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
+                              }}
+                            >
+                              {detail.observaciones['condicion']?.length > 0 ? (
+                                <Typography
+                                  color="text.secondary"
+                                  fontWeight="bold"
+                                  sx={{
+                                    cursor: 'pointer',
+                                    '&:hover': {
+                                      color: 'primary.main',
+                                    },
+                                  }}
+                                >
+                                  {detail.observaciones['condicion'].join('. ')}
+                                </Typography>
+                              ) : (
+                                'Sin observaciones'
+                              )}
+                            </Typography>
+                          </TableCell>
+                        )}
+                      {columnVisibility.observacionObligado &&
+                        params.filters.hasOwnProperty('obligado') && (
+                          <TableCell className="customTableCell">
+                            <Typography
+                              sx={{
+                                fontSize: 14,
+                                fontWeight: 'normal',
+                                whiteSpace: 'nowrap',
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
+                              }}
+                            >
+                              {detail.observaciones['obligado']?.length > 0 ? (
+                                <Typography
+                                  color="text.secondary"
+                                  fontWeight="bold"
+                                  sx={{
+                                    cursor: 'pointer',
+                                    '&:hover': {
+                                      color: 'primary.main',
+                                    },
+                                  }}
+                                >
+                                  {detail.observaciones['obligado'].join('. ')}
+                                </Typography>
+                              ) : (
+                                'Sin observaciones'
+                              )}
+                            </Typography>
+                          </TableCell>
+                        )}
                     </TableRow>
                   );
                 })
               )}
             </TableBody>
-            {details.length > 0 && (
+            {results?.length > 0 && (
               <TableFooter
                 sx={{
                   position: 'sticky',
@@ -1192,13 +1305,13 @@ export const PurchasesInconsistenciesDetails = (props) => {
                   {columnVisibility.moneda && <TableCell></TableCell>}
                   {columnVisibility.mtoBIGravadaDGNG && (
                     <TableCell sx={{ textAlign: 'right', fontSize: 14, fontWeight: 600 }}>
-                      {totalSums.baseIGravadaDGNG.toLocaleString('en-US')}
+                      {totals.baseIGravadaDGNG.toLocaleString('en-US')}
                     </TableCell>
                   )}
                   {columnVisibility.mtoIgvIpmDGNG && <TableCell></TableCell>}
                   {columnVisibility.mtoBIGravadaDNG && (
                     <TableCell sx={{ textAlign: 'right', fontSize: 14, fontWeight: 600 }}>
-                      {totalSums.baseIGravadaDNG.toLocaleString('en-US')}
+                      {totals.baseIGravadaDNG.toLocaleString('en-US')}
                     </TableCell>
                   )}
                   {columnVisibility.mtoIgvIpmDNG && <TableCell></TableCell>}
@@ -1206,50 +1319,49 @@ export const PurchasesInconsistenciesDetails = (props) => {
                   {columnVisibility.mtoISC && <TableCell></TableCell>}
                   {columnVisibility.mtoIcbp && <TableCell></TableCell>}
                   {columnVisibility.mtoOtrosTrib && <TableCell></TableCell>}
-                  {/* {columnVisibility.mtoBIGravada && <TableCell></TableCell>} */}
+                  {columnVisibility.mtoBIGravada && <TableCell></TableCell>}
                   {columnVisibility.igv && <TableCell></TableCell>}
                   {columnVisibility.igvSunat && (
                     <TableCell sx={{ textAlign: 'right', fontSize: 14, fontWeight: 600 }}>
-                      {totalSums.igvSunat.toLocaleString('en-US')}
+                      {totals.igvSunat.toLocaleString('en-US')}
                     </TableCell>
                   )}
                   {columnVisibility.importe && <TableCell></TableCell>}
                   {columnVisibility.importeSunat && (
                     <TableCell sx={{ textAlign: 'right', fontSize: 14, fontWeight: 600 }}>
-                      {totalSums.importeSunat.toLocaleString('en-US')}
+                      {totals.importeSunat.toLocaleString('en-US')}
                     </TableCell>
                   )}
                   {columnVisibility.tipoCambio && <TableCell></TableCell>}
-                  {columnVisibility.observacionTC && (
+                  {columnVisibility.observacionTC &&
+                    params.filters.hasOwnProperty('tipoCambio') && (
+                      <TableCell sx={{ textAlign: 'center', fontSize: 14, fontWeight: 600 }}>
+                        {totals.observacionTC}
+                      </TableCell>
+                    )}
+                  {columnVisibility.observacionCpe && params.filters.hasOwnProperty('cpe') && (
                     <TableCell sx={{ textAlign: 'center', fontSize: 14, fontWeight: 600 }}>
-                      {totalSums.observacionTC}
+                      {totals.observacionCpe}
                     </TableCell>
                   )}
-                  {columnVisibility.observacionFactoring && (
-                    <TableCell sx={{ textAlign: 'center', fontSize: 14, fontWeight: 600 }}>
-                      {totalSums.observacionFacto}
-                    </TableCell>
-                  )}
-                  {columnVisibility.observacionIncons && (
-                    <TableCell sx={{ textAlign: 'center', fontSize: 14, fontWeight: 600 }}>
-                      {totalSums.observacionIncons}
-                    </TableCell>
-                  )}
-                  {columnVisibility.observacionCpe && (
-                    <TableCell sx={{ textAlign: 'center', fontSize: 14, fontWeight: 600 }}>
-                      {totalSums.observacionCpe}
-                    </TableCell>
-                  )}
-                  {columnVisibility.observacionCond && (
-                    <TableCell sx={{ textAlign: 'center', fontSize: 14, fontWeight: 600 }}>
-                      {totalSums.observacionCond}
-                    </TableCell>
-                  )}
-                  {columnVisibility.observacionObligado && (
-                    <TableCell sx={{ textAlign: 'center', fontSize: 14, fontWeight: 600 }}>
-                      {totalSums.observacionObligado}
-                    </TableCell>
-                  )}
+                  {columnVisibility.observacionIncons &&
+                    params.filters.hasOwnProperty('inconsistencias') && (
+                      <TableCell sx={{ textAlign: 'center', fontSize: 14, fontWeight: 600 }}>
+                        {totals.observacionIncons}
+                      </TableCell>
+                    )}
+                  {columnVisibility.observacionCond &&
+                    params.filters.hasOwnProperty('condicion') && (
+                      <TableCell sx={{ textAlign: 'center', fontSize: 14, fontWeight: 600 }}>
+                        {totals.observacionCond}
+                      </TableCell>
+                    )}
+                  {columnVisibility.observacionObligado &&
+                    params.filters.hasOwnProperty('obligado') && (
+                      <TableCell sx={{ textAlign: 'center', fontSize: 14, fontWeight: 600 }}>
+                        {totals.observacionObligado}
+                      </TableCell>
+                    )}
                 </TableRow>
               </TableFooter>
             )}
@@ -1268,8 +1380,8 @@ export const PurchasesInconsistenciesDetails = (props) => {
 
 PurchasesInconsistenciesDetails.propTypes = {
   loading: PropTypes.bool,
-  details: PropTypes.array.isRequired,
-  totalSums: PropTypes.object,
+  // details: PropTypes.array.isRequired,
+  totals: PropTypes.object,
   downloadPath: PropTypes.string,
   onDownload: PropTypes.func,
 };

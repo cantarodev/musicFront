@@ -29,7 +29,6 @@ import XCloseIcon from '@untitled-ui/icons-react/build/esm/XClose';
 import ChevronDownIcon from '@untitled-ui/icons-react/build/esm/ChevronDown';
 import { claveSolAccountsApi } from 'src/api/sun-key-accounts/sunKeyService';
 import { useDispatch } from 'react-redux';
-import { useSelector } from 'react-redux';
 import { setAccount } from '../../../slices/account';
 
 const SIDE_NAV_WIDTH = 280;

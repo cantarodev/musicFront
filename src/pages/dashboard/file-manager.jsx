@@ -10,24 +10,17 @@ import { Seo } from 'src/components/seo';
 import { useDialog } from 'src/hooks/use-dialog';
 import { useMounted } from 'src/hooks/use-mounted';
 import { useSettings } from 'src/hooks/use-settings';
-import { FileUploader } from 'src/sections/dashboard/file-manager/file-uploader';
 import { ItemDrawer } from 'src/sections/dashboard/file-manager/item-drawer';
 import { ItemList } from 'src/sections/dashboard/file-manager/item-list';
 import { ItemSearch } from 'src/sections/dashboard/file-manager/item-search';
 import { StorageStats } from 'src/sections/dashboard/file-manager/storage-stats';
 import { useMockedUser } from 'src/hooks/use-mocked-user';
 import { PLESearchDialog } from 'src/sections/dashboard/file-manager/search-ple'; // Asegúrate de que la ruta sea correcta
+import socket from 'src/utils/socket';
 import toast from 'react-hot-toast';
 import { useSelector } from 'react-redux';
 
-import io from 'socket.io-client';
 import { usePageView } from 'src/hooks/use-page-view';
-
-const fullUrl = import.meta.env.VITE_API_URL;
-const url = new URL(fullUrl);
-const baseUrl = `${url.protocol}//${url.hostname}:${url.port}`;
-
-const socket = io(baseUrl);
 
 const useItemsSearch = (user_id, rucAccount) => {
   const [state, setState] = useState({

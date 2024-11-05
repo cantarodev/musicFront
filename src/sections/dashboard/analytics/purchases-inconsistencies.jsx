@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react';
 import { useMockedUser } from 'src/hooks/use-mocked-user';
 import { PurchasesInconsistenciesDetails } from 'src/sections/dashboard/analytics/purchases-inconsistencies-details';
 import { reportApi } from 'src/api/reports/reportService';
-import { format, subMonths } from 'date-fns';
 
 import axios from 'axios';
 import { useSelector } from 'react-redux';
@@ -12,44 +11,32 @@ import { PurchasesInconsistenciesCards } from 'src/sections/dashboard/analytics/
 import { PurchasesInconsistenciesFilter } from './purchases-inconsistencies-filter';
 import toast from 'react-hot-toast';
 
+import { useDispatch } from 'react-redux';
+import { setReport, resetReport } from '../../../slices/report';
+import { useLocalStorage } from 'src/hooks/use-local-storage';
+
 const Page = ({ type }) => {
   const selectedAccount = useSelector((state) => state.account);
-  const [detailsMain, setDetailsMain] = useState([]);
   const [downloadPath, setDownloadPath] = useState('');
 
   const [loading, setLoading] = useState(false);
+  const dispatch = useDispatch();
 
   const user = useMockedUser();
-
+  const [filters, setFilters] = useLocalStorage('filters');
   const [selectedParams, setSelectedParams] = useState({
-    period: format(subMonths(new Date(), 1), 'yyyyMM'),
+    period: filters.period,
     account: selectedAccount,
     queryType: String(type).toLowerCase(),
     docType: 'all',
     currency: 'all',
-    filters: {},
-    factoringStatuses: [],
-  });
-
-  const [totalSums, setTotalSums] = useState({
-    baseIGravada: 0.0,
-    baseIGravadaDGNG: 0.0,
-    baseIGravadaDNG: 0.0,
-    igv: 0.0,
-    igvSunat: 0.0,
-    importe: 0.0,
-    importeSunat: 0.0,
-    observacionTC: 0,
-    observacionFacto: 0,
-    observacionIncons: 0,
-    observacionCpe: 0,
-    observacionCond: 0,
+    filters: { all: [] },
   });
 
   const handleApplyFilters = async () => {
     const user_id = user?.user_id;
 
-    setDetailsMain([]);
+    dispatch(resetReport());
     setLoading(true);
     try {
       const response = await reportApi.reportObservations({
@@ -65,7 +52,7 @@ const Page = ({ type }) => {
         });
       }
 
-      setDetailsMain(data);
+      dispatch(setReport(data));
       setDownloadPath(response?.download_path);
       setLoading(false);
     } catch (err) {
@@ -103,61 +90,8 @@ const Page = ({ type }) => {
   };
 
   useEffect(() => {
-    setDetailsMain([]);
     setSelectedParams((state) => ({ ...state, account: selectedAccount }));
   }, [selectedAccount]);
-
-  useEffect(() => {
-    const newTotals = detailsMain.reduce(
-      (totals, detail) => {
-        totals.baseIGravada += parseFloat(detail.mtoBIGravada) || 0;
-        totals.baseIGravadaDGNG += parseFloat(detail.mtoBIGravadaDGNG) || 0;
-        totals.baseIGravadaDNG += parseFloat(detail.mtoBIGravadaDNG) || 0;
-        totals.igv += parseFloat(detail.mtoIGV) || 0;
-        totals.igvSunat += parseFloat(detail.igvSunat) || 0;
-        totals.importe += parseFloat(detail.importeTotal) || 0;
-        totals.importeSunat += parseFloat(detail.importeTotalSunat) || 0;
-
-        if (detail.observacion['tc'].length > 0) {
-          totals.observacionTC += 1;
-        }
-
-        if (detail.observacion['facto'].length > 0) {
-          totals.observacionFacto += 1;
-        }
-
-        if (detail.observacion['incons'].length > 0) {
-          totals.observacionIncons += 1;
-        }
-
-        if (detail.observacion['cpe'].length > 0) {
-          totals.observacionCpe += 1;
-        }
-
-        if (detail.observacion['cond'].length > 0) {
-          totals.observacionCond += 1;
-        }
-
-        return totals;
-      },
-      {
-        baseIGravada: 0.0,
-        baseIGravadaDGNG: 0.0,
-        baseIGravadaDNG: 0.0,
-        igv: 0.0,
-        igvSunat: 0.0,
-        importe: 0.0,
-        importeSunat: 0.0,
-        observacionTC: 0,
-        observacionFacto: 0,
-        observacionIncons: 0,
-        observacionCpe: 0,
-        observacionCond: 0,
-      }
-    );
-
-    setTotalSums(newTotals);
-  }, [detailsMain]);
 
   return (
     <Box
@@ -173,17 +107,14 @@ const Page = ({ type }) => {
       />
       <PurchasesInconsistenciesCards
         title={type}
-        totalInconsistencies={detailsMain.length || 0}
-        totalSums={totalSums}
         loading={loading}
       />
       <PurchasesInconsistenciesDetails
         loading={loading}
-        details={detailsMain || []}
         downloadPath={downloadPath}
         onLoadData={handleApplyFilters}
         onDownload={handleDownloadObservations}
-        totalSums={totalSums}
+        params={selectedParams}
       />
     </Box>
   );

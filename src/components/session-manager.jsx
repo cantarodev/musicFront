@@ -3,7 +3,7 @@ import { Backdrop, Box, Button, ButtonBase, Fade, Modal, SvgIcon } from '@mui/ma
 
 const SessionManager = ({ showModal, signOut, counter, extendSession }) => {
   const settings = window.localStorage.getItem('app.settings');
-  const { paletteMode } = JSON.parse(settings);
+  const { paletteMode } = settings ? JSON.parse(settings) : { paletteMode: 'light' };
 
   const style = {
     position: 'absolute',
