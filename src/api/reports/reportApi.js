@@ -91,6 +91,30 @@ export const getReportCorrelativity = (
   );
 };
 
+export const getReportFactoring = (
+  user_id,
+  period,
+  queryType,
+  docType,
+  currency,
+  filters,
+  account,
+  ) => {
+  return handleResponse(
+    apiClient.post(
+      `/report/observations/factoring`, {
+        user_id,
+        period,
+        queryType,
+        docType,
+        currency,
+        filters,
+        account  
+      }
+    )
+  );
+};
+
 export const getReportMissings = (user_id, period, queryType, docType, currency, account) => {
   return handleResponse(
     apiClient.get(

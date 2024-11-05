@@ -4,7 +4,8 @@ import {
   downloadObservations, 
   getReportDetractions, 
   getReportDebitCreditNotes,
-  getReportCorrelativity
+  getReportCorrelativity,
+  getReportFactoring
 } from './reportApi';
 
 class ReportApi {
@@ -52,6 +53,19 @@ class ReportApi {
     );
   }
 
+  async getReportFactoring(request) {
+    const { user_id, period, queryType, docType, currency, filters, account } = request;
+
+    return await getReportFactoring(
+      user_id,
+      period,
+      queryType,
+      docType,
+      currency,
+      filters,
+      account
+    );
+  }
 
 
   async getReportCorrelativity(request) {

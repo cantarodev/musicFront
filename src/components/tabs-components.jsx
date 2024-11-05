@@ -10,6 +10,7 @@ import SalesSire from 'src/sections/dashboard/analytics/sales-sire';
 
 import PurchasesDetractions from 'src/sections/dashboard/analytics/detractions';
 import PurchasesCreditDebitNotes from 'src/sections/dashboard/analytics/purchases_credit_debit_notes';
+import Factoring from 'src/sections/dashboard/analytics/purchases-factoring'; // Importar factoring
 
 const TabPanel = (props) => {
   const { children, value, index, ...other } = props;
@@ -51,46 +52,43 @@ const BasicTabs = ({ type }) => {
       >
         <Tab label="Home" />
         <Tab label="Sire" />
+        <Tab label="Factoring" />
         <Tab label="Notas Créd. Déb." />
         {type === 'Compras' && <Tab label="Detracciones" />}
         {type === 'Ventas' && <Tab label="Correlatividad" />}
       </Tabs>
 
-      <TabPanel
-        value={value}
-        index={0}
-      >
+      <TabPanel value={value} index={0}>
         {type === 'Compras' ? (
           <PurchasesInconsinstencies type={type} />
         ) : (
           <SalesInconsinstencies type={type} />
         )}
       </TabPanel>
-      <TabPanel
-        value={value}
-        index={1}
-      >
+
+      <TabPanel value={value} index={1}>
         {type === 'Compras' ? <PurchasesSire type={type} /> : <SalesSire type={type} />}
       </TabPanel>
-      <TabPanel
-        value={value}
-        index={2}
-      >
-        {/* Usar PurchasesCreditDebitNotes para ambos tipos */}
+
+      <TabPanel value={value} index={2}>
+        <Factoring type={type} /> {/* Añadido factoring */}
+      </TabPanel>
+
+      <TabPanel value={value} index={3}>
         <PurchasesCreditDebitNotes type={type} />
       </TabPanel>
-      <TabPanel
-        value={value}
-        index={3}
-      >
-        {type === 'Compras' && <PurchasesDetractions type={type} />}
-      </TabPanel>
-      <TabPanel
-        value={value}
-        index={3}
-      >
-        {type === 'Ventas' && <Correlativity type={type} />}
-      </TabPanel>
+
+      {type === 'Compras' && (
+        <TabPanel value={value} index={4}>
+          <PurchasesDetractions type={type} />
+        </TabPanel>
+      )}
+
+      {type === 'Ventas' && (
+        <TabPanel value={value} index={4}>
+          <Correlativity type={type} />
+        </TabPanel>
+      )}
     </Box>
   );
 };
