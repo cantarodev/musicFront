@@ -1,10 +1,23 @@
 import { createSlice } from '@reduxjs/toolkit';
 
-const initialState = [];
+const initialState = {
+  sales: [],
+  purchases: [],
+};
 
 const reducers = {
-  setReport: (state, action) => action.payload,
-  resetReport: () => initialState,
+  setSalesReport: (state, action) => {
+    state.sales = action.payload;
+  },
+  setPurchasesReport: (state, action) => {
+    state.purchases = action.payload;
+  },
+  resetSalesReport: (state) => {
+    state.sales = [];
+  },
+  resetPurchasesReport: (state) => {
+    state.purchases = [];
+  },
 };
 
 export const slice = createSlice({
@@ -13,6 +26,7 @@ export const slice = createSlice({
   reducers,
 });
 
-export const { setReport, resetReport } = slice.actions;
+export const { setSalesReport, setPurchasesReport, resetSalesReport, resetPurchasesReport } =
+  slice.actions;
 
 export const { reducer } = slice;

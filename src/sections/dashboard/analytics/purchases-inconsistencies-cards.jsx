@@ -10,7 +10,7 @@ import { useSelector } from 'react-redux';
 
 export const PurchasesInconsistenciesCards = (props) => {
   const { title, loading } = props;
-  const { results, totals } = useSelector((state) => state.filteredResults);
+  const { totals } = useSelector((state) => state.filteredResults.purchases);
 
   return (
     <Card>
