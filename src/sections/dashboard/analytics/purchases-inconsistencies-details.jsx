@@ -895,7 +895,7 @@ export const PurchasesInconsistenciesDetails = (props) => {
 
                       {columnVisibility.ruc && (
                         <TableCell className="customTableCell">
-                          <Typography sx={{ fontSize: 14 }}>{detail.numDocRecep}</Typography>
+                          <Typography sx={{ fontSize: 14 }}>{detail.numDoc}</Typography>
                         </TableCell>
                       )}
                       {columnVisibility.razonSocial && (
