@@ -18,14 +18,24 @@ import toast from 'react-hot-toast';
 import { fileManagerApi } from 'src/api/file-manager/fileService';
 import { FileIcon } from 'src/components/file-icon';
 import { bytesToSize } from 'src/utils/bytes-to-size';
-import { useState } from 'react';
+import { Fragment, useState } from 'react';
 import { useMockedUser } from 'src/hooks/use-mocked-user';
 import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import InputLabel from '@mui/material/InputLabel';
 import { useSelector } from 'react-redux';
-import { LinearProgress } from '@mui/material';
+import {
+  Alert,
+  LinearProgress,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+} from '@mui/material';
 
 export const FileDropzone = (props) => {
   const {
@@ -48,6 +58,8 @@ export const FileDropzone = (props) => {
   const [periodocpe, setPeriodocpe] = useState('');
   const [type, setType] = useState('');
   const [showConfirmation, setShowConfirmation] = useState(false);
+
+  const [errors, setErrors] = useState([]);
 
   const handlePeriodocpeChange = (e) => {
     setPeriodocpe(e.target.value);
@@ -82,6 +94,10 @@ export const FileDropzone = (props) => {
         onClose();
         handleItemsTotalsGet();
         handleItemsGet();
+      } else {
+        setErrors(response.errors);
+        setShowConfirmation(false);
+        onRemoveAll();
       }
 
       setUploading(false);
@@ -251,6 +267,7 @@ export const FileDropzone = (props) => {
               <LinearProgress />
             </Typography>
           )}
+
           {!uploading && showConfirmation && (
             <Typography
               variant="body1"
@@ -287,6 +304,108 @@ export const FileDropzone = (props) => {
               {showConfirmation ? 'Confirmar' : 'Subir'}
             </Button>
           </Stack>
+        </Box>
+      )}
+      {errors?.length > 0 && !hasAnyFiles && (
+        <Box
+          display="flex"
+          flexDirection="column"
+          maxHeight="500px"
+          pt={2}
+        >
+          <Box mb={2}>
+            <Alert
+              severity="warning"
+              variant="outlined"
+            >
+              Se encontraron errores en el archivo. Por favor, corríjalos y vuelva a cargar los
+              archivos.
+            </Alert>
+          </Box>
+          <TableContainer
+            component={Paper}
+            sx={{ flex: 1, overflowY: 'auto', position: 'relative' }}
+          >
+            <Table stickyHeader>
+              <TableHead>
+                <TableRow>
+                  <TableCell>
+                    <Typography
+                      variant="subtitle1"
+                      textAlign="center"
+                    >
+                      Error
+                    </Typography>
+                  </TableCell>
+                  <TableCell>
+                    <Typography
+                      variant="subtitle1"
+                      textAlign="center"
+                    >
+                      Filas
+                    </Typography>
+                  </TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {errors?.map((file, fileIndex) => {
+                  return (
+                    <Fragment key={fileIndex}>
+                      <TableRow>
+                        <TableCell colSpan={2}>
+                          <Typography
+                            variant="subtitle1"
+                            fontWeight="bold"
+                            textAlign="center"
+                          >
+                            {file.filename}
+                          </Typography>
+                        </TableCell>
+                      </TableRow>
+                      {file.observations.map((obs, obsIndex) => {
+                        return (
+                          <TableRow key={obsIndex}>
+                            <TableCell
+                              className="customTableCell"
+                              sx={{
+                                color: 'error.main',
+                                fontWeight: 'bold',
+                                wordWrap: 'break-word',
+                                overflowWrap: 'break-word',
+                                whiteSpace: 'normal',
+                                maxWidth: '300px',
+                              }}
+                            >
+                              <Typography sx={{ fontSize: 14 }}>
+                                {String(obs.split('en las filas')[0]).trim()}
+                              </Typography>
+                            </TableCell>
+                            <TableCell
+                              className="customTableCell"
+                              sx={{
+                                color: 'error.main',
+                                fontWeight: 'bold',
+                                wordWrap: 'break-word',
+                                overflowWrap: 'break-word',
+                                whiteSpace: 'normal',
+                                maxWidth: '300px',
+                              }}
+                            >
+                              <Typography sx={{ fontSize: 14 }}>
+                                {String(obs.split('en las filas')[1])
+                                  .trim()
+                                  .replace(/^\[|\]$/g, '')}
+                              </Typography>
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
+                    </Fragment>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          </TableContainer>
         </Box>
       )}
     </div>

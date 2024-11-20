@@ -33,7 +33,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import ViewColumnIcon from '@mui/icons-material/ViewColumn';
 import { useSelector } from 'react-redux';
 
-import { setFilteredResultsAndTotals } from 'src/slices/filtered-results';
+import { setFilteredPurchases } from 'src/slices/filtered-results';
 import { useDispatch } from 'react-redux';
 
 const columnLabels = {
@@ -100,7 +100,7 @@ export const PurchasesInconsistenciesDetails = (props) => {
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedDetail, setSelectedDetail] = useState('');
 
-  const results = useSelector((state) => state.report);
+  const results = useSelector((state) => state.report.purchases);
 
   const [displayedRows, setDisplayedRows] = useState([]);
   const [page, setPage] = useState(0);
@@ -296,7 +296,7 @@ export const PurchasesInconsistenciesDetails = (props) => {
   };
 
   useEffect(() => {
-    dispatch(setFilteredResultsAndTotals({ results: filteredResults, totals }));
+    dispatch(setFilteredPurchases({ results: filteredResults, totals }));
   }, [filteredResults, totals, dispatch]);
 
   return (
@@ -895,7 +895,7 @@ export const PurchasesInconsistenciesDetails = (props) => {
 
                       {columnVisibility.ruc && (
                         <TableCell className="customTableCell">
-                          <Typography sx={{ fontSize: 14 }}>{detail.numDocRecep}</Typography>
+                          <Typography sx={{ fontSize: 14 }}>{detail.numDoc}</Typography>
                         </TableCell>
                       )}
                       {columnVisibility.razonSocial && (
@@ -915,7 +915,7 @@ export const PurchasesInconsistenciesDetails = (props) => {
                                 maxWidth: '150px',
                               }}
                             >
-                              {detail.razonSocial}
+                              {detail.razonSocial ? detail.razonSocial : '-'}
                             </Typography>
                           </Tooltip>
                         </TableCell>
@@ -1120,7 +1120,7 @@ export const PurchasesInconsistenciesDetails = (props) => {
                             // }
                             style={{ fontSize: 14 }}
                           >
-                            {detail.tipoCambio}
+                            {detail.tipoCambio ? detail.tipoCambio : '-'}
                           </Typography>
                         </TableCell>
                       )}

@@ -42,8 +42,10 @@ const validations = [
 ];
 
 export const PurchasesInconsistenciesFilter = (props) => {
-  const { selectedParams, setSelectedParams, loading, onLoadData } = props;
-  const results = useSelector((state) => state.report);
+  const { selectedParams, setSelectedParams, loading, onLoadData, type } = props;
+  const results = useSelector((state) =>
+    type == 'purchases' ? state.report.purchases : state.report.sales
+  );
   const [filters, setFilters] = useLocalStorage('filters');
 
   const [activeSubOptions, setActiveSubOptions] = useState(null);
@@ -504,4 +506,5 @@ PurchasesInconsistenciesFilter.propTypes = {
   selectedParams: PropTypes.object,
   setSelectedParams: PropTypes.func,
   onLoadData: PropTypes.func,
+  type: PropTypes.string,
 };

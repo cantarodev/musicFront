@@ -11,43 +11,34 @@ import { useSelector } from 'react-redux';
 import { SalesInconsistenciesCards } from 'src/sections/dashboard/analytics/sales-inconsistencies-cards';
 import { SalesInconsistenciesFilter } from './sales-inconsistencies-filter';
 import toast from 'react-hot-toast';
+import { PurchasesInconsistenciesFilter } from './purchases-inconsistencies-filter';
+
+import { useDispatch } from 'react-redux';
+import { setSalesReport, resetSalesReport } from '../../../slices/report';
+import { useLocalStorage } from 'src/hooks/use-local-storage';
 
 const Page = ({ type }) => {
   const selectedAccount = useSelector((state) => state.account);
-  const [detailsMain, setDetailsMain] = useState([]);
   const [downloadPath, setDownloadPath] = useState('');
 
   const [loading, setLoading] = useState(false);
+  const dispatch = useDispatch();
 
   const user = useMockedUser();
-
+  const [filters, setFilters] = useLocalStorage('filters');
   const [selectedParams, setSelectedParams] = useState({
-    period: format(subMonths(new Date(), 1), 'yyyyMM'),
+    period: filters.period,
     account: selectedAccount,
     queryType: String(type).toLowerCase(),
     docType: 'all',
     currency: 'all',
-    filters: {},
-    factoringStatuses: [],
-  });
-
-  const [totalSums, setTotalSums] = useState({
-    baseIGravada: 0.0,
-    igv: 0.0,
-    igvSunat: 0.0,
-    importe: 0.0,
-    importeSunat: 0.0,
-    observacionGeneral: 0,
-    observacionTC: 0,
-    observacionFacto: 0,
-    observacionIncons: 0,
-    observacionCpe: 0,
+    filters: { all: [] },
   });
 
   const handleApplyFilters = async () => {
     const user_id = user?.user_id;
 
-    setDetailsMain([]);
+    dispatch(resetSalesReport());
     setLoading(true);
     try {
       const response = await reportApi.reportObservations({
@@ -63,8 +54,7 @@ const Page = ({ type }) => {
         });
       }
 
-      setDetailsMain(data);
-      setDownloadPath(response?.download_path);
+      dispatch(setSalesReport(data));
       setLoading(false);
     } catch (err) {
       console.error(err);
@@ -101,57 +91,8 @@ const Page = ({ type }) => {
   };
 
   useEffect(() => {
-    setDetailsMain([]);
     setSelectedParams((state) => ({ ...state, account: selectedAccount }));
   }, [selectedAccount]);
-
-  useEffect(() => {
-    const newTotals = detailsMain.reduce(
-      (totals, detail) => {
-        totals.baseIGravada += parseFloat(detail.mtoBIGravada) || 0;
-        totals.igv += parseFloat(detail.mtoIGV) || 0;
-        totals.igvSunat += parseFloat(detail.igvSunat) || 0;
-        totals.importe += parseFloat(detail.importeTotal) || 0;
-        totals.importeSunat += parseFloat(detail.importeTotalSunat) || 0;
-
-        if (detail.observacion['general'].length > 0) {
-          totals.observacionGeneral += 1;
-        }
-
-        if (detail.observacion['tc'].length > 0) {
-          totals.observacionTC += 1;
-        }
-
-        if (detail.observacion['facto'].length > 0) {
-          totals.observacionFacto += 1;
-        }
-
-        if (detail.observacion['incons'].length > 0) {
-          totals.observacionIncons += 1;
-        }
-
-        if (detail.observacion['cpe'].length > 0) {
-          totals.observacionCpe += 1;
-        }
-
-        return totals;
-      },
-      {
-        baseIGravada: 0.0,
-        igv: 0.0,
-        igvSunat: 0.0,
-        importe: 0.0,
-        importeSunat: 0.0,
-        observacionTC: 0,
-        observacionGeneral: 0,
-        observacionFacto: 0,
-        observacionIncons: 0,
-        observacionCpe: 0,
-      }
-    );
-
-    setTotalSums(newTotals);
-  }, [detailsMain]);
 
   return (
     <Box
@@ -159,25 +100,23 @@ const Page = ({ type }) => {
       flexDirection="column"
       gap={2}
     >
-      <SalesInconsistenciesFilter
+      <PurchasesInconsistenciesFilter
         selectedParams={selectedParams}
         setSelectedParams={setSelectedParams}
         onLoadData={handleApplyFilters}
         loading={loading}
+        type="sales"
       />
       <SalesInconsistenciesCards
         title={type}
-        totalInconsistencies={detailsMain.length || 0}
-        totalSums={totalSums}
         loading={loading}
       />
       <SalesInconsistenciesDetails
         loading={loading}
-        details={detailsMain || []}
         downloadPath={downloadPath}
         onLoadData={handleApplyFilters}
         onDownload={handleDownloadObservations}
-        totalSums={totalSums}
+        params={selectedParams}
       />
     </Box>
   );

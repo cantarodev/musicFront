@@ -74,8 +74,8 @@ export const ItemListRow = (props) => {
       <TableRow key={item._id}>
         <TableCell>
           <Typography variant="subtitle2">
-            <SeverityPill color={status[item.cpe_validation_status].color}>
-              {status[item.cpe_validation_status].label}
+            <SeverityPill color={status[item.general_status].color}>
+              {status[item.general_status].label}
             </SeverityPill>
           </Typography>
         </TableCell>

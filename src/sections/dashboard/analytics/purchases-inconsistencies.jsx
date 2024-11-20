@@ -12,7 +12,7 @@ import { PurchasesInconsistenciesFilter } from './purchases-inconsistencies-filt
 import toast from 'react-hot-toast';
 
 import { useDispatch } from 'react-redux';
-import { setReport, resetReport } from '../../../slices/report';
+import { setPurchasesReport, resetPurchasesReport } from '../../../slices/report';
 import { useLocalStorage } from 'src/hooks/use-local-storage';
 
 const Page = ({ type }) => {
@@ -36,7 +36,7 @@ const Page = ({ type }) => {
   const handleApplyFilters = async () => {
     const user_id = user?.user_id;
 
-    dispatch(resetReport());
+    dispatch(resetPurchasesReport());
     setLoading(true);
     try {
       const response = await reportApi.reportObservations({
@@ -52,8 +52,8 @@ const Page = ({ type }) => {
         });
       }
 
-      dispatch(setReport(data));
-      setDownloadPath(response?.download_path);
+      dispatch(setPurchasesReport(data));
+      // setDownloadPath(response?.download_path);
       setLoading(false);
     } catch (err) {
       console.error(err);
@@ -104,6 +104,7 @@ const Page = ({ type }) => {
         setSelectedParams={setSelectedParams}
         onLoadData={handleApplyFilters}
         loading={loading}
+        type="purchases"
       />
       <PurchasesInconsistenciesCards
         title={type}
