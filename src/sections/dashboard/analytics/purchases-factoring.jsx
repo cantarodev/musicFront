@@ -1,17 +1,3 @@
-import React, { useState, useEffect } from 'react';
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Box, Typography } from '@mui/material';
-import { FactoringInconsistenciesFilter } from 'src/sections/dashboard/analytics/factoring-inconsistencies-filter';
-import { useMockedUser } from 'src/hooks/use-mocked-user';
-import { reportApi } from 'src/api/reports/reportService';
-import { useSelector } from 'react-redux';
-import PropTypes from 'prop-types';
-import Card from '@mui/material/Card';
-import CardContent from '@mui/material/CardContent';
-import CardHeader from '@mui/material/CardHeader';
-import Grid from '@mui/material/Grid';
-import Stack from '@mui/material/Stack';
-import Skeleton from '@mui/material/Skeleton';
-
 const Factoring = ({ type }) => {
   const [responseData, setResponseData] = useState(null);
   const selectedAccount = useSelector((state) => state.account);
@@ -40,6 +26,31 @@ const Factoring = ({ type }) => {
     }
   }, [selectedAccount]);
 
+  useEffect(() => {
+    console.log("Updated selectedParams in parent:", selectedParams);
+  }, [selectedParams]); // Logs each time selectedParams is updated
+
+  useEffect(() => {
+    console.log("detailsMain actualizado: ", detailsMain);
+  }, [detailsMain]);
+
+  console.log("######row: ",row)
+  const filteredData = detailsMain.filter((row) => {
+    // Filtro por tipo de comprobante
+    const matchesDocType = selectedParams.docType === 'all' || row.codComp === selectedParams.docType;
+    console.log("matchesDocType: ", matchesDocType);
+    // Filtro por tipo de moneda
+    const matchesCurrency = selectedParams.currency === 'all' || String(row.codMoneda).toUpperCase() === selectedParams.currency.toUpperCase();
+    
+    // Filtro por observaciones
+    const matchesObservation = selectedParams.filters.length === 0 || selectedParams.filters.includes(row.observacion);
+  
+    // Retorna solo las filas que coinciden con todos los filtros
+    return matchesDocType && matchesCurrency && matchesObservation;
+  });  
+  
+
+
   const onLoadData = async () => {
     const user_id = user?.user_id;
     setDetailsMain([]);
@@ -50,44 +61,42 @@ const Factoring = ({ type }) => {
         ...selectedParams,
         user_id,
       });
-  
+      console.log("##response: ", response);
+      console.log("-------------------------SELECTED PARAMS: ", selectedParams);
       const data = response?.data;
       console.log("data: ", data);
       console.log("-------------------------");
-      setDetailsMain(data?.all_results);
+      setDetailsMain(data?.data); // Ajustado para reflejar la estructura actual
       setDownloadPath(data?.download_path);
-      
-      // Obtiene los filtros de la respuesta
-      const codcpe = data.relevant_data.filter.codCpe || [];
-      const codMoneda = data.relevant_data.filter.codMoneda || [];
-      const observaciones = data.relevant_data.filter.observacion || [];
-  
-      console.log("codcpe: ", codcpe);
-      
-      // Actualiza el estado con los valores de filtro que se encuentran
-      if (data?.filter) {
-        setSelectedParams((prevParams) => ({
+
+      const codcpeList = data?.data
+        .filter(item => item.codcpe) // Filtra solo los objetos que tienen `codcpe`
+        .map(item => item.codcpe);   // Extrae el valor de `codcpe`
+
+      console.log("Lista de codcpe: ", codcpeList);
+
+      if (data?.relevant_data) {
+        setSelectedParams(prevParams => ({
           ...prevParams,
-          docType: codcpe.length > 0 ? codcpe[0] : "all", // Asigna un valor válido o "all"
-          currency: codMoneda.length > 0 ? codMoneda[0] : "all", // Asigna un valor válido o "all"
-          filters: observaciones.length > 0 ? observaciones : [], // Solo asigna los filtros que están disponibles
+          docType: codcpeList.length > 0 ? codcpeList[0] : "all",
+          currency: data.relevant_data.codMoneda || "all",
+          filters: data.relevant_data.observacion || []
         }));
       }
 
-      // Cálculo de los totales y inconsistencias
-      const totalBase = data?.all_results.reduce((sum, row) => sum + Math.abs(parseFloat(row.mtoBIGravadaDG) || 0), 0);
-      const totalIgv = data?.all_results.reduce((sum, row) => sum + Math.abs(parseFloat(row.mtoIGV) || 0), 0);
-      const totalImporte = data?.all_results.reduce((sum, row) => sum + Math.abs(parseFloat(row.mtoImporteTotal) || 0), 0);
-      
-      setResponseData(data);  // Almacena la respuesta para usarla en los filtros
+      const totalBase = data?.data.reduce((sum, row) => sum + Math.abs(parseFloat(row.mtoBIGravadaDG) || 0), 0);
+      const totalIgv = data?.data.reduce((sum, row) => sum + Math.abs(parseFloat(row.mtoIGV) || 0), 0);
+      const totalImporte = data?.data.reduce((sum, row) => sum + Math.abs(parseFloat(row.mtoImporteTotal) || 0), 0);
+
+      setResponseData(data);
       setTotalSums({
         baseIGravada: totalBase,
         igv: totalIgv,
         importe: totalImporte,
       });
-      setTotalInconsistencies(data?.all_results.length || 0); // Total de inconsistencias según los resultados
+      setTotalInconsistencies(data?.data.length || 0);
 
-      setLoading(false); 
+      setLoading(false);
     } catch (err) {
       console.error(err);
       setLoading(false);
@@ -116,7 +125,7 @@ const Factoring = ({ type }) => {
                     height: 70,
                     borderRadius: 1.5,
                     p: 1.5,
-                    width: '100%', // Ensure it takes full width
+                    width: '100%',
                   }}
                 >
                   <Typography color="text.secondary" variant="body2">Inconsistencias</Typography>
@@ -130,7 +139,7 @@ const Factoring = ({ type }) => {
                     height: 70,
                     borderRadius: 1.5,
                     p: 1.5,
-                    width: '100%', // Ensure it takes full width
+                    width: '100%',
                   }}
                 >
                   <Typography color="text.secondary" variant="body2">Base Imponible</Typography>
@@ -144,7 +153,7 @@ const Factoring = ({ type }) => {
                     height: 70,
                     borderRadius: 1.5,
                     p: 1.5,
-                    width: '100%', // Ensure it takes full width
+                    width: '100%',
                   }}
                 >
                   <Typography color="text.secondary" variant="body2">IGV</Typography>
@@ -158,7 +167,7 @@ const Factoring = ({ type }) => {
                     height: 70,
                     borderRadius: 1.5,
                     p: 1.5,
-                    width: '100%', // Ensure it takes full width
+                    width: '100%',
                   }}
                 >
                   <Typography color="text.secondary" variant="body2">Importe</Typography>
@@ -188,30 +197,24 @@ const Factoring = ({ type }) => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {detailsMain.length > 0 ? (
-              detailsMain.map((row, index) => (
+            {filteredData.length > 0 ? (
+              filteredData.map((row, index) => (
                 <TableRow key={index}>
                   <TableCell>{row.periodo}</TableCell>
                   <TableCell>{row.ruc}</TableCell>
                   <TableCell>{row.razonSocial}</TableCell>
                   <TableCell>{row.fecEmision}</TableCell>
-                  <TableCell>{row.codCpe}</TableCell>
+                  <TableCell>{row.codComp}</TableCell>
                   <TableCell>{row.numCpe}</TableCell>
                   <TableCell>{row.codMoneda}</TableCell>
-                  <TableCell>{row.mtoTipoCambio}</TableCell>
+                  <TableCell>{row.tipoCambio}</TableCell>
                   <TableCell>{row.mtoImporteTotal}</TableCell>
-                  <TableCell sx={{ maxWidth: '90%'}}>
-                    <Typography variant="body2" style={{ wordWrap: 'break-word' }}>
-                      {row.observacion}
-                    </Typography>
-                  </TableCell>
+                  <TableCell>{row.observacion}</TableCell>
                 </TableRow>
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={10} align="center">
-                  No hay datos disponibles
-                </TableCell>
+                <TableCell colSpan={10} align="center">No se encontraron registros</TableCell>
               </TableRow>
             )}
           </TableBody>

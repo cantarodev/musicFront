@@ -374,7 +374,7 @@ export const PurchasesInconsistenciesFilter = (props) => {
 
         <TextField
           fullWidth
-          label="Tipo Comprobante"
+          label="Tipo Comprobante1"
           name="docType"
           onChange={handleSelected}
           select
