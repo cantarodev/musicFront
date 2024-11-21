@@ -29,7 +29,7 @@ const customEnLocale = {
   },
 };
 
-const searchTypeOptions = [
+const initialTypeOptions = [
   { label: 'Todos', value: 'all' },
   { label: '01 - Factura', value: '01' },
   { label: '03 - Boleta de venta', value: '03' },
@@ -37,23 +37,14 @@ const searchTypeOptions = [
   { label: '08 - Nota de débito', value: 'F8' },
 ];
 
-const searchCurrencyOptions = [
+const initialCurrencyOptions = [
   { label: 'Todos', value: 'all' },
   { label: 'USD - Dólares', value: 'USD' },
   { label: 'PEN- Soles', value: 'PEN' },
   { label: 'EUR - Euros', value: 'EUR' },
 ];
 
-// Agregamos las opciones de estados de Factoring
-const factoringStatusOptions = [
-  { label: 'No válido', value: 'No válido' },
-  { label: 'Pendiente', value: 'Pendiente' },
-  { label: 'Pendiente por reinicio', value: 'Pendiente por reinicio' },
-  { label: 'Subsanado', value: 'Subsanado' },
-  { label: 'Disconforme', value: 'Disconforme' },
-];
-
-const filterOptions = [
+const initialFilterOptions = [
   { label: 'Todos', value: 'all' },
   { label: 'Fecha de Pago', value: 'fecha_pago' },
   { label: 'Tasa Detracción', value: 'tasa_detraction' },
@@ -62,10 +53,17 @@ const filterOptions = [
 ];
 
 export const DetractionsInconsistenciesFilter = (props) => {
-  const { selectedParams, setSelectedParams, loading, onLoadData } = props;
-  const [selectedOptions, setSelectedOptions] = useState(['general']);
+  const { selectedParams, setSelectedParams, loading, onLoadData, detailsMain, responseData } = props;
+  //const [selectedOptions, setSelectedOptions] = useState(['general']);
+  const [selectedOptions, setSelectedOptions] = useState(['all']); 
   const [selectedFactoringStatus, setSelectedFactoringStatus] = useState([]); // Para almacenar estados seleccionados
   const [expanded, setExpanded] = useState({});
+  const [searchTypeOptions, setSearchTypeOptions] = useState(initialTypeOptions);
+  const [searchCurrencyOptions, setSearchCurrencyOptions] = useState(initialCurrencyOptions);
+  const [filterOptions, setFilterOptions] = useState(initialFilterOptions);
+  const [selectedDate, setSelectedDate] = useState(
+    selectedParams.period ? parse(selectedParams.period, 'yyyyMM', new Date()) : null
+  );
 
   const handleSelected = (event) => {
     const { name, value } = event.target;
@@ -74,30 +72,65 @@ export const DetractionsInconsistenciesFilter = (props) => {
 
   const handleSelectedOptions = (option) => {
     let updatedSelection = [];
-
+  
     if (option.value === 'all') {
+      // Si se selecciona/desmarca "Todos"
       if (selectedOptions.includes('all')) {
-        updatedSelection = [];
+        updatedSelection = []; // Desmarcar todo
       } else {
-        updatedSelection = [
-          'all',
-          ...filterOptions.filter((opt) => opt.value !== 'all').map((opt) => opt.value),
-        ];
+        updatedSelection = filterOptions.map((opt) => opt.value); // Seleccionar todo
       }
     } else {
+      // Seleccionar/desmarcar una opción individual
       updatedSelection = selectedOptions.includes(option.value)
-        ? selectedOptions.filter((item) => item !== option.value && item !== 'all')
-        : [...selectedOptions.filter((item) => item !== 'all'), option.value];
-
-      if (updatedSelection.length === filterOptions.length - 1) {
+        ? selectedOptions.filter((item) => item !== option.value) // Desmarcar la opción
+        : [...selectedOptions, option.value]; // Agregar la opción seleccionada
+  
+      // Si todas las opciones están seleccionadas menos "Todos", incluir "Todos"
+      if (
+        updatedSelection.length === filterOptions.length - 1 &&
+        !updatedSelection.includes('all')
+      ) {
         updatedSelection.push('all');
       }
+  
+      // Si "Todos" está seleccionado pero se desmarca una opción individual, quitar "Todos"
+      if (updatedSelection.includes('all') && option.value !== 'all') {
+        updatedSelection = updatedSelection.filter((item) => item !== 'all');
+      }
     }
-
+  
     setSelectedOptions(updatedSelection);
-
-    setSelectedParams((state) => ({ ...state, ['filters']: updatedSelection }));
+    setSelectedParams((state) => ({ ...state, filters: updatedSelection }));
   };
+  
+
+  // const handleSelectedOptions = (option) => {
+  //   let updatedSelection = [];
+
+  //   if (option.value === 'all') {
+  //     if (selectedOptions.includes('all')) {
+  //       updatedSelection = [];
+  //     } else {
+  //       updatedSelection = [
+  //         'all',
+  //         ...filterOptions.filter((opt) => opt.value !== 'all').map((opt) => opt.value),
+  //       ];
+  //     }
+  //   } else {
+  //     updatedSelection = selectedOptions.includes(option.value)
+  //       ? selectedOptions.filter((item) => item !== option.value && item !== 'all')
+  //       : [...selectedOptions.filter((item) => item !== 'all'), option.value];
+
+  //     if (updatedSelection.length === filterOptions.length - 1) {
+  //       updatedSelection.push('all');
+  //     }
+  //   }
+
+  //   setSelectedOptions(updatedSelection);
+
+  //   setSelectedParams((state) => ({ ...state, ['filters']: updatedSelection }));
+  // };
 
   const handleSubOptionSelect = (subOption) => {
     setSelectedFactoringStatus((prevSelected) => {
@@ -134,8 +167,10 @@ export const DetractionsInconsistenciesFilter = (props) => {
   };
 
   const handleDateChange = (date) => {
-    const value = formatDate(date);
-    setSelectedParams((state) => ({ ...state, period: value }));
+    const formattedPeriod = date ? format(date, 'yyyyMM') : '';
+    console.log('Periodo seleccionado:', formattedPeriod);
+    setSelectedDate(date);
+    setSelectedParams((state) => ({ ...state, period: formattedPeriod, period_search: formattedPeriod }));
   };
 
   const toggleSubMenu = (option) => {
@@ -145,17 +180,64 @@ export const DetractionsInconsistenciesFilter = (props) => {
     }));
   };
 
+
   useEffect(() => {
     setSelectedParams((state) => ({
       ...state,
       filters: selectedOptions,
       factoringStatuses: selectedFactoringStatus,
     }));
-
-    // Agregar console.log para validar los datos
     console.log('Filtros seleccionados: ', selectedOptions);
   }, [selectedOptions, selectedFactoringStatus, setSelectedParams]);
-  console.log('PARAMS', selectedParams);
+  // useEffect(() => {
+  //   setSelectedParams((state) => ({
+  //     ...state,
+  //     filters: selectedOptions,
+  //     factoringStatuses: selectedFactoringStatus,
+  //   }));
+  //   console.log('Filtros seleccionados: ', selectedOptions);
+  // }, [selectedOptions, selectedFactoringStatus, setSelectedParams]);
+
+  console.log("responseData: ", responseData);
+  
+  useEffect(() => {
+    if (responseData && responseData.data) {
+      const filterData = responseData.data;
+
+      if (filterData?.length) {
+        const uniqueTypes = [...new Set(filterData.map(item => item.tipoComprobante))];
+        setSearchTypeOptions(
+          uniqueTypes.length === 1
+            ? [{ label: 'Todos', value: 'all' }, { label: uniqueTypes[0], value: uniqueTypes[0] }]
+            : initialTypeOptions
+        );
+        console.log("uniqueTypes: ", uniqueTypes);
+        const uniqueCurrencies = [...new Set(filterData.map(item => item.codMoneda))];
+        const validCurrencies = uniqueCurrencies.filter(currency => ['PEN', 'USD'].includes(currency));
+        setSearchCurrencyOptions(
+          validCurrencies.length === 0
+            ? initialCurrencyOptions
+            : [
+                { label: 'Todos', value: 'all' }, // Siempre mostramos la opción 'Todos'
+                ...validCurrencies.map(currency => ({ label: `${currency} - ${currency}`, value: currency }))
+              ]
+        );
+        console.log("validCurrencies: ", validCurrencies);
+        const uniqueObservations = [...new Set(filterData.map(item => item.observacion))];
+        setFilterOptions(
+          uniqueObservations.length === 1
+            ? [{ label: 'Todos', value: 'all' }, { label: uniqueObservations[0], value: uniqueObservations[0] }]
+            : [{ label: 'Todos', value: 'all' }, ...uniqueObservations.map(obs => ({ label: obs, value: obs })) ]
+        );
+        console.log("uniqueObservations: ", uniqueObservations);
+      }
+    }
+  }, [responseData]);
+
+
+  useEffect(() => {
+    onLoadData();
+  }, [selectedParams.period]);
 
   return (
     <Box
@@ -303,18 +385,6 @@ export const DetractionsInconsistenciesFilter = (props) => {
             </div>
           ))}
         </TextField>
-
-        <Button
-          fullWidth
-          variant="contained"
-          color="primary"
-          onClick={onLoadData}
-          startIcon={<FilterListIcon />}
-          disabled={loading ? true : false}
-          sx={{ height: '56px' }}
-        >
-          Filtrar
-        </Button>
       </Box>
     </Box>
   );
@@ -326,4 +396,6 @@ DetractionsInconsistenciesFilter.propTypes = {
   setSelectedParams: PropTypes.func,
   onApplyFilters: PropTypes.func,
   onLoadData: PropTypes.func,
+  detailsMain: PropTypes.array,
+  responseData: PropTypes.object,
 };

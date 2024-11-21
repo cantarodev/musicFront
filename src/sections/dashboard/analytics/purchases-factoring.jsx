@@ -1,3 +1,17 @@
+import React, { useState, useEffect } from 'react';
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Box, Typography } from '@mui/material';
+import { FactoringInconsistenciesFilter } from 'src/sections/dashboard/analytics/factoring-inconsistencies-filter';
+import { useMockedUser } from 'src/hooks/use-mocked-user';
+import { reportApi } from 'src/api/reports/reportService';
+import { useSelector } from 'react-redux';
+import PropTypes from 'prop-types';
+import Card from '@mui/material/Card';
+import CardContent from '@mui/material/CardContent';
+import CardHeader from '@mui/material/CardHeader';
+import Grid from '@mui/material/Grid';
+import Stack from '@mui/material/Stack';
+import Skeleton from '@mui/material/Skeleton';
+
 const Factoring = ({ type }) => {
   const [responseData, setResponseData] = useState(null);
   const selectedAccount = useSelector((state) => state.account);
@@ -33,23 +47,15 @@ const Factoring = ({ type }) => {
   useEffect(() => {
     console.log("detailsMain actualizado: ", detailsMain);
   }, [detailsMain]);
-
-  console.log("######row: ",row)
-  const filteredData = detailsMain.filter((row) => {
-    // Filtro por tipo de comprobante
-    const matchesDocType = selectedParams.docType === 'all' || row.codComp === selectedParams.docType;
-    console.log("matchesDocType: ", matchesDocType);
-    // Filtro por tipo de moneda
-    const matchesCurrency = selectedParams.currency === 'all' || String(row.codMoneda).toUpperCase() === selectedParams.currency.toUpperCase();
+  
+  // console.log("##############################################")
+  // console.log("responseData?.data?: ", responseData?.data);
+  // const data = responseData?.data;
+  // const filteredData = responseData?.data?.filter((row) => {
+  //   return data;
+  // }) || [];
+  // console.log("Filtered Data:", filteredData);
     
-    // Filtro por observaciones
-    const matchesObservation = selectedParams.filters.length === 0 || selectedParams.filters.includes(row.observacion);
-  
-    // Retorna solo las filas que coinciden con todos los filtros
-    return matchesDocType && matchesCurrency && matchesObservation;
-  });  
-  
-
 
   const onLoadData = async () => {
     const user_id = user?.user_id;
@@ -102,6 +108,54 @@ const Factoring = ({ type }) => {
       setLoading(false);
     }
   };
+
+  // console.log("##############################################")
+  // console.log("-------------------------SELECTED PARAMS: ", selectedParams);
+  // console.log("responseData?.data?: ", responseData?.data);
+  // const data = responseData?.data;
+  // const filteredData = responseData?.data?.filter((row) => {
+  //   return data;
+  // }) || [];
+  // console.log("Filtered Data:", filteredData);
+
+
+console.log("##############################################");
+console.log("-------------------------SELECTED PARAMS: ", selectedParams);
+console.log("responseData?.data?: ", responseData?.data);
+
+const data = responseData?.data;
+
+// Filtrar la data según los parámetros seleccionados
+const filteredData = data?.filter((row) => {
+  let isValid = true;
+
+  // Filtrar por moneda
+  const monedaRow = row.tipoMoneda.split(' ')[0];
+  console.log("monedaRow: ", monedaRow);
+  if (selectedParams.currency !== 'all' && monedaRow !== selectedParams.currency) {
+    isValid = false;
+  }
+
+  // Filtrar por tipo de comprobante
+  console.log("Tipo de comprobante: ", row.tipoComprobante);
+  console.log("selectedParams.docType: ", selectedParams.docType);
+  console.log("row.tipoComprobante: ", row.tipoComprobante);
+  if (selectedParams.docType !== 'all' && row.tipoComprobante !== selectedParams.docType) {
+    isValid = false;
+  }
+
+  // Filtrar por observaciones
+  if (selectedParams.filters.length > 0 && !selectedParams.filters.includes(row.observacion)) {
+    isValid = false;
+  }
+
+  return isValid;
+}) || [];
+
+console.log("Filtered Data:", filteredData);
+
+
+
 
   return (
     <div>
@@ -201,11 +255,11 @@ const Factoring = ({ type }) => {
               filteredData.map((row, index) => (
                 <TableRow key={index}>
                   <TableCell>{row.periodo}</TableCell>
-                  <TableCell>{row.ruc}</TableCell>
+                  <TableCell>{row.numDoc}</TableCell>
                   <TableCell>{row.razonSocial}</TableCell>
-                  <TableCell>{row.fecEmision}</TableCell>
+                  <TableCell>{row.fechaEmision}</TableCell>
                   <TableCell>{row.codComp}</TableCell>
-                  <TableCell>{row.numCpe}</TableCell>
+                  <TableCell>{row.numeroSerie}</TableCell>
                   <TableCell>{row.codMoneda}</TableCell>
                   <TableCell>{row.tipoCambio}</TableCell>
                   <TableCell>{row.mtoImporteTotal}</TableCell>
