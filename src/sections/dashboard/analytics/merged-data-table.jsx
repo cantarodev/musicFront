@@ -21,12 +21,94 @@ import {
   Stack,
   Paper,
 } from '@mui/material';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { useSelector } from 'react-redux';
+
+import { reportApi } from 'src/api/reports/reportService';
 
 export const MergeDataTable = (props) => {
-  const { loading, details, sourceCounts } = props;
+  const { loading, filePath, params } = props;
 
-  const isEmpty = details.length === 0;
+  const results = useSelector((state) => state.report.missings);
 
+  const [displayedRows, setDisplayedRows] = useState([]);
+  const [page, setPage] = useState(0);
+  const rowsPerPage = 20;
+  const containerRef = useRef();
+
+  const { filteredResults } = useMemo(() => {
+    let filteredResults =
+      results?.filter((item) => {
+        const matchesDocType = params.docType === 'all' || item.codComp === params.docType;
+
+        const matchesCurrency = params.currency === 'all' || item.moneda === params.currency;
+
+        return matchesDocType && matchesCurrency;
+      }) || [];
+
+    return { filteredResults };
+  }, [results, params.docType, params.currency]);
+  console.log(filteredResults);
+
+  const handleScroll = () => {
+    if (containerRef.current) {
+      const { scrollTop, scrollHeight, clientHeight } = containerRef.current;
+      if (scrollTop + clientHeight >= scrollHeight - 5) {
+        setPage((prevPage) => prevPage + 1);
+      }
+    }
+  };
+
+  const exportToExcel = async (data) => {
+    try {
+      const response = await reportApi.downloadMissingsExcel({
+        filteredData: JSON.stringify(data),
+        filePath,
+      });
+
+      if (response?.status === 'success') {
+        const binaryString = window.atob(response?.data.excelBase64);
+        const bytes = new Uint8Array(binaryString.length);
+        for (let i = 0; i < binaryString.length; i++) {
+          bytes[i] = binaryString.charCodeAt(i);
+        }
+
+        const blob = new Blob([bytes], {
+          type: response?.data.contentType,
+        });
+
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = response?.data.filename;
+        document.body.appendChild(link);
+
+        link.click();
+        link.remove();
+        window.URL.revokeObjectURL(url);
+      }
+    } catch (error) {
+      console.error('Error:', error.message);
+    }
+  };
+
+  const formatNumber = (number) => {
+    const formattedNumber = new Intl.NumberFormat('en-US', {
+      style: 'decimal',
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(parseFloat(number));
+
+    return formattedNumber;
+  };
+
+  useEffect(() => {
+    const newRows = filteredResults.slice(0, (page + 1) * rowsPerPage);
+    setDisplayedRows(newRows);
+  }, [page, filteredResults]);
+  console.log('ROWS:', displayedRows);
+
+  const isEmpty = filteredResults.length === 0;
   return (
     <Card>
       <CardHeader
@@ -38,6 +120,16 @@ export const MergeDataTable = (props) => {
             alignItems="center"
             spacing={2}
           >
+            {/* {filteredResults?.length > 0 && (
+              <IconButton
+                color="inherit"
+                onClick={() => exportToExcel(filteredResults)}
+              >
+                <SvgIcon fontSize="small">
+                  <DownloadIcon />
+                </SvgIcon>
+              </IconButton>
+            )} */}
             <Typography
               variant="subtitle2"
               sx={{ display: 'flex', alignItems: 'center' }}
@@ -60,26 +152,44 @@ export const MergeDataTable = (props) => {
         p={2}
       >
         <TableContainer
-          sx={{ flex: 1, overflowY: 'auto', position: 'relative' }}
           component={Paper}
+          ref={containerRef}
+          onScroll={handleScroll}
+          sx={{ flex: 1, overflowY: 'auto', position: 'relative' }}
         >
           <Table stickyHeader>
             <TableHead>
               <TableRow>
-                <TableCell sx={{ textAlign: 'center' }}>
+                <TableCell>
                   <Typography sx={{ fontSize: 12, fontWeight: 'bold' }}>Período</Typography>
                 </TableCell>
-                <TableCell sx={{ textAlign: 'center' }}>
-                  <Typography sx={{ fontSize: 12, fontWeight: 'bold' }}>Serie</Typography>
+                <TableCell>
+                  <Typography sx={{ fontSize: 12, fontWeight: 'bold' }}>
+                    Tipo Comprobante
+                  </Typography>
                 </TableCell>
-                <TableCell sx={{ textAlign: 'center' }}>
-                  <Typography sx={{ fontSize: 12, fontWeight: 'bold' }}>Número</Typography>
+                <TableCell>
+                  <Typography sx={{ fontSize: 12, fontWeight: 'bold' }}>
+                    Número Comprobante
+                  </Typography>
                 </TableCell>
-                <TableCell sx={{ textAlign: 'center' }}>
-                  <Typography sx={{ fontSize: 12, fontWeight: 'bold' }}>SUNAT</Typography>
+                <TableCell>
+                  <Typography sx={{ fontSize: 12, fontWeight: 'bold' }}>Moneda</Typography>
                 </TableCell>
-                <TableCell sx={{ textAlign: 'center' }}>
-                  <Typography sx={{ fontSize: 12, fontWeight: 'bold' }}>PLE</Typography>
+                <TableCell>
+                  <Typography sx={{ fontSize: 12, fontWeight: 'bold', textAlign: 'right' }}>
+                    Importe Total
+                  </Typography>
+                </TableCell>
+                <TableCell>
+                  <Typography sx={{ fontSize: 12, fontWeight: 'bold', textAlign: 'center' }}>
+                    SUNAT
+                  </Typography>
+                </TableCell>
+                <TableCell>
+                  <Typography sx={{ fontSize: 12, fontWeight: 'bold', textAlign: 'center' }}>
+                    PLE
+                  </Typography>
                 </TableCell>
               </TableRow>
             </TableHead>
@@ -89,7 +199,7 @@ export const MergeDataTable = (props) => {
                   <TableCell
                     colSpan={12}
                     align="center"
-                    style={{ height: 200 }}
+                    style={{ height: 180 }}
                   >
                     <Typography
                       variant="body1"
@@ -104,7 +214,7 @@ export const MergeDataTable = (props) => {
                   <TableCell
                     colSpan={12}
                     align="center"
-                    style={{ height: 200 }}
+                    style={{ height: 180 }}
                   >
                     <Typography
                       variant="body1"
@@ -115,49 +225,51 @@ export const MergeDataTable = (props) => {
                   </TableCell>
                 </TableRow>
               ) : (
-                details?.map((detail, index) => {
+                displayedRows?.map((detail, index) => {
                   return (
                     <TableRow
                       key={index}
                       sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
                     >
-                      <TableCell
-                        sx={{ textAlign: 'center' }}
-                        className="customTableCell"
-                      >
-                        {detail.periodo}
+                      <TableCell className="customTableCell">{detail.periodo}</TableCell>
+                      <TableCell className="customTableCell">{detail?.tipoComprobante}</TableCell>
+                      <TableCell className="customTableCell">
+                        {String(detail.numeroSerie).trim() !== '-'
+                          ? detail.numeroSerie + ' - ' + Number(detail.numero)
+                          : Number(detail.numero)}
+                      </TableCell>
+                      <TableCell className="customTableCell">
+                        {String(detail.codMoneda).trim() !== '' ? detail.codMoneda : '-'}
                       </TableCell>
                       <TableCell
-                        sx={{ textAlign: 'center' }}
                         className="customTableCell"
+                        sx={{ textAlign: 'right' }}
                       >
-                        {detail.numSerie}
+                        {detail.source === 'sunat'
+                          ? formatNumber(detail.mtos.mtoImporteTotal)
+                          : formatNumber(Number(detail.monto))}
                       </TableCell>
-                      <TableCell
-                        sx={{ textAlign: 'center' }}
-                        className="customTableCell"
-                      >
-                        {detail.numCpe}
-                      </TableCell>
-                      <TableCell
-                        sx={{ textAlign: 'center' }}
-                        className="customTableCell"
-                      >
+                      <TableCell className="customTableCell">
                         <Typography
                           variant="h5"
-                          sx={detail?.source === 'sunat' ? { color: 'green' } : { color: 'red' }}
+                          sx={
+                            detail?.source === 'sunat'
+                              ? { color: 'green', textAlign: 'center' }
+                              : { color: 'red', textAlign: 'center' }
+                          }
                           padding={1}
                         >
                           •
                         </Typography>
                       </TableCell>
-                      <TableCell
-                        sx={{ textAlign: 'center' }}
-                        className="customTableCell"
-                      >
+                      <TableCell className="customTableCell">
                         <Typography
                           variant="h5"
-                          sx={detail?.source === 'ple' ? { color: 'green' } : { color: 'red' }}
+                          sx={
+                            detail?.source === 'ple'
+                              ? { color: 'green', textAlign: 'center' }
+                              : { color: 'red', textAlign: 'center' }
+                          }
                           padding={1}
                         >
                           •
@@ -168,27 +280,6 @@ export const MergeDataTable = (props) => {
                 })
               )}
             </TableBody>
-            {details.length > 0 && (
-              <TableFooter
-                sx={{
-                  position: 'sticky',
-                  bottom: 0,
-                  backgroundColor: 'background.paper',
-                }}
-              >
-                <TableRow>
-                  <TableCell></TableCell>
-                  <TableCell></TableCell>
-                  <TableCell></TableCell>
-                  <TableCell sx={{ textAlign: 'center', fontSize: 16, fontWeight: 600 }}>
-                    {sourceCounts?.ple}
-                  </TableCell>
-                  <TableCell sx={{ textAlign: 'center', fontSize: 16, fontWeight: 600 }}>
-                    {sourceCounts?.sunat}
-                  </TableCell>
-                </TableRow>
-              </TableFooter>
-            )}
           </Table>
         </TableContainer>
       </Box>
@@ -198,6 +289,6 @@ export const MergeDataTable = (props) => {
 
 MergeDataTable.propTypes = {
   loading: PropTypes.bool,
-  details: PropTypes.array.isRequired,
+  results: PropTypes.array.isRequired,
   sourceCounts: PropTypes.object,
 };

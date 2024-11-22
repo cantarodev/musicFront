@@ -3,7 +3,6 @@ import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper
 import { reportApi } from 'src/api/reports/reportService';
 import { useMockedUser } from 'src/hooks/use-mocked-user';
 import { useSelector } from 'react-redux';
-import { PurchasesInconsistenciesCards } from 'src/sections/dashboard/analytics/purchases-inconsistencies-cards';
 import { CorrelativityInconsistenciesFilter } from 'src/sections/dashboard/analytics/correlativity-filter.jsx';
 
 const Correlativity = ({ type }) => {
@@ -42,18 +41,24 @@ const Correlativity = ({ type }) => {
         user_id,
       });
 
-      console.log("######### RESPONSE: ", response);
+      console.log('######### RESPONSE: ', response);
       const responseData = response?.data;
 
       setData(responseData);
       setDownloadPath(responseData?.download_path);
 
       const totalBase = responseData?.all_results?.reduce(
-        (sum, row) => sum + Math.abs(parseFloat(row.mtoImporteTotal) || 0), 0);
+        (sum, row) => sum + Math.abs(parseFloat(row.mtoImporteTotal) || 0),
+        0
+      );
       const totalIgv = responseData?.all_results?.reduce(
-        (sum, row) => sum + Math.abs(parseFloat(row.igv) || 0), 0);
+        (sum, row) => sum + Math.abs(parseFloat(row.igv) || 0),
+        0
+      );
       const totalImporte = responseData?.all_results?.reduce(
-        (sum, row) => sum + Math.abs(parseFloat(row.sunat_monto_dep) || 0), 0);
+        (sum, row) => sum + Math.abs(parseFloat(row.sunat_monto_dep) || 0),
+        0
+      );
 
       setTotalSums({
         baseIGravadaDG: totalBase,
@@ -79,8 +84,10 @@ const Correlativity = ({ type }) => {
         />
       </Box>
 
-
-      <TableContainer component={Paper} sx={{ marginTop: 2, overflowX: 'auto' }}>
+      <TableContainer
+        component={Paper}
+        sx={{ marginTop: 2, overflowX: 'auto' }}
+      >
         <Table>
           <TableHead>
             <TableRow>
@@ -92,7 +99,10 @@ const Correlativity = ({ type }) => {
           <TableBody>
             {loading ? (
               <TableRow>
-                <TableCell colSpan={3} align="center">
+                <TableCell
+                  colSpan={3}
+                  align="center"
+                >
                   <CircularProgress />
                 </TableCell>
               </TableRow>

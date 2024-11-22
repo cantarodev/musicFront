@@ -8,7 +8,7 @@ import TableRow from '@mui/material/TableRow';
 import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
 import DownloadIcon from '@untitled-ui/icons-react/build/esm/Download01';
-
+import { reportApi } from 'src/api/reports/reportService';
 import {
   TableContainer,
   CardHeader,
@@ -74,8 +74,6 @@ function descendingComparator(a, b, orderBy) {
 }
 
 function getComparator(order, orderBy) {
-  console.log(order, orderBy);
-
   return order === 'desc'
     ? (a, b) => descendingComparator(a, b, orderBy)
     : (a, b) => -descendingComparator(a, b, orderBy);
@@ -83,7 +81,6 @@ function getComparator(order, orderBy) {
 
 function sortRows(array, comparator) {
   const stabilizedRows = array.map((el, index) => [el, index]);
-  console.log(stabilizedRows);
   stabilizedRows.sort((a, b) => {
     const order = comparator(a[0], b[0]);
     if (order !== 0) return order;
@@ -93,14 +90,13 @@ function sortRows(array, comparator) {
 }
 
 export const SalesInconsistenciesDetails = (props) => {
-  const { loading, downloadPath, onDownload, params } = props;
+  const { loading, filePath, params } = props;
 
   const dispatch = useDispatch();
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedDetail, setSelectedDetail] = useState('');
 
   const results = useSelector((state) => state.report.sales);
-  console.log('RESULTS:', results);
 
   const [displayedRows, setDisplayedRows] = useState([]);
   const [page, setPage] = useState(0);
@@ -144,7 +140,7 @@ export const SalesInconsistenciesDetails = (props) => {
       results?.filter((item) => {
         const matchesDocType = params.docType === 'all' || item.codComp === params.docType;
 
-        const matchesCurrency = params.currency === 'all' || item.codMoneda === params.currency;
+        const matchesCurrency = params.currency === 'all' || item.moneda === params.currency;
 
         const matchesFilters = Object.keys(params.filters).some((key) => {
           if (key === 'all') {
@@ -294,6 +290,59 @@ export const SalesInconsistenciesDetails = (props) => {
     }
   };
 
+  const exportToExcel = async (data) => {
+    let filteredData = data.map((item) => ({
+      identityInfo: item.identityInfo,
+      observaciones: item.observaciones || [],
+    }));
+
+    filteredData = filteredData.map((item) => {
+      const filteredObservaciones = Object.keys(item.observaciones)
+        .filter((key) => key in params.filters)
+        .reduce((acc, key) => {
+          acc[key] = item.observaciones[key];
+          return acc;
+        }, {});
+
+      return {
+        ...item,
+        observaciones: filteredObservaciones,
+      };
+    });
+
+    try {
+      const response = await reportApi.downloadObservationsExcel({
+        params,
+        filteredData: JSON.stringify(filteredData),
+        filePath,
+      });
+
+      if (response?.status === 'success') {
+        const binaryString = window.atob(response?.data.excelBase64);
+        const bytes = new Uint8Array(binaryString.length);
+        for (let i = 0; i < binaryString.length; i++) {
+          bytes[i] = binaryString.charCodeAt(i);
+        }
+
+        const blob = new Blob([bytes], {
+          type: response?.data.contentType,
+        });
+
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = response?.data.filename;
+        document.body.appendChild(link);
+
+        link.click();
+        link.remove();
+        window.URL.revokeObjectURL(url);
+      }
+    } catch (error) {
+      console.error('Error:', error.message);
+    }
+  };
+
   useEffect(() => {
     dispatch(setFilteredSales({ results: filteredResults, totals }));
   }, [filteredResults, totals, dispatch]);
@@ -309,10 +358,10 @@ export const SalesInconsistenciesDetails = (props) => {
             alignItems="center"
             spacing={1}
           >
-            {downloadPath && (
+            {filteredResults.length > 0 && (
               <IconButton
                 color="inherit"
-                onClick={onDownload}
+                onClick={() => exportToExcel(filteredResults)}
               >
                 <SvgIcon fontSize="small">
                   <DownloadIcon />
@@ -830,7 +879,7 @@ export const SalesInconsistenciesDetails = (props) => {
                   <TableCell
                     colSpan={26}
                     align="center"
-                    style={{ height: 200 }}
+                    style={{ height: 180 }}
                   >
                     <Typography
                       variant="body1"
@@ -845,7 +894,7 @@ export const SalesInconsistenciesDetails = (props) => {
                   <TableCell
                     colSpan={26}
                     align="center"
-                    style={{ height: 200 }}
+                    style={{ height: 180 }}
                   >
                     <Typography
                       variant="body1"
@@ -930,7 +979,7 @@ export const SalesInconsistenciesDetails = (props) => {
                       {columnVisibility.moneda && (
                         <TableCell className="customTableCell">
                           <Typography sx={{ fontSize: 14 }}>
-                            {detail.codMoneda ? detail.codMoneda : '-'}
+                            {String(detail.codMoneda).trim() !== '' ? detail.codMoneda : '-'}
                           </Typography>
                         </TableCell>
                       )}
@@ -1348,7 +1397,4 @@ export const SalesInconsistenciesDetails = (props) => {
 
 SalesInconsistenciesDetails.propTypes = {
   loading: PropTypes.bool,
-  totalSums: PropTypes.object,
-  downloadPath: PropTypes.string,
-  onDownload: PropTypes.func,
 };
