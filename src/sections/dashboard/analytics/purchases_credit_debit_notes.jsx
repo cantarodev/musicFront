@@ -191,8 +191,17 @@ const PurchasesDetractions = ({ type }) => {
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={15} align="center">
-                  No hay datos disponibles
+                <TableCell
+                  colSpan={25}
+                  align="center"
+                  style={{ height: 200 }}
+                >
+                  <Typography
+                    variant="body1"
+                    color="textSecondary"
+                  >
+                    No hay datos disponibles
+                  </Typography>
                 </TableCell>
               </TableRow>
             )}

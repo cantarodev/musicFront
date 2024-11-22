@@ -1,6 +1,7 @@
 import PropTypes from 'prop-types';
 import Grid from '@mui/material/Grid2';
 import TextField from '@mui/material/TextField';
+import RestoreIcon from '@mui/icons-material/Restore';
 import {
   Box,
   Button,
@@ -11,8 +12,9 @@ import {
   List,
   ListItemText,
   MenuItem,
+  Tooltip,
 } from '@mui/material';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import FilterListIcon from '@mui/icons-material/FilterList';
 import { ExpandMore, ExpandLess } from '@mui/icons-material';
 
@@ -20,6 +22,8 @@ import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { LocalizationProvider, DatePicker } from '@mui/x-date-pickers';
 import { format, parse } from 'date-fns';
 import esES from 'date-fns/locale/es';
+import { useSelector } from 'react-redux';
+import { useLocalStorage } from 'src/hooks/use-local-storage';
 
 const customEnLocale = {
   ...esES,
@@ -56,7 +60,7 @@ export const DetractionsInconsistenciesFilter = (props) => {
   const { selectedParams, setSelectedParams, loading, onLoadData, detailsMain, responseData } = props;
   //const [selectedOptions, setSelectedOptions] = useState(['general']);
   const [selectedOptions, setSelectedOptions] = useState(['all']); 
-  const [selectedFactoringStatus, setSelectedFactoringStatus] = useState([]); // Para almacenar estados seleccionados
+  const [selectedFactoringStatus, setSelectedFactoringStatus] = useState([]);
   const [expanded, setExpanded] = useState({});
   const [searchTypeOptions, setSearchTypeOptions] = useState(initialTypeOptions);
   const [searchCurrencyOptions, setSearchCurrencyOptions] = useState(initialCurrencyOptions);
@@ -74,27 +78,24 @@ export const DetractionsInconsistenciesFilter = (props) => {
     let updatedSelection = [];
   
     if (option.value === 'all') {
-      // Si se selecciona/desmarca "Todos"
       if (selectedOptions.includes('all')) {
-        updatedSelection = []; // Desmarcar todo
+        updatedSelection = [];
       } else {
-        updatedSelection = filterOptions.map((opt) => opt.value); // Seleccionar todo
+        updatedSelection = filterOptions.map((opt) => opt.value);
       }
     } else {
       // Seleccionar/desmarcar una opción individual
       updatedSelection = selectedOptions.includes(option.value)
-        ? selectedOptions.filter((item) => item !== option.value) // Desmarcar la opción
-        : [...selectedOptions, option.value]; // Agregar la opción seleccionada
-  
-      // Si todas las opciones están seleccionadas menos "Todos", incluir "Todos"
+        ? selectedOptions.filter((item) => item !== option.value)
+        : [...selectedOptions, option.value];
+      
       if (
         updatedSelection.length === filterOptions.length - 1 &&
         !updatedSelection.includes('all')
       ) {
         updatedSelection.push('all');
       }
-  
-      // Si "Todos" está seleccionado pero se desmarca una opción individual, quitar "Todos"
+      
       if (updatedSelection.includes('all') && option.value !== 'all') {
         updatedSelection = updatedSelection.filter((item) => item !== 'all');
       }
@@ -105,32 +106,6 @@ export const DetractionsInconsistenciesFilter = (props) => {
   };
   
 
-  // const handleSelectedOptions = (option) => {
-  //   let updatedSelection = [];
-
-  //   if (option.value === 'all') {
-  //     if (selectedOptions.includes('all')) {
-  //       updatedSelection = [];
-  //     } else {
-  //       updatedSelection = [
-  //         'all',
-  //         ...filterOptions.filter((opt) => opt.value !== 'all').map((opt) => opt.value),
-  //       ];
-  //     }
-  //   } else {
-  //     updatedSelection = selectedOptions.includes(option.value)
-  //       ? selectedOptions.filter((item) => item !== option.value && item !== 'all')
-  //       : [...selectedOptions.filter((item) => item !== 'all'), option.value];
-
-  //     if (updatedSelection.length === filterOptions.length - 1) {
-  //       updatedSelection.push('all');
-  //     }
-  //   }
-
-  //   setSelectedOptions(updatedSelection);
-
-  //   setSelectedParams((state) => ({ ...state, ['filters']: updatedSelection }));
-  // };
 
   const handleSubOptionSelect = (subOption) => {
     setSelectedFactoringStatus((prevSelected) => {
@@ -142,6 +117,17 @@ export const DetractionsInconsistenciesFilter = (props) => {
         return [...prevSelected, subOption.value];
       }
     });
+  };
+
+
+  const handleCleanFilters = () => {
+    setSelectedParams((state) => ({
+      ...state,
+      docType: 'all',
+      currency: 'all',
+      filters: { all: [] },
+    }));
+    setClean(!clean);
   };
 
   const renderValue = (selected) => {
@@ -189,14 +175,6 @@ export const DetractionsInconsistenciesFilter = (props) => {
     }));
     console.log('Filtros seleccionados: ', selectedOptions);
   }, [selectedOptions, selectedFactoringStatus, setSelectedParams]);
-  // useEffect(() => {
-  //   setSelectedParams((state) => ({
-  //     ...state,
-  //     filters: selectedOptions,
-  //     factoringStatuses: selectedFactoringStatus,
-  //   }));
-  //   console.log('Filtros seleccionados: ', selectedOptions);
-  // }, [selectedOptions, selectedFactoringStatus, setSelectedParams]);
 
   console.log("responseData: ", responseData);
   
@@ -233,7 +211,6 @@ export const DetractionsInconsistenciesFilter = (props) => {
       }
     }
   }, [responseData]);
-
 
   useEffect(() => {
     onLoadData();
@@ -385,6 +362,14 @@ export const DetractionsInconsistenciesFilter = (props) => {
             </div>
           ))}
         </TextField>
+        <Tooltip title="Restablecer filtros">
+          <IconButton
+            onClick={handleCleanFilters}
+            size="large"
+          >
+            <RestoreIcon fontSize="large" />
+          </IconButton>
+        </Tooltip>
       </Box>
     </Box>
   );

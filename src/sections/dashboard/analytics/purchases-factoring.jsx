@@ -268,7 +268,18 @@ console.log("Filtered Data:", filteredData);
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={10} align="center">No se encontraron registros</TableCell>
+                <TableCell
+                  colSpan={25}
+                  align="center"
+                  style={{ height: 200 }}
+                >
+                  <Typography
+                    variant="body1"
+                    color="textSecondary"
+                  >
+                    No hay datos disponibles
+                  </Typography>
+                </TableCell>
               </TableRow>
             )}
           </TableBody>
