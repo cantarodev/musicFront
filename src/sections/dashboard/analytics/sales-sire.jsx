@@ -3,48 +3,38 @@ import { useEffect, useState } from 'react';
 import { useMockedUser } from 'src/hooks/use-mocked-user';
 import { MergeDataTable } from 'src/sections/dashboard/analytics/merged-data-table';
 import { reportApi } from 'src/api/reports/reportService';
-import { format, subMonths } from 'date-fns';
+import { setMissingsReport, resetMissingsReport } from '../../../slices/report';
 
 import { useSelector } from 'react-redux';
-import { PurchasesSireCards } from './purchases-sire-cards';
-import { PurchasesSireFilter } from './purchases-sire-filter';
 import { Box } from '@mui/material';
+import { MissingCards } from './missing-cards';
+import { ObservationFilters } from './observation-filters';
+import { useDispatch } from 'react-redux';
+import { useLocalStorage } from 'src/hooks/use-local-storage';
 
 const Page = ({ type }) => {
   const selectedAccount = useSelector((state) => state.account);
-  const [detailsMerge, setDetailsMerge] = useState([]);
-  const [relevantData, setRelevantData] = useState({
-    total_sunat: 0,
-    total_ple: 0,
-    coincidences: 0,
-    num_only_in_database: 0,
-    num_only_in_s3: 0,
-    coincidence_percentage: 0,
-    sum_total_difference: 0,
-    sum_total_database: 0,
-    sum_total_ple: 0,
-    discrepancy_percentage: 0,
-    discrepancy_count: 0,
-    total_coincidences: 0,
-  });
+  const [relevantData, setRelevantData] = useState({});
 
   const [loading, setLoading] = useState(false);
+  const dispatch = useDispatch();
 
   const user = useMockedUser();
 
+  const [filters, setFilters] = useLocalStorage('filters');
   const [selectedParams, setSelectedParams] = useState({
-    period: format(subMonths(new Date(), 1), 'yyyyMM'),
+    period: filters.period,
     account: selectedAccount,
     queryType: String(type).toLowerCase(),
     docType: 'all',
     currency: 'all',
-    filters: {},
-    factoringStatuses: [],
+    filters: { all: [] },
   });
 
   const loadData = async () => {
     const user_id = user?.user_id;
 
+    dispatch(resetMissingsReport());
     setLoading(true);
     try {
       const response = await reportApi.getReportMissings({
@@ -54,8 +44,9 @@ const Page = ({ type }) => {
 
       const data = response?.data;
 
-      setDetailsMerge(data?.all_results);
-      setRelevantData(data?.relevant_data);
+      dispatch(setMissingsReport(data?.allResults));
+      setRelevantData(data?.relevantData);
+      setFilePath(data?.filePath);
       setLoading(false);
     } catch (err) {
       console.error(err);
@@ -64,28 +55,8 @@ const Page = ({ type }) => {
   };
 
   useEffect(() => {
-    setDetailsMerge([]);
-    setRelevantData({
-      total_sunat: 0,
-      total_ple: 0,
-      coincidences: 0,
-      num_only_in_database: 0,
-      num_only_in_s3: 0,
-      coincidence_percentage: 0,
-      sum_total_difference: 0,
-      sum_total_database: 0,
-      sum_total_ple: 0,
-      discrepancy_percentage: 0,
-      discrepancy_count: 0,
-      total_coincidences: 0,
-    });
     setSelectedParams((state) => ({ ...state, account: selectedAccount }));
   }, [selectedAccount]);
-
-  const sourceCounts = detailsMerge.reduce((counts, item) => {
-    counts[item.source] = (counts[item.source] || 0) + 1;
-    return counts;
-  }, {});
 
   return (
     <Box
@@ -94,22 +65,22 @@ const Page = ({ type }) => {
       gap={2}
       width="100%"
     >
-      <PurchasesSireFilter
+      <ObservationFilters
         selectedParams={selectedParams}
         setSelectedParams={setSelectedParams}
         onLoadData={loadData}
         loading={loading}
+        hide={['filters']}
+        type="Faltantes"
       />
-      <PurchasesSireCards
-        title={type}
+      <MissingCards
+        type={type}
         loading={loading}
         relevantData={relevantData}
       />
       <MergeDataTable
         loading={loading}
-        details={detailsMerge}
-        sourceCounts={sourceCounts}
-        onLoadData={loadData}
+        params={selectedParams}
       />
     </Box>
   );

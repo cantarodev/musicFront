@@ -6,15 +6,14 @@ import Grid from '@mui/material/Grid2';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import Skeleton from '@mui/material/Skeleton';
-import { useSelector } from 'react-redux';
 
-export const PurchasesSireCards = (props) => {
-  const { title, loading, relevantData } = props;
+export const MissingCards = (props) => {
+  const { type, loading, relevantData } = props;
 
   return (
     <Card>
       <CardHeader
-        title={title}
+        title={type}
         sx={{ p: 2, pb: 0 }}
       />
       <CardContent sx={{ p: 2, pb: '16px !important' }}>
@@ -39,7 +38,7 @@ export const PurchasesSireCards = (props) => {
                 Total de Registros SUNAT
               </Typography>
               <Typography variant="h5">
-                {loading ? <Skeleton variant="text" /> : relevantData.total_sunat}
+                {loading ? <Skeleton variant="text" /> : relevantData?.totalSunat}
               </Typography>
             </Stack>
           </Grid>
@@ -60,7 +59,7 @@ export const PurchasesSireCards = (props) => {
                 Total de Registros PLE
               </Typography>
               <Typography variant="h5">
-                {loading ? <Skeleton variant="text" /> : relevantData.total_ple}
+                {loading ? <Skeleton variant="text" /> : relevantData?.totalPle}
               </Typography>
             </Stack>
           </Grid>
@@ -81,7 +80,7 @@ export const PurchasesSireCards = (props) => {
                 Registros Coincidentes
               </Typography>
               <Typography variant="h5">
-                {loading ? <Skeleton variant="text" /> : relevantData.coincidences}
+                {loading ? <Skeleton variant="text" /> : relevantData?.coincidences}
               </Typography>
             </Stack>
           </Grid>
@@ -102,7 +101,7 @@ export const PurchasesSireCards = (props) => {
                 Registros No Coincidentes (SUNAT)
               </Typography>
               <Typography variant="h5">
-                {loading ? <Skeleton variant="text" /> : relevantData.num_only_in_database}
+                {loading ? <Skeleton variant="text" /> : relevantData?.numOnlyInDatabase}
               </Typography>
             </Stack>
           </Grid>
@@ -123,7 +122,7 @@ export const PurchasesSireCards = (props) => {
                 Registros No Coincidentes (PLE)
               </Typography>
               <Typography variant="h5">
-                {loading ? <Skeleton variant="text" /> : relevantData.num_only_in_s3}
+                {loading ? <Skeleton variant="text" /> : relevantData?.numOnlyInPle}
               </Typography>
             </Stack>
           </Grid>
@@ -144,11 +143,7 @@ export const PurchasesSireCards = (props) => {
                 Porcentaje de Coincidencia
               </Typography>
               <Typography variant="h5">
-                {loading ? (
-                  <Skeleton variant="text" />
-                ) : (
-                  parseFloat(relevantData.coincidence_percentage).toFixed(2) + '%'
-                )}
+                {loading ? <Skeleton variant="text" /> : relevantData?.coincidencePercentage}
               </Typography>
             </Stack>
           </Grid>
@@ -169,12 +164,7 @@ export const PurchasesSireCards = (props) => {
                 Diferencia en Monto Total
               </Typography>
               <Typography variant="h5">
-                {loading ? (
-                  <Skeleton variant="text" />
-                ) : (
-                  'S/ ' +
-                  parseFloat(relevantData.sum_total_difference.toLocaleString('en-US')).toFixed(2)
-                )}
+                {loading ? <Skeleton variant="text" /> : 'S/ ' + relevantData?.sumTotalDifference}
               </Typography>
             </Stack>
           </Grid>
@@ -195,11 +185,7 @@ export const PurchasesSireCards = (props) => {
                 Porcentaje de Discrepancia en Monto
               </Typography>
               <Typography variant="h5">
-                {loading ? (
-                  <Skeleton variant="text" />
-                ) : (
-                  relevantData.discrepancy_percentage.toFixed(2) + '%'
-                )}
+                {loading ? <Skeleton variant="text" /> : relevantData?.discrepancyPercentage}
               </Typography>
             </Stack>
           </Grid>
@@ -209,7 +195,7 @@ export const PurchasesSireCards = (props) => {
   );
 };
 
-PurchasesSireCards.propTypes = {
+MissingCards.propTypes = {
   title: PropTypes.string,
   loading: PropTypes.bool,
   relevantData: PropTypes.object,

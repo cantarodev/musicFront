@@ -1,16 +1,19 @@
-import { 
-  reportObservations, 
-  getReportMissings, 
-  downloadObservations, 
-  getReportDetractions, 
+import {
+  reportObservations,
+  getReportMissings,
+  downloadObservations,
+  downloadObservationsExcel,
+  downloadMissingsExcel,
+  getReportDetractions,
   getReportDebitCreditNotes,
   getReportCorrelativity,
-  getReportFactoring
+  getReportFactoring,
 } from './reportApi';
 
 class ReportApi {
   async reportObservations(request) {
-    const { user_id, period, queryType, docType, currency, filters, account, factoringStatuses } = request;
+    const { user_id, period, queryType, docType, currency, filters, account, factoringStatuses } =
+      request;
 
     return await reportObservations(
       user_id,
@@ -23,7 +26,6 @@ class ReportApi {
       factoringStatuses
     );
   }
-
 
   async getReportDetractions(request) {
     const { user_id, period, queryType, docType, currency, filters, account } = request;
@@ -67,7 +69,6 @@ class ReportApi {
     );
   }
 
-
   async getReportCorrelativity(request) {
     const { user_id, period, queryType, docType, currency, filters, account } = request;
 
@@ -91,6 +92,16 @@ class ReportApi {
   async downloadObservations(request) {
     const { downloadPath } = request;
     return await downloadObservations(downloadPath);
+  }
+
+  async downloadObservationsExcel(request) {
+    const { params, filteredData, filePath } = request;
+    return await downloadObservationsExcel(params, filteredData, filePath);
+  }
+
+  async downloadMissingsExcel(request) {
+    const { filteredData, filePath } = request;
+    return await downloadMissingsExcel(filteredData, filePath);
   }
 }
 

@@ -7,17 +7,17 @@ import { reportApi } from 'src/api/reports/reportService';
 
 import axios from 'axios';
 import { useSelector } from 'react-redux';
-import { PurchasesInconsistenciesCards } from 'src/sections/dashboard/analytics/purchases-inconsistencies-cards';
-import { PurchasesInconsistenciesFilter } from './purchases-inconsistencies-filter';
 import toast from 'react-hot-toast';
 
 import { useDispatch } from 'react-redux';
 import { setPurchasesReport, resetPurchasesReport } from '../../../slices/report';
 import { useLocalStorage } from 'src/hooks/use-local-storage';
+import { ObservationFilters } from './observation-filters';
+import { ObservationCards } from './observation-cards';
 
 const Page = ({ type }) => {
   const selectedAccount = useSelector((state) => state.account);
-  const [downloadPath, setDownloadPath] = useState('');
+  const [filePath, setFilePath] = useState('');
 
   const [loading, setLoading] = useState(false);
   const dispatch = useDispatch();
@@ -53,39 +53,11 @@ const Page = ({ type }) => {
       }
 
       dispatch(setPurchasesReport(data));
-      // setDownloadPath(response?.download_path);
+      setFilePath(response?.filePath);
       setLoading(false);
     } catch (err) {
       console.error(err);
       setLoading(false);
-    }
-  };
-
-  const handleDownloadObservations = async () => {
-    try {
-      const response = await reportApi.downloadObservations({
-        downloadPath,
-      });
-
-      const fileResponse = await axios.get(response.data, {
-        responseType: 'blob',
-      });
-
-      const blob = new Blob([fileResponse.data], { type: fileResponse.data.type });
-
-      const fileName = downloadPath.split('/').pop();
-      const today = new Date();
-      const formattedDate = today.toISOString().slice(0, 10).replace(/-/g, '');
-      const newFileName = fileName.replace('.xlsx', `_${formattedDate}.xlsx`);
-
-      const link = document.createElement('a');
-      link.href = window.URL.createObjectURL(blob);
-      link.setAttribute('download', newFileName);
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-    } catch (err) {
-      console.error(err);
     }
   };
 
@@ -99,22 +71,20 @@ const Page = ({ type }) => {
       flexDirection="column"
       gap={2}
     >
-      <PurchasesInconsistenciesFilter
+      <ObservationFilters
         selectedParams={selectedParams}
         setSelectedParams={setSelectedParams}
         onLoadData={handleApplyFilters}
-        loading={loading}
-        type="purchases"
+        type={type}
       />
-      <PurchasesInconsistenciesCards
-        title={type}
+      <ObservationCards
+        type={type}
         loading={loading}
       />
       <PurchasesInconsistenciesDetails
         loading={loading}
-        downloadPath={downloadPath}
+        filePath={filePath}
         onLoadData={handleApplyFilters}
-        onDownload={handleDownloadObservations}
         params={selectedParams}
       />
     </Box>

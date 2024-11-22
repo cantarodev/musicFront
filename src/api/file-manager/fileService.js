@@ -28,8 +28,6 @@ class FileManagerApi {
     let { data } = await getFiles(user_id, rucAccount, year, type);
     let count = data.length;
 
-    console.log(filters);
-
     if (typeof filters !== 'undefined') {
       data = data?.filter((file) => {
         if (typeof filters.query !== 'undefined' && filters.query !== '') {
@@ -68,7 +66,7 @@ class FileManagerApi {
 
   async searchComprobante(request = {}) {
     const { user_id, file_id, comprobante } = request;
-    console.log("FILE SERVICE: ", user_id, file_id, comprobante);
+    console.log('FILE SERVICE: ', user_id, file_id, comprobante);
     return searchComprobante(user_id, file_id, comprobante);
   }
 }

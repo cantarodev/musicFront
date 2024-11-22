@@ -98,20 +98,18 @@ export const getReportFactoring = (
   docType,
   currency,
   filters,
-  account,
-  ) => {
+  account
+) => {
   return handleResponse(
-    apiClient.post(
-      `/report/observations/factoring`, {
-        user_id,
-        period,
-        queryType,
-        docType,
-        currency,
-        filters,
-        account  
-      }
-    )
+    apiClient.post(`/report/observations/factoring`, {
+      user_id,
+      period,
+      queryType,
+      docType,
+      currency,
+      filters,
+      account,
+    })
   );
 };
 
@@ -123,6 +121,18 @@ export const getReportMissings = (user_id, period, queryType, docType, currency,
   );
 };
 
-export const downloadObservations = (path) => {
-  return handleResponse(apiClient.post('/report/observations/download', { path }));
+export const downloadObservations = (filteredData) => {
+  return handleResponse(apiClient.post('/report/observations/download', { filteredData }));
+};
+
+export const downloadObservationsExcel = (params, filteredData, filePath) => {
+  return handleResponse(
+    apiClient.post('/report/observations/download-excel', { params, filteredData, filePath })
+  );
+};
+
+export const downloadMissingsExcel = (filteredData, filePath) => {
+  return handleResponse(
+    apiClient.post('/report/missings/download-excel', { filteredData, filePath })
+  );
 };

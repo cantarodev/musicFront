@@ -8,14 +8,16 @@ import Typography from '@mui/material/Typography';
 import Skeleton from '@mui/material/Skeleton';
 import { useSelector } from 'react-redux';
 
-export const SalesInconsistenciesCards = (props) => {
-  const { title, loading } = props;
-  const { totals } = useSelector((state) => state.filteredResults.sales);
+export const ObservationCards = (props) => {
+  const { loading, type } = props;
+  const { totals } = useSelector((state) =>
+    type == 'Compras' ? state.filteredResults.purchases : state.filteredResults.sales
+  );
 
   return (
     <Card>
       <CardHeader
-        title={title}
+        title={type}
         sx={{ p: 2, pb: 0 }}
       />
       <CardContent sx={{ p: 2, pb: '16px !important' }}>
@@ -125,7 +127,7 @@ export const SalesInconsistenciesCards = (props) => {
   );
 };
 
-SalesInconsistenciesCards.propTypes = {
+ObservationCards.propTypes = {
   title: PropTypes.string,
   loading: PropTypes.bool,
 };
