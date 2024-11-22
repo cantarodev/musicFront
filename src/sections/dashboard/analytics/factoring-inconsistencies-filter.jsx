@@ -1,9 +1,8 @@
-import PropTypes from 'prop-types';
+import PropTypes from 'prop-types'; 
 import { useEffect, useState } from 'react';
 import {
-  Box, Button, Checkbox, Collapse, List, ListItemText, MenuItem, TextField,
+  Box, Checkbox, ListItemText, MenuItem, TextField,
 } from '@mui/material';
-import FilterListIcon from '@mui/icons-material/FilterList';
 import { LocalizationProvider, DatePicker } from '@mui/x-date-pickers';
 import { format, parse } from 'date-fns';
 import esES from 'date-fns/locale/es';
@@ -35,95 +34,79 @@ const initialFilterOptions = [
 
 export const FactoringInconsistenciesFilter = (props) => {
   const { selectedParams, setSelectedParams, loading, onLoadData, responseData } = props;
+
   const [searchTypeOptions, setSearchTypeOptions] = useState(initialTypeOptions);
   const [searchCurrencyOptions, setSearchCurrencyOptions] = useState(initialCurrencyOptions);
   const [filterOptions, setFilterOptions] = useState(initialFilterOptions);
-  const [selectedOptions, setSelectedOptions] = useState(selectedParams.filters || []);
-  const [selectedDate, setSelectedDate] = useState(selectedParams.period ? parse(selectedParams.period, 'yyyyMM', new Date()) : null);
-  const [filterInitialized, setFilterInitialized] = useState(false);
+  const [selectedOptions, setSelectedOptions] = useState(selectedParams?.filters || ['all']); // 'all' seleccionado por defecto
+  const [selectedDate, setSelectedDate] = useState(
+    selectedParams.period ? parse(selectedParams.period, 'yyyyMM', new Date()) : null
+  );
+
   useEffect(() => {
-    // Si ya se han inicializado los filtros, no los actualizamos de nuevo
-    if (filterInitialized) return;
-  
-    if (responseData && responseData.relevant_data) {
-      const filterData = responseData.relevant_data.filter; // Los filtros están aquí
-  
-      if (filterData) {
-        // Actualiza las opciones de Tipo de Comprobante
-        if (filterData.codCpe) {
-          const updatedTypeOptions = initialTypeOptions.filter(option =>
-            filterData.codCpe.includes(option.value)
-          );
-          setSearchTypeOptions(updatedTypeOptions.length ? updatedTypeOptions : initialTypeOptions);
-        }
-  
-        // Actualiza las opciones de Moneda
-        if (filterData.codMoneda) {
-          const updatedCurrencyOptions = initialCurrencyOptions.filter(option =>
-            filterData.codMoneda.includes(option.value)
-          );
-          setSearchCurrencyOptions(updatedCurrencyOptions.length ? updatedCurrencyOptions : initialCurrencyOptions);
-        }
-  
-        // Actualiza las opciones de Observación
-        if (filterData.observacion) {
-          const updatedFilterOptions = initialFilterOptions.filter(option =>
-            filterData.observacion.includes(option.value)
-          );
-          setFilterOptions(updatedFilterOptions.length ? updatedFilterOptions : initialFilterOptions);
-        } else {
-          // Si no hay observaciones en el response, reseteamos a todos los filtros
-          setFilterOptions(initialFilterOptions);
-        }
-  
-        // Marcamos que los filtros ya han sido inicializados
-        setFilterInitialized(true);
+    if (responseData && responseData.data) {
+      const filterData = responseData.data;
+
+      if (filterData?.length) {
+        // Obtener los tipos únicos de comprobante
+        const uniqueTypes = [...new Set(filterData.map(item => item.tipoComprobante))];
+        setSearchTypeOptions(
+          uniqueTypes.length === 1
+            ? [{ label: 'Todos', value: 'all' }, { label: uniqueTypes[0], value: uniqueTypes[0] }]
+            : initialTypeOptions
+        );
+        console.log("uniqueTypes: ", uniqueTypes);
+
+        // Obtener las monedas únicas, pero solo incluir las monedas que están en los datos
+        const uniqueCurrencies = [...new Set(filterData.map(item => item.codMoneda))];
+        const validCurrencies = uniqueCurrencies.filter(currency => ['PEN', 'USD'].includes(currency)); // Filtramos solo PEN y USD
+
+        // Si las monedas válidas son las únicas disponibles, mostramos solo esas, pero si hay varias, mostramos todas las opciones
+        setSearchCurrencyOptions(
+          validCurrencies.length === 0
+            ? initialCurrencyOptions // Si no hay monedas válidas, mostramos todas las opciones
+            : [
+                { label: 'Todos', value: 'all' }, // Siempre mostramos la opción 'Todos'
+                ...validCurrencies.map(currency => ({ label: `${currency} - ${currency}`, value: currency }))
+              ]
+        );
+        console.log("validCurrencies: ", validCurrencies);
+
+        // Obtener las observaciones únicas
+        const uniqueObservations = [...new Set(filterData.map(item => item.observacion))];
+        setFilterOptions(
+          uniqueObservations.length === 1
+            ? [{ label: 'Todos', value: 'all' }, { label: uniqueObservations[0], value: uniqueObservations[0] }]
+            : [{ label: 'Todos', value: 'all' }, ...uniqueObservations.map(obs => ({ label: obs, value: obs })) ]
+        );
+        console.log("uniqueObservations: ", uniqueObservations);
       }
     }
-  }, [responseData, filterInitialized]);
-  
-  
-  
+  }, [responseData]);
 
-  // useEffect(() => {
-  //   if (responseData && responseData.relevant_data) {
-  //     const filterData = responseData.relevant_data.filter;
-
-  //     if (filterData) {
-  //       if (filterData.codCpe) {
-  //         const updatedTypeOptions = initialTypeOptions.filter(option =>
-  //           filterData.codCpe.includes(option.value)
-  //         );
-  //         setSearchTypeOptions(updatedTypeOptions.length ? updatedTypeOptions : initialTypeOptions);
-  //       }
-
-  //       if (filterData.codMoneda) {
-  //         const updatedCurrencyOptions = initialCurrencyOptions.filter(option =>
-  //           filterData.codMoneda.includes(option.value)
-  //         );
-  //         setSearchCurrencyOptions(updatedCurrencyOptions.length ? updatedCurrencyOptions : initialCurrencyOptions);
-  //       }
-
-  //       if (filterData.observacion) {
-  //         const updatedFilterOptions = initialFilterOptions.filter(option =>
-  //           filterData.observacion.includes(option.value)
-  //         );
-  //         setFilterOptions(updatedFilterOptions.length ? updatedFilterOptions : initialFilterOptions);
-  //       }
-  //     }
-  //   }
-  // }, [responseData]);
+  useEffect(() => {
+    onLoadData();
+  }, [selectedParams.period]);
 
   const handleSelected = (event) => {
     const { name, value } = event.target;
-    setSelectedParams((state) => ({ ...state, [name]: value }));
+
+    // Si seleccionamos "Todos", se debe actualizar el estado correctamente
+    if (value === 'all') {
+      setSelectedParams((state) => ({ ...state, [name]: 'all' }));
+    } else {
+      setSelectedParams((state) => ({ ...state, [name]: value }));
+    }
   };
 
   const handleSelectedOptions = (event) => {
     const { target: { value } } = event;
+
     if (value.includes('all')) {
-      setSelectedOptions(selectedOptions.includes('all') ? [] : filterOptions.map((option) => option.value));
-      setSelectedParams((state) => ({ ...state, filters: selectedOptions.includes('all') ? [] : filterOptions.map((option) => option.value) }));
+      // Si seleccionamos "Todos", seleccionamos todas las opciones
+      const newSelectedOptions = value.includes('all') ? filterOptions.map(option => option.value) : value;
+      setSelectedOptions(newSelectedOptions);
+      setSelectedParams((state) => ({ ...state, filters: newSelectedOptions }));
     } else {
       setSelectedOptions(value);
       setSelectedParams((state) => ({ ...state, filters: value }));
@@ -131,9 +114,9 @@ export const FactoringInconsistenciesFilter = (props) => {
   };
 
   const handleDateChange = (date) => {
-    const value = date ? format(date, 'yyyyMM') : '';
-    setSelectedParams((state) => ({ ...state, period: value }));
+    const formattedPeriod = date ? format(date, 'yyyyMM') : '';
     setSelectedDate(date);
+    setSelectedParams((state) => ({ ...state, period: formattedPeriod, period_search: formattedPeriod }));
   };
 
   const renderValue = (selected) => {
@@ -143,28 +126,25 @@ export const FactoringInconsistenciesFilter = (props) => {
     return selected.join(', ');
   };
 
+  // Filtrar los datos según las observaciones seleccionadas
+  const filteredData = responseData?.data?.filter((row) => {
+    return selectedOptions.includes('all') || selectedOptions.includes(row.observacion);
+  }) || [];
+
   return (
-    <Box
-      sx={{
+    <Box sx={{ width: '100%', maxWidth: { xs: '100%', md: 'none' } }}>
+      <Box sx={{
         width: '100%',
-        maxWidth: { xs: '100%', md: 'none' },
-      }}
-    >
-      <Box
-        sx={{
-          width: '100%',
-          display: 'flex',
-          flexDirection: { xs: 'column', md: 'row' },
-          alignItems: { xs: 'stretch', md: 'center' },
-          gap: 2,
-          '& > *': {
-            flex: { xs: '1 1 100%', md: '1 1 0' },
-            minWidth: { xs: '100%', md: 0 },
-            height: '54px', // Asegurando que todos los filtros tengan la misma altura
-          },
-        }}
-      >
-        {/* Periodo */}
+        display: 'flex',
+        flexDirection: { xs: 'column', md: 'row' },
+        alignItems: { xs: 'stretch', md: 'center' },
+        gap: 2,
+        '& > *': {
+          flex: { xs: '1 1 100%', md: '1 1 0' },
+          minWidth: { xs: '100%', md: 0 },
+          height: '54px',
+        },
+      }}>
         <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={esES}>
           <DatePicker
             label="Periodo"
@@ -172,19 +152,16 @@ export const FactoringInconsistenciesFilter = (props) => {
             openTo="month"
             value={selectedDate}
             onChange={handleDateChange}
-            renderInput={(params) => (
-              <TextField {...params} fullWidth />
-            )}
+            renderInput={(params) => <TextField {...params} fullWidth />}
           />
         </LocalizationProvider>
 
-        {/* Tipo de Comprobante */}
         <TextField
           label="Tipo Comprobante"
           name="docType"
           onChange={handleSelected}
           select
-          value={selectedParams.docType}
+          value={selectedParams.docType || ''} // Aseguramos que 'all' no cause problemas
         >
           {searchTypeOptions.map((option) => (
             <MenuItem key={option.value} value={option.value}>
@@ -193,13 +170,12 @@ export const FactoringInconsistenciesFilter = (props) => {
           ))}
         </TextField>
 
-        {/* Moneda */}
         <TextField
           label="Moneda"
           name="currency"
           onChange={handleSelected}
           select
-          value={selectedParams.currency}
+          value={selectedParams.currency || ''} // Aseguramos que 'all' no cause problemas
         >
           {searchCurrencyOptions.map((option) => (
             <MenuItem key={option.value} value={option.value}>
@@ -208,7 +184,6 @@ export const FactoringInconsistenciesFilter = (props) => {
           ))}
         </TextField>
 
-        {/* Validaciones */}
         <TextField
           label="Validaciones"
           name="filters"
@@ -227,17 +202,6 @@ export const FactoringInconsistenciesFilter = (props) => {
             </MenuItem>
           ))}
         </TextField>
-
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={onLoadData}
-          startIcon={<FilterListIcon />}
-          disabled={loading}
-          sx={{ height: '56px' }}
-        >
-          Filtrar
-        </Button>
       </Box>
     </Box>
   );

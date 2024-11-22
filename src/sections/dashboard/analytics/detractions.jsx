@@ -22,13 +22,14 @@ import CardContent from '@mui/material/CardContent';
 import CardHeader from '@mui/material/CardHeader';
 
 const PurchasesDetractions = ({ type }) => {
-  const selectedAccount = useSelector((state) => state.account); 
+  const [responseData, setResponseData] = useState(null);
+  const selectedAccount = useSelector((state) => state.account);
   const [loading, setLoading] = useState(false);
-  const [detailsMain, setDetailsMain] = useState([]); 
+  const [detailsMain, setDetailsMain] = useState([]); // Inicializa como array vacío
   const [totalSums, setTotalSums] = useState({ baseIGravadaDG: 0, igv: 0, importe: 0 });
-  const [totalInconsistencies, setTotalInconsistencies] = useState(0); 
-  const [downloadPath, setDownloadPath] = useState(''); 
-  const user = useMockedUser(); 
+  const [totalInconsistencies, setTotalInconsistencies] = useState(0);
+  const [downloadPath, setDownloadPath] = useState('');
+  const user = useMockedUser();
 
   const [selectedParams, setSelectedParams] = useState({
     period: '',
@@ -47,33 +48,75 @@ const PurchasesDetractions = ({ type }) => {
       }));
     }
   }, [selectedAccount]);
+  console.log("###################setSelectedParams: ", selectedParams);
+  console.log("responseData?.data?: ", responseData?.data);
+
+  const data = responseData?.data;
+  
+  // Filtrar la data según los parámetros seleccionados
+  const filteredData = data?.filter((row) => {
+    let isValid = true;
+  
+    // Filtrar por moneda
+    const monedaRow = row.tipoMoneda.split(' ')[0];
+    console.log("monedaRow: ", monedaRow);
+    if (selectedParams.currency !== 'all' && monedaRow !== selectedParams.currency) {
+      isValid = false;
+    }
+  
+    // Filtrar por tipo de comprobante
+    console.log("Tipo de comprobante: ", row.tipoComprobante);
+    console.log("selectedParams.docType: ", selectedParams.docType);
+    console.log("row.tipoComprobante: ", row.tipoComprobante);
+    if (selectedParams.docType !== 'all' && row.tipoComprobante !== selectedParams.docType) {
+      isValid = false;
+    }
+  
+    // Filtrar por observaciones
+    if (selectedParams.filters.length > 0 && !selectedParams.filters.includes(row.observacion)) {
+      isValid = false;
+    }
+  
+    return isValid;
+  }) || [];
+  
+  console.log("Filtered Data:", filteredData);
+
 
   const onLoadData = async () => {
     const user_id = user?.user_id;
-    setDetailsMain([]);
+    setDetailsMain([]);  // Reinicia los datos al cargar
     setLoading(true);
     try {
       const response = await reportApi.getReportDetractions({
         ...selectedParams,
         user_id,
       });
+
       const data = response?.data;
-      setDetailsMain(data?.all_results);
-      setDownloadPath(data?.download_path);
+      setResponseData(data);
+      if (data) {
+        const allResults = data?.data || [];  // Asegúrate de que 'data' siempre sea un array
+        console.log("response: ", response);
+        console.log("data: ", data);
+        console.log("allResults: ", allResults);
+        setDetailsMain(allResults);
 
-      // Cálculo de los totales
-      const totalBase = data?.all_results.reduce((sum, row) => sum + Math.abs(parseFloat(row.mtoImporteTotal) || 0), 0);
-      const totalIgv = data?.all_results.reduce((sum, row) => sum + Math.abs(parseFloat(row.sunat_monto_dep) || 0), 0);
-      const totalImporte = data?.all_results.reduce((sum, row) => sum + Math.abs(parseFloat(row.sunat_rate_csv) || 0), 0);
+        // Cálculo de los totales
+        const totalBase = allResults.reduce((sum, row) => sum + Math.abs(parseFloat(row.mtoImporteTotal) || 0), 0);
+        const totalIgv = allResults.reduce((sum, row) => sum + Math.abs(parseFloat(row.sunat_monto_dep) || 0), 0);
+        const totalImporte = allResults.reduce((sum, row) => sum + Math.abs(parseFloat(row.sunat_rate_csv) || 0), 0);
 
-      setTotalSums({
-        baseIGravadaDG: totalBase,
-        igv: totalIgv,
-        importe: totalImporte,
-      });
+        setTotalSums({
+          baseIGravadaDG: totalBase,
+          igv: totalIgv,
+          importe: totalImporte,
+        });
 
-      setTotalInconsistencies(data?.all_results.length || 0); 
-      setLoading(false); 
+        setTotalInconsistencies(allResults.length);  // Ahora 'allResults' siempre es un array
+      }
+
+      setLoading(false);
     } catch (err) {
       console.error(err);
       setLoading(false);
@@ -87,10 +130,11 @@ const PurchasesDetractions = ({ type }) => {
         setSelectedParams={setSelectedParams}
         loading={loading}
         onLoadData={onLoadData}
+        responseData={responseData} 
       />
 
       {/* Tarjeta con los totales */}
-      <Box sx={{ mt: 2 }}>
+      {/* <Box sx={{ mt: 2 }}>
         <Card>
           <CardHeader title="Compras" sx={{ p: 2, pb: 0 }} />
           <CardContent sx={{ p: 2, pb: '16px !important' }}>
@@ -120,7 +164,13 @@ const PurchasesDetractions = ({ type }) => {
                   }}
                 >
                   <Typography color="text.secondary" variant="body2">Base Imponible</Typography>
-                  <Typography variant="h5">{loading ? <Skeleton variant="text" /> : 'S/ ' + parseFloat(totalSums.baseIGravadaDG.toLocaleString('en-US')).toFixed(2)}</Typography>
+                  <Typography variant="h5">
+                    {loading ? (
+                      <Skeleton variant="text" />
+                    ) : (
+                      'S/ ' + (isNaN(totalSums.baseIGravadaDG) ? '0.00' : parseFloat(totalSums.baseIGravadaDG).toLocaleString('en-US')).toFixed(2)
+                    )}
+                  </Typography>
                 </Stack>
               </Grid>
               <Grid item xs={12} sm={3}>
@@ -134,7 +184,13 @@ const PurchasesDetractions = ({ type }) => {
                   }}
                 >
                   <Typography color="text.secondary" variant="body2">IGV</Typography>
-                  <Typography variant="h5">{loading ? <Skeleton variant="text" /> : 'S/ ' + parseFloat(totalSums.igv.toLocaleString('en-US')).toFixed(2)}</Typography>
+                  <Typography variant="h5">
+                    {loading ? (
+                      <Skeleton variant="text" />
+                    ) : (
+                      'S/ ' + (isNaN(totalSums.igv) ? '0.00' : parseFloat(totalSums.igv).toLocaleString('en-US')).toFixed(2)
+                    )}
+                  </Typography>
                 </Stack>
               </Grid>
               <Grid item xs={12} sm={3}>
@@ -148,13 +204,20 @@ const PurchasesDetractions = ({ type }) => {
                   }}
                 >
                   <Typography color="text.secondary" variant="body2">Importe Total</Typography>
-                  <Typography variant="h5">{loading ? <Skeleton variant="text" /> : 'S/ ' + parseFloat(totalSums.importe.toLocaleString('en-US')).toFixed(2)}</Typography>
+                  <Typography variant="h5">
+                    {loading ? (
+                      <Skeleton variant="text" />
+                    ) : (
+                      'S/ ' + (isNaN(totalSums.importe) ? '0.00' : parseFloat(totalSums.importe).toLocaleString('en-US')).toFixed(2)
+                    )}
+                  </Typography>
                 </Stack>
               </Grid>
             </Grid>
           </CardContent>
         </Card>
-      </Box>
+      </Box> */}
+
 
       {/* Tabla de datos */}
       <TableContainer
@@ -182,35 +245,29 @@ const PurchasesDetractions = ({ type }) => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {detailsMain.length > 0 ? (
-              detailsMain.map((row, index) => (
+            {filteredData.length > 0 ? (
+              filteredData.map((row, index) => (
                 <TableRow key={index}>
                   <TableCell>{row.periodo}</TableCell>
-                  <TableCell>{row.ruc}</TableCell>
+                  <TableCell>{row.numDoc}</TableCell>
                   <TableCell>{row.razonSocial}</TableCell>
                   <TableCell>{row.fechaEmision}</TableCell>
-                  <TableCell>{row.codCpe}</TableCell>
-                  <TableCell>{row.numCpe}</TableCell>
+                  <TableCell>{row.tipoComprobante}</TableCell>
+                  <TableCell>{row.numero}</TableCell>
                   <TableCell>{row.codMoneda}</TableCell>
-                  <TableCell>{row.mtoTipoCambio}</TableCell>
+                  <TableCell>{row.tipoCambio}</TableCell>
                   <TableCell>{row.numCDD}</TableCell>
                   <TableCell>{row.mtoImporteTotal}</TableCell>
                   <TableCell>{row.sunat_monto_dep}</TableCell>
                   <TableCell>{row.sunat_rate_csv}</TableCell>
-                  <TableCell>{row.fecEmisionCDD}</TableCell>
-                  <TableCell>{row.fecha_pago_sunat}</TableCell>
-                  <TableCell sx={{ whiteSpace: 'normal', wordBreak: 'break-word' }}>
-                    <Typography variant="body2" style={{ wordWrap: 'break-word' }}>
-                      {row.observacion}
-                    </Typography>
-                  </TableCell>
+                  <TableCell>{row.sunat_fecha_detraccion}</TableCell>
+                  <TableCell>{row.sunat_fecha_pago}</TableCell>
+                  <TableCell>{row.observacion}</TableCell>
                 </TableRow>
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={15} align="center">
-                  No hay datos disponibles
-                </TableCell>
+                <TableCell colSpan={14}>No hay datos disponibles</TableCell>
               </TableRow>
             )}
           </TableBody>

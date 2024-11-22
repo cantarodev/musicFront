@@ -78,7 +78,7 @@ const PurchasesDetractions = ({ type }) => {
       />
 
       {/* Tarjeta con el título "Compras" y los totales */}
-      <Card sx={{ marginTop: 2 }}>
+      {/* <Card sx={{ marginTop: 2 }}>
         <CardHeader title="Compras" sx={{ p: 2, pb: 0 }} />
         <Box sx={{ p: 2 }}>
           <Grid container spacing={2}>
@@ -140,7 +140,7 @@ const PurchasesDetractions = ({ type }) => {
             </Grid>
           </Grid>
         </Box>
-      </Card>
+      </Card> */}
 
       {/* Tabla de datos */}
       <TableContainer component={Paper} sx={{ marginTop: 2 }}>
