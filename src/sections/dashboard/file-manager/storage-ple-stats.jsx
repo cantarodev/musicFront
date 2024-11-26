@@ -12,8 +12,8 @@ import { bytesToSize } from 'src/utils/bytes-to-size';
 import { ListItemIcon, Skeleton } from '@mui/material';
 import { FileIcon } from 'src/components/file-icon';
 
-export const StorageStats = (props) => {
-  const { items, loading } = props;
+export const StoragePleStats = (props) => {
+  const { items, loading, title, opt } = props;
   const [totalStorage, setTotalStorage] = useState(0);
   const [totalPle, setTotalPle] = useState(0);
 
@@ -36,7 +36,7 @@ export const StorageStats = (props) => {
   return (
     <Card>
       <CardHeader
-        title="PLEs compras y ventas"
+        title={title}
         sx={{ pb: 0 }}
       />
       <CardContent>
@@ -287,66 +287,13 @@ export const StorageStats = (props) => {
               </div>
             </Stack>
           </Grid>
-          {/* {items?.map((total, index) => {
-            const size = bytesToSize(total.size);
-            const name = total.type == 'compras' ? 'Compras' : 'Ventas';
-            return (
-              <Grid
-                size={{ xs: 12, sm: 4 }}
-                key={index}
-              >
-                <Stack
-                  alignItems="center"
-                  direction="row"
-                  spacing={1.5} // Reduje el espacio entre los íconos y el texto
-                  sx={{
-                    backgroundColor: (theme) =>
-                      theme.palette.mode === 'dark' ? 'neutral.800' : 'error.lightest',
-                    borderRadius: 1.5, // Reduje el radio de los bordes
-                    px: 2, // Reduje el padding horizontal
-                    py: 2.5, // Reduje el padding vertical
-                  }}
-                >
-                  <Box
-                    sx={{
-                      flexShrink: 0,
-                      height: 36, // Reduje la altura del ícono
-                      width: 36, // Reduje el ancho del ícono
-                    }}
-                  >
-                    <ListItemIcon>
-                      <Box sx={{ color: 'primary.main' }}>
-                        <FileIcon extension="txt" />
-                      </Box>
-                    </ListItemIcon>
-                  </Box>
-                  <div>
-                    <Typography
-                      color="text.secondary"
-                      variant="body2"
-                    >
-                      {name}
-                    </Typography>
-                    <Typography variant="h6">{size}</Typography>
-                    <Typography
-                      color="text.secondary"
-                      variant="body2"
-                    >
-                      • {total.countPle}
-                      {total.countPle > 1 ? ' PLEs' : ' PLE'} • {total.countDoc} documentos
-                    </Typography>
-                  </div>
-                </Stack>
-              </Grid>
-            );
-          })} */}
         </Grid>
       </CardContent>
     </Card>
   );
 };
 
-StorageStats.propTypes = {
+StoragePleStats.propTypes = {
   loading: PropTypes.bool,
   items: PropTypes.array,
 };

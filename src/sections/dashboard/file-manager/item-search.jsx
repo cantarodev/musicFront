@@ -57,6 +57,7 @@ export const ItemSearch = (props) => {
     type,
     handleItemsTotalsGet,
     handleItemsGet,
+    opt,
   } = props;
 
   const queryRef = useRef(null);
@@ -120,7 +121,7 @@ export const ItemSearch = (props) => {
             fullWidth
             inputProps={{ ref: queryRef }}
             name="itemName"
-            placeholder="Buscar PLE"
+            placeholder="Buscar"
             startAdornment={
               <InputAdornment position="start">
                 <SvgIcon>
@@ -131,24 +132,26 @@ export const ItemSearch = (props) => {
           />
         </Box>
         <Box sx={{ display: 'flex', columnGap: 1 }}>
-          <TextField
-            label="Tipo"
-            name="type"
-            onChange={handleTypeSelected}
-            select
-            SelectProps={{ native: true }}
-            value={type}
-            sx={{ minWidth: 120 }} // Asegúrate de que el campo de selección sea compacto
-          >
-            {typeOptions.map((option) => (
-              <option
-                key={option.value}
-                value={option.value}
-              >
-                {option.label}
-              </option>
-            ))}
-          </TextField>
+          {opt === 'ple' && (
+            <TextField
+              label="Tipo"
+              name="type"
+              onChange={handleTypeSelected}
+              select
+              SelectProps={{ native: true }}
+              value={type}
+              sx={{ minWidth: 120 }}
+            >
+              {typeOptions.map((option) => (
+                <option
+                  key={option.value}
+                  value={option.value}
+                >
+                  {option.label}
+                </option>
+              ))}
+            </TextField>
+          )}
           <TextField
             label="Año"
             name="year"
@@ -203,6 +206,7 @@ export const ItemSearch = (props) => {
         open={uploadDialog.open} // Estado del diálogo (abierto o cerrado)
         handleItemsTotalsGet={handleItemsTotalsGet} // Pasa la función para actualizar los totales
         handleItemsGet={handleItemsGet} // Pasa la función para obtener los ítems
+        opt={opt} // Pasa la función para obtener los ítems
       />
     </Card>
   );
@@ -220,6 +224,7 @@ ItemSearch.propTypes = {
   sortDir: PropTypes.oneOf(['asc', 'desc']),
   year: PropTypes.number,
   type: PropTypes.string,
+  opt: PropTypes.string,
 };
 
 export default ItemSearch;

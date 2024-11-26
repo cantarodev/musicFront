@@ -11,7 +11,7 @@ import { useState } from 'react';
 import axios from 'axios';
 import { fileManagerApi } from 'src/api/file-manager/fileService';
 
-export const ItemMenu = (props) => {
+export const ItemPleMenu = (props) => {
   const { anchorEl, onClose, onDelete, item, open = false } = props;
 
   // Estado para controlar la apertura del diálogo
@@ -19,14 +19,14 @@ export const ItemMenu = (props) => {
   const [comprobante, setComprobante] = useState(''); // Estado para guardar el valor del comprobante
 
   const handleDownload = async () => {
-    console.log('ITEMDOWNLOAD---------------------------', item);
     try {
       const response = await fileManagerApi.downloadFile({
         user_id: item?.user_id,
         file_id: item?._id,
+        option: 'ple',
       });
 
-      if (response.status === 'SUCCESS') {
+      if (response.status === 'success') {
         const fileResponse = await axios.get(response.message, {
           responseType: 'blob',
         });
@@ -123,7 +123,7 @@ export const ItemMenu = (props) => {
   );
 };
 
-ItemMenu.propTypes = {
+ItemPleMenu.propTypes = {
   anchorEl: PropTypes.any,
   onClose: PropTypes.func,
   onDelete: PropTypes.func,

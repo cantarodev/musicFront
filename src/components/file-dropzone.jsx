@@ -46,6 +46,7 @@ export const FileDropzone = (props) => {
     onClose,
     handleItemsTotalsGet,
     handleItemsGet,
+    opt,
     ...other
   } = props;
   const { getRootProps, getInputProps, isDragActive } = useDropzone(other);
@@ -84,6 +85,7 @@ export const FileDropzone = (props) => {
       formData.append('rucAccount', selectedAccount);
       formData.append('period', periodocpe.replace(/-/g, ''));
       formData.append('type', type);
+      formData.append('option', opt);
       files.forEach((file) => {
         formData.append('files', file);
       });
@@ -145,20 +147,22 @@ export const FileDropzone = (props) => {
             ))}
           </Select>
         </FormControl>
-        <FormControl sx={{ m: 1, minWidth: 120 }}>
-          <InputLabel id="type-label">Tipo</InputLabel>
-          <Select
-            labelId="type-label"
-            id="type"
-            value={type}
-            onChange={handleTypeChange}
-            label="Tipo"
-          >
-            <MenuItem value="compras">compras</MenuItem>
-            <MenuItem value="ventas">ventas</MenuItem>
-            {/* Añade más opciones según sea necesario */}
-          </Select>
-        </FormControl>
+        {opt === 'ple' && (
+          <FormControl sx={{ m: 1, minWidth: 120 }}>
+            <InputLabel id="type-label">Tipo</InputLabel>
+            <Select
+              labelId="type-label"
+              id="type"
+              value={type}
+              onChange={handleTypeChange}
+              label="Tipo"
+            >
+              <MenuItem value="compras">compras</MenuItem>
+              <MenuItem value="ventas">ventas</MenuItem>
+              {/* Añade más opciones según sea necesario */}
+            </Select>
+          </FormControl>
+        )}
       </Stack>
 
       <Box
@@ -299,7 +303,7 @@ export const FileDropzone = (props) => {
               size="small"
               type="button"
               variant="contained"
-              disabled={!periodocpe || !type || uploading}
+              disabled={!periodocpe || (!type && opt !== 'vouching') || uploading}
             >
               {showConfirmation ? 'Confirmar' : 'Subir'}
             </Button>

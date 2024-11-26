@@ -16,7 +16,7 @@ import { usePopover } from 'src/hooks/use-popover';
 import { bytesToSize } from 'src/utils/bytes-to-size';
 
 import { ItemIcon } from './item-icon';
-import { ItemMenu } from './item-menu';
+import { ItemMenu } from './item-ple-menu';
 
 import { convertToPeriodDate } from '../../../utils/date';
 import { Button } from '@mui/material';

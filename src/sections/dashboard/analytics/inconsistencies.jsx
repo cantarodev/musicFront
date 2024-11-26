@@ -2,22 +2,39 @@ import Box from '@mui/material/Box';
 import { useEffect, useState } from 'react';
 
 import { useMockedUser } from 'src/hooks/use-mocked-user';
-import { SalesInconsistenciesDetails } from 'src/sections/dashboard/analytics/sales-inconsistencies-details';
+import { PurchasesInconsistenciesDetails } from 'src/sections/dashboard/analytics/purchases-inconsistencies-details';
 import { reportApi } from 'src/api/reports/reportService';
 
-import axios from 'axios';
 import { useSelector } from 'react-redux';
 import toast from 'react-hot-toast';
 
 import { useDispatch } from 'react-redux';
-import { setSalesReport, resetSalesReport } from '../../../slices/report';
+import {
+  setPurchasesReport,
+  setSalesReport,
+  resetPurchasesReport,
+  resetSalesReport,
+} from '../../../slices/report';
 import { useLocalStorage } from 'src/hooks/use-local-storage';
 import { ObservationFilters } from './observation-filters';
 import { ObservationCards } from './observation-cards';
+import { SalesInconsistenciesDetails } from './sales-inconsistencies-details';
 
 const Page = ({ type }) => {
   const selectedAccount = useSelector((state) => state.account);
   const [filePath, setFilePath] = useState('');
+  const setReport =
+    type === 'Compras'
+      ? setPurchasesReport
+      : type === 'Ventas'
+        ? setSalesReport
+        : () => console.warn('Tipo no válido');
+  const resetReport =
+    type === 'Compras'
+      ? resetPurchasesReport
+      : type === 'Ventas'
+        ? resetSalesReport
+        : () => console.warn('Tipo no válido');
 
   const [loading, setLoading] = useState(false);
   const dispatch = useDispatch();
@@ -36,7 +53,7 @@ const Page = ({ type }) => {
   const handleApplyFilters = async () => {
     const user_id = user?.user_id;
 
-    dispatch(resetSalesReport());
+    dispatch(resetReport());
     setLoading(true);
     try {
       const response = await reportApi.reportObservations({
@@ -45,14 +62,14 @@ const Page = ({ type }) => {
       });
 
       const data = response?.data;
-      if (data.status === 'failed') {
+      if (response?.status === 'failed') {
         toast.error(response?.message, {
           duration: 5000,
           position: 'top-right',
         });
       }
 
-      dispatch(setSalesReport(data));
+      dispatch(setReport(data));
       setFilePath(response?.filePath);
       setLoading(false);
     } catch (err) {
@@ -75,19 +92,27 @@ const Page = ({ type }) => {
         selectedParams={selectedParams}
         setSelectedParams={setSelectedParams}
         onLoadData={handleApplyFilters}
-        loading={loading}
         type={type}
       />
       <ObservationCards
         type={type}
         loading={loading}
       />
-      <SalesInconsistenciesDetails
-        loading={loading}
-        filePath={filePath}
-        onLoadData={handleApplyFilters}
-        params={selectedParams}
-      />
+      {type === 'Compras' ? (
+        <PurchasesInconsistenciesDetails
+          loading={loading}
+          filePath={filePath}
+          onLoadData={handleApplyFilters}
+          params={selectedParams}
+        />
+      ) : (
+        <SalesInconsistenciesDetails
+          loading={loading}
+          filePath={filePath}
+          onLoadData={handleApplyFilters}
+          params={selectedParams}
+        />
+      )}
     </Box>
   );
 };

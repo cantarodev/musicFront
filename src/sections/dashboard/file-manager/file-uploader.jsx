@@ -11,7 +11,7 @@ import Typography from '@mui/material/Typography';
 import { FileDropzone } from 'src/components/file-dropzone';
 
 export const FileUploader = (props) => {
-  const { setLoading, onClose, open = false, handleItemsTotalsGet, handleItemsGet } = props;
+  const { setLoading, onClose, open = false, handleItemsTotalsGet, handleItemsGet, opt } = props;
   const [files, setFiles] = useState([]);
 
   useEffect(() => {
@@ -64,8 +64,12 @@ export const FileUploader = (props) => {
       <DialogContent>
         <FileDropzone
           setLoading={setLoading}
-          accept={{ 'text/plain': ['.txt'] }}
-          caption="(Sólo se permiten archivos .txt)"
+          accept={opt === 'vouching' ? { 'application/pdf': ['.pdf'] } : { 'text/plain': ['.txt'] }}
+          caption={
+            opt === 'vouching'
+              ? '(Sólo se permiten archivos .pdf)'
+              : '(Sólo se permiten archivos .txt)'
+          }
           files={files}
           onDrop={handleDrop}
           onRemove={handleRemove}
@@ -73,6 +77,7 @@ export const FileUploader = (props) => {
           onClose={onClose}
           handleItemsTotalsGet={handleItemsTotalsGet}
           handleItemsGet={handleItemsGet}
+          opt={opt}
         />
       </DialogContent>
     </Dialog>
@@ -85,4 +90,5 @@ FileUploader.propTypes = {
   open: PropTypes.bool,
   handleItemsTotalsGet: PropTypes.func,
   handleItemsGet: PropTypes.func,
+  opt: PropTypes.string,
 };

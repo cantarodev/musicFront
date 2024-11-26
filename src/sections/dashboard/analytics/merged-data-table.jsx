@@ -120,7 +120,7 @@ export const MergeDataTable = (props) => {
             alignItems="center"
             spacing={2}
           >
-            {/* {filteredResults?.length > 0 && (
+            {filteredResults?.length > 0 && (
               <IconButton
                 color="inherit"
                 onClick={() => exportToExcel(filteredResults)}
@@ -129,7 +129,7 @@ export const MergeDataTable = (props) => {
                   <DownloadIcon />
                 </SvgIcon>
               </IconButton>
-            )} */}
+            )}
             <Typography
               variant="subtitle2"
               sx={{ display: 'flex', alignItems: 'center' }}
@@ -245,9 +245,7 @@ export const MergeDataTable = (props) => {
                         className="customTableCell"
                         sx={{ textAlign: 'right' }}
                       >
-                        {detail.source === 'sunat'
-                          ? formatNumber(detail.mtos.mtoImporteTotal)
-                          : formatNumber(Number(detail.monto))}
+                        {formatNumber(Number(detail.monto))}
                       </TableCell>
                       <TableCell className="customTableCell">
                         <Typography

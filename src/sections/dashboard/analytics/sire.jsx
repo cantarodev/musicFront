@@ -1,28 +1,27 @@
-import Box from '@mui/material/Box';
 import { useEffect, useState } from 'react';
 
 import { useMockedUser } from 'src/hooks/use-mocked-user';
-import { PurchasesInconsistenciesDetails } from 'src/sections/dashboard/analytics/purchases-inconsistencies-details';
+import { MergeDataTable } from 'src/sections/dashboard/analytics/merged-data-table';
 import { reportApi } from 'src/api/reports/reportService';
+import { setMissingsReport, resetMissingsReport } from '../../../slices/report';
 
-import axios from 'axios';
 import { useSelector } from 'react-redux';
-import toast from 'react-hot-toast';
-
-import { useDispatch } from 'react-redux';
-import { setPurchasesReport, resetPurchasesReport } from '../../../slices/report';
-import { useLocalStorage } from 'src/hooks/use-local-storage';
+import { Box } from '@mui/material';
+import { MissingCards } from './missing-cards';
 import { ObservationFilters } from './observation-filters';
-import { ObservationCards } from './observation-cards';
+import { useDispatch } from 'react-redux';
+import { useLocalStorage } from 'src/hooks/use-local-storage';
 
 const Page = ({ type }) => {
   const selectedAccount = useSelector((state) => state.account);
+  const [relevantData, setRelevantData] = useState({});
   const [filePath, setFilePath] = useState('');
 
   const [loading, setLoading] = useState(false);
   const dispatch = useDispatch();
 
   const user = useMockedUser();
+
   const [filters, setFilters] = useLocalStorage('filters');
   const [selectedParams, setSelectedParams] = useState({
     period: filters.period,
@@ -33,27 +32,22 @@ const Page = ({ type }) => {
     filters: { all: [] },
   });
 
-  const handleApplyFilters = async () => {
+  const loadData = async () => {
     const user_id = user?.user_id;
 
-    dispatch(resetPurchasesReport());
+    dispatch(resetMissingsReport());
     setLoading(true);
     try {
-      const response = await reportApi.reportObservations({
+      const response = await reportApi.getReportMissings({
         ...selectedParams,
         user_id,
       });
 
       const data = response?.data;
-      if (response?.status === 'failed') {
-        toast.error(response?.message, {
-          duration: 5000,
-          position: 'top-right',
-        });
-      }
 
-      dispatch(setPurchasesReport(data));
-      setFilePath(response?.filePath);
+      dispatch(setMissingsReport(data?.allResults));
+      setRelevantData(data?.relevantData);
+      setFilePath(data?.filePath);
       setLoading(false);
     } catch (err) {
       console.error(err);
@@ -70,21 +64,24 @@ const Page = ({ type }) => {
       display="flex"
       flexDirection="column"
       gap={2}
+      width="100%"
     >
       <ObservationFilters
         selectedParams={selectedParams}
         setSelectedParams={setSelectedParams}
-        onLoadData={handleApplyFilters}
-        type={type}
+        onLoadData={loadData}
+        loading={loading}
+        hide={['filters']}
+        type="Faltantes"
       />
-      <ObservationCards
+      <MissingCards
         type={type}
         loading={loading}
+        relevantData={relevantData}
       />
-      <PurchasesInconsistenciesDetails
+      <MergeDataTable
         loading={loading}
         filePath={filePath}
-        onLoadData={handleApplyFilters}
         params={selectedParams}
       />
     </Box>

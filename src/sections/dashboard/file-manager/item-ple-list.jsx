@@ -6,7 +6,7 @@ import TablePagination from '@mui/material/TablePagination';
 
 import { Scrollbar } from 'src/components/scrollbar';
 
-import { ItemListRow } from './item-list-row';
+import { ItemPleListRow } from './item-ple-list-row';
 import {
   LinearProgress,
   Paper,
@@ -17,7 +17,7 @@ import {
   Typography,
 } from '@mui/material';
 
-export const ItemList = (props) => {
+export const ItemPleList = (props) => {
   const {
     setLoading,
     loading,
@@ -83,7 +83,7 @@ export const ItemList = (props) => {
                 </TableRow>
               ) : (
                 items.map((item) => (
-                  <ItemListRow
+                  <ItemPleListRow
                     setLoading={setLoading}
                     key={item._id}
                     item={item}
@@ -108,7 +108,7 @@ export const ItemList = (props) => {
   );
 };
 
-ItemList.propTypes = {
+ItemPleList.propTypes = {
   setLoading: PropTypes.func,
   bool: PropTypes.bool,
   items: PropTypes.array,

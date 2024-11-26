@@ -17,15 +17,15 @@ class FileManagerApi {
   }
 
   async getTotals(request) {
-    const { user_id, rucAccount } = request;
-    return await getTotals(user_id, rucAccount);
+    const { user_id, rucAccount, option } = request;
+    return await getTotals(user_id, rucAccount, option);
   }
 
   async getFiles(request = {}) {
-    const { filters, page, rowsPerPage, sortBy, sortDir, user_id, rucAccount, year, type } =
+    const { filters, page, rowsPerPage, sortBy, sortDir, user_id, rucAccount, option, year, type } =
       request;
 
-    let { data } = await getFiles(user_id, rucAccount, year, type);
+    let { data } = await getFiles(user_id, rucAccount, option, year, type);
     let count = data.length;
 
     if (typeof filters !== 'undefined') {
@@ -60,8 +60,8 @@ class FileManagerApi {
   }
 
   async downloadFile(request = {}) {
-    const { user_id, file_id } = request;
-    return downloadFile(user_id, file_id);
+    const { user_id, file_id, option } = request;
+    return downloadFile(user_id, file_id, option);
   }
 
   async searchComprobante(request = {}) {
