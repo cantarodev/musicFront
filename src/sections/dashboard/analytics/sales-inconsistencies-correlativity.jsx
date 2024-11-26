@@ -1,15 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Paper,
-  Box,
-  CircularProgress,
-} from '@mui/material';
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Box, CircularProgress, Typography } from '@mui/material';
 import { reportApi } from 'src/api/reports/reportService';
 import { useMockedUser } from 'src/hooks/use-mocked-user';
 import { useSelector } from 'react-redux';
@@ -127,10 +117,16 @@ const Correlativity = ({ type }) => {
             ) : (
               <TableRow>
                 <TableCell
-                  colSpan={3}
+                  colSpan={25}
                   align="center"
+                  style={{ height: 200 }}
                 >
-                  No hay faltantes disponibles
+                  <Typography
+                    variant="body1"
+                    color="textSecondary"
+                  >
+                    No hay datos disponibles
+                  </Typography>
                 </TableCell>
               </TableRow>
             )}

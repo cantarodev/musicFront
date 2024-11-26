@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Box, Typography } from '@mui/material';
 import { FactoringInconsistenciesFilter } from 'src/sections/dashboard/analytics/factoring-inconsistencies-filter';
 import { useMockedUser } from 'src/hooks/use-mocked-user';
@@ -11,6 +11,7 @@ import CardHeader from '@mui/material/CardHeader';
 import Grid from '@mui/material/Grid';
 import Stack from '@mui/material/Stack';
 import Skeleton from '@mui/material/Skeleton';
+import { useLocalStorage } from 'src/hooks/use-local-storage';
 
 const Factoring = ({ type }) => {
   const [responseData, setResponseData] = useState(null);
@@ -21,9 +22,10 @@ const Factoring = ({ type }) => {
   const [totalInconsistencies, setTotalInconsistencies] = useState(0);
   const [downloadPath, setDownloadPath] = useState('');
   const user = useMockedUser();
+  const [filters, setFilters] = useLocalStorage('filters');
 
   const [selectedParams, setSelectedParams] = useState({
-    period: '',
+    period: filters.period,
     account: selectedAccount,
     queryType: String(type).toLowerCase(),
     docType: 'all',
@@ -42,20 +44,12 @@ const Factoring = ({ type }) => {
 
   useEffect(() => {
     console.log("Updated selectedParams in parent:", selectedParams);
-  }, [selectedParams]); // Logs each time selectedParams is updated
+  }, [selectedParams]);
 
   useEffect(() => {
     console.log("detailsMain actualizado: ", detailsMain);
   }, [detailsMain]);
   
-  // console.log("##############################################")
-  // console.log("responseData?.data?: ", responseData?.data);
-  // const data = responseData?.data;
-  // const filteredData = responseData?.data?.filter((row) => {
-  //   return data;
-  // }) || [];
-  // console.log("Filtered Data:", filteredData);
-    
 
   const onLoadData = async () => {
     const user_id = user?.user_id;
@@ -72,12 +66,12 @@ const Factoring = ({ type }) => {
       const data = response?.data;
       console.log("data: ", data);
       console.log("-------------------------");
-      setDetailsMain(data?.data); // Ajustado para reflejar la estructura actual
+      setDetailsMain(data?.data);
       setDownloadPath(data?.download_path);
 
       const codcpeList = data?.data
-        .filter(item => item.codcpe) // Filtra solo los objetos que tienen `codcpe`
-        .map(item => item.codcpe);   // Extrae el valor de `codcpe`
+        .filter(item => item.codcpe)
+        .map(item => item.codcpe);
 
       console.log("Lista de codcpe: ", codcpeList);
 
@@ -108,51 +102,35 @@ const Factoring = ({ type }) => {
       setLoading(false);
     }
   };
+  const data = responseData?.data;
+  const filteredData = useMemo(() => {
+    return data?.filter((row) => {
+      let isValid = true;
+      if (
+        selectedParams.docType !== 'all' && 
+        row.tipoComprobante.split(' - ')[0] !== selectedParams.docType
+      ) {
+        isValid = false;
+      }
 
-  // console.log("##############################################")
-  // console.log("-------------------------SELECTED PARAMS: ", selectedParams);
-  // console.log("responseData?.data?: ", responseData?.data);
-  // const data = responseData?.data;
-  // const filteredData = responseData?.data?.filter((row) => {
-  //   return data;
-  // }) || [];
-  // console.log("Filtered Data:", filteredData);
+      // Filtrar por moneda
+      const monedaRow = row.tipoMoneda.split(' ')[0];
+      console.log("monedaRow: ", monedaRow);
+      if (selectedParams.currency !== 'all' && monedaRow !== selectedParams.currency) {
+        isValid = false;
+      }
+
+      // Filtrar por observaciones
+      if (selectedParams.filters.length > 0 && !selectedParams.filters.includes(row.observacion)) {
+        isValid = false;
+      }
+
+      return isValid;
+    }) || [];
+  }, [data, selectedParams]);
 
 
-console.log("##############################################");
-console.log("-------------------------SELECTED PARAMS: ", selectedParams);
-console.log("responseData?.data?: ", responseData?.data);
-
-const data = responseData?.data;
-
-// Filtrar la data según los parámetros seleccionados
-const filteredData = data?.filter((row) => {
-  let isValid = true;
-
-  // Filtrar por moneda
-  const monedaRow = row.tipoMoneda.split(' ')[0];
-  console.log("monedaRow: ", monedaRow);
-  if (selectedParams.currency !== 'all' && monedaRow !== selectedParams.currency) {
-    isValid = false;
-  }
-
-  // Filtrar por tipo de comprobante
-  console.log("Tipo de comprobante: ", row.tipoComprobante);
-  console.log("selectedParams.docType: ", selectedParams.docType);
-  console.log("row.tipoComprobante: ", row.tipoComprobante);
-  if (selectedParams.docType !== 'all' && row.tipoComprobante !== selectedParams.docType) {
-    isValid = false;
-  }
-
-  // Filtrar por observaciones
-  if (selectedParams.filters.length > 0 && !selectedParams.filters.includes(row.observacion)) {
-    isValid = false;
-  }
-
-  return isValid;
-}) || [];
-
-console.log("Filtered Data:", filteredData);
+  console.log("Filtered Data:", filteredData);
 
 
 
@@ -164,7 +142,7 @@ console.log("Filtered Data:", filteredData);
         setSelectedParams={setSelectedParams}
         loading={loading}
         onLoadData={onLoadData}
-        responseData={responseData}  // Pasamos la respuesta del backend al filtro
+        responseData={responseData}
       />
 
       <Box sx={{ mt: 2 }}>
@@ -268,7 +246,18 @@ console.log("Filtered Data:", filteredData);
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={10} align="center">No se encontraron registros</TableCell>
+                <TableCell
+                  colSpan={25}
+                  align="center"
+                  style={{ height: 200 }}
+                >
+                  <Typography
+                    variant="body1"
+                    color="textSecondary"
+                  >
+                    No hay datos disponibles
+                  </Typography>
+                </TableCell>
               </TableRow>
             )}
           </TableBody>

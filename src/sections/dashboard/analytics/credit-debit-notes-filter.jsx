@@ -11,11 +11,12 @@ import {
   List,
   ListItemText,
   MenuItem,
+  Tooltip,
 } from '@mui/material';
 import { useEffect, useState } from 'react';
-import FilterListIcon from '@mui/icons-material/FilterList';
-import { ExpandMore, ExpandLess } from '@mui/icons-material';
 
+import { ExpandMore, ExpandLess } from '@mui/icons-material';
+import RestoreIcon from '@mui/icons-material/Restore';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { LocalizationProvider, DatePicker } from '@mui/x-date-pickers';
 import { format, parse } from 'date-fns';
@@ -29,41 +30,55 @@ const customEnLocale = {
   },
 };
 
-const searchTypeOptions = [
+const initialTypeOptions = [
   { label: 'Todos', value: 'all' },
-  { label: '07 - Nota de crédito', value: 'F7' },
-  { label: '08 - Nota de débito', value: 'F8' },
+  { label: '07 - Nota de crédito', value: '07' },
+  { label: '08 - Nota de débito', value: '08' },
 ];
 
-const searchCurrencyOptions = [
+const initialCurrencyOptions = [
   { label: 'Todos', value: 'all' },
   { label: 'USD - Dólares', value: 'USD' },
   { label: 'PEN- Soles', value: 'PEN' },
   { label: 'EUR - Euros', value: 'EUR' },
 ];
 
-// Agregamos las opciones de estados de Factoring
-const factoringStatusOptions = [
-  { label: 'No válido', value: 'No válido' },
-  { label: 'Pendiente', value: 'Pendiente' },
-  { label: 'Pendiente por reinicio', value: 'Pendiente por reinicio' },
-  { label: 'Subsanado', value: 'Subsanado' },
-  { label: 'Disconforme', value: 'Disconforme' },
-];
 
-const filterOptions = [
+const initialFilterOptions = [
   { label: 'Todos', value: 'all' },
-  { label: 'Fecha Emision', value: 'fecha_emision' },
-  { label: 'Importe Total', value: 'importe_total' },
-  { label: 'NC Sin F/B', value: 'nc_sin_f_b' },
-  { label: 'NC Negativo / ND Positivo NC', value: 'nc_nd_valor' },
+  { label: 'Fecha Emision', value: 'Fecha Emision' },	
+  { label: 'No se encontró F/B asociada.', value: 'No se encontró F/B asociada.' },
+  { label: 'Importe Total', value: 'Importe Total' },
+  { label: 'NC Sin F/B', value: 'NC Sin F/B' },
+  { label: 'NC Negativo / ND Positivo NC', value: 'C Negativo / ND Positivo NC' },
 ];
 
 export const CreditDebitInconsistenciesFilter = (props) => {
-  const { selectedParams, setSelectedParams, loading, onLoadData } = props;
-  const [selectedOptions, setSelectedOptions] = useState(['general']);
+  const { selectedParams, setSelectedParams, loading, onLoadData, responseData} = props;
+  const [selectedOptions, setSelectedOptions] = useState(['all']);
   const [selectedFactoringStatus, setSelectedFactoringStatus] = useState([]); // Para almacenar estados seleccionados
   const [expanded, setExpanded] = useState({});
+  const [searchTypeOptions, setSearchTypeOptions] = useState(initialTypeOptions);
+  const [searchCurrencyOptions, setSearchCurrencyOptions] = useState(initialCurrencyOptions);
+  const [filterOptions, setFilterOptions] = useState(initialFilterOptions);
+  const [selectedDate, setSelectedDate] = useState(
+    selectedParams.period ? parse(selectedParams.period, 'yyyyMM', new Date()) : null
+  );
+
+  const [clean, setClean] = useState(false);
+  const [DefaultTypeOptions, setDefaultTypeOptions] = useState(initialTypeOptions);
+  const [DefaultCurrencyOptions, setDefaultCurrencyOptions] = useState(initialCurrencyOptions);
+  const [DefaultFilterOptions, setDefaultFilterOptions] = useState(initialFilterOptions);
+
+  const handleCleanFilters = () => {
+    setSelectedParams((state) => ({
+      ...state,
+      docType: 'all',
+      currency: 'all',
+      filters: { all: [] },
+    }));
+    setClean(!clean);
+  };
 
   const handleSelected = (event) => {
     const { name, value } = event.target;
@@ -113,12 +128,7 @@ export const CreditDebitInconsistenciesFilter = (props) => {
     if (selected.includes('all')) {
       return 'Todos seleccionados';
     }
-    if (selected.length > 2) {
-      return `${selected.length} seleccionados`;
-    }
-    return selected
-      .map((value) => filterOptions.find((opt) => opt.value === value)?.label)
-      .join(', ');
+    return selected.join(', ');
   };
 
   const formatDate = (date) => {
@@ -132,8 +142,9 @@ export const CreditDebitInconsistenciesFilter = (props) => {
   };
 
   const handleDateChange = (date) => {
-    const value = formatDate(date);
-    setSelectedParams((state) => ({ ...state, period: value }));
+    const formattedPeriod = date ? format(date, 'yyyyMM') : '';
+    setSelectedDate(date);
+    setSelectedParams((state) => ({ ...state, period: formattedPeriod, period_search: formattedPeriod }));
   };
 
   const toggleSubMenu = (option) => {
@@ -143,6 +154,80 @@ export const CreditDebitInconsistenciesFilter = (props) => {
     }));
   };
 
+  const [selectedType, setSelectedType] = useState('all');
+
+  useEffect(() => {
+    if (responseData && responseData.data) {
+      const filterData = responseData.data;
+
+      if (filterData?.length) {
+        // tipos de comprobantes
+        const uniqueTypes = [...new Set(filterData.map(item => item.tipoComprobante))];
+        setDefaultTypeOptions(uniqueTypes)
+        const filteredOptions = initialTypeOptions.filter(option => 
+          option.value === 'all' || uniqueTypes.some(type => type.startsWith(option.value))
+        );
+        setSearchTypeOptions(filteredOptions);
+        // monedas
+        const uniqueCurrencies = [...new Set(filterData.map(item => item.codMoneda))];
+        setDefaultCurrencyOptions(uniqueCurrencies)
+        const validCurrencies = uniqueCurrencies.filter(currency => ['PEN', 'USD'].includes(currency));
+        setSearchCurrencyOptions(
+          validCurrencies.length === 0
+            ? initialCurrencyOptions
+            : [
+                { label: 'Todos', value: 'all' }, // Siempre mostramos la opción 'Todos'
+                ...validCurrencies.map(currency => ({ label: `${currency} - ${currency}`, value: currency }))
+              ]
+        );
+        
+        // observaciones
+        const uniqueObservations = [...new Set(filterData.map(item => item.observacion))];
+        setFilterOptions(
+          uniqueObservations.length === 1
+            ? [{ label: 'Todos', value: 'all' }, { label: uniqueObservations[0], value: uniqueObservations[0] }]
+            : [{ label: 'Todos', value: 'all' }, ...uniqueObservations.map(obs => ({ label: obs, value: obs })) ]
+        );
+        setDefaultFilterOptions(uniqueObservations)
+
+      }
+    }
+  }, [responseData]);
+
+  useEffect(() => {
+  
+    const data = responseData?.data || [];
+    const isDocTypeAll = selectedParams.docType === 'all';
+    const filteredRows = data.filter(row => {
+      const matchesDocType = isDocTypeAll || row.codComp === selectedParams.docType;
+      const matchesCurrency = selectedParams.currency === 'all' || row.codMoneda === selectedParams.currency;
+      return matchesDocType && matchesCurrency;
+    });
+    
+    if (filteredRows.length > 0) {
+      const uniqueCurrencies = [...new Set(filteredRows.map(item => item.codMoneda))];
+      const filteredCurrencyOptions = initialCurrencyOptions.filter(option =>
+        option.value === 'all' || uniqueCurrencies.some(currency => currency?.startsWith(option.value))
+      );
+      setSearchCurrencyOptions(filteredCurrencyOptions);
+      
+      const uniqueObservations = [...new Set(filteredRows.map(item => item.observacion))];
+      const filteredOptionsObs = initialFilterOptions.filter(option =>
+        option.value === 'all' || uniqueObservations.some(filters => filters?.startsWith(option.value))
+      );
+      setFilterOptions(filteredOptionsObs);
+  
+    } else {
+      console.log("No hay filas filtradas, opciones no se actualizan.");
+    }
+  }, [selectedParams.docType, selectedParams.currency, selectedParams.filters]);
+  
+
+
+  useEffect(() => {
+    onLoadData();
+  }, [selectedParams.period]);
+
   useEffect(() => {
     setSelectedParams((state) => ({
       ...state,
@@ -150,11 +235,7 @@ export const CreditDebitInconsistenciesFilter = (props) => {
       factoringStatuses: selectedFactoringStatus,
     }));
 
-    // Agregar console.log para validar los datos
-    console.log('Filtros seleccionados: ', selectedOptions);
   }, [selectedOptions, selectedFactoringStatus, setSelectedParams]);
-  console.log('PARAMS', selectedParams);
-
   return (
     <Box
       sx={{
@@ -302,17 +383,18 @@ export const CreditDebitInconsistenciesFilter = (props) => {
           ))}
         </TextField>
 
-        <Button
-          fullWidth
-          variant="contained"
-          color="primary"
-          onClick={onLoadData}
-          startIcon={<FilterListIcon />}
-          disabled={loading ? true : false}
-          sx={{ height: '56px' }}
-        >
-          Filtrar
-        </Button>
+        <Tooltip title="Restablecer filtros">
+            <IconButton
+              onClick={handleCleanFilters}
+              size="large"
+              sx={{
+                height: '100%',
+                width: 'auto',
+              }}
+            >
+              <RestoreIcon fontSize="large" />
+            </IconButton>
+        </Tooltip>
       </Box>
     </Box>
   );
@@ -324,4 +406,5 @@ CreditDebitInconsistenciesFilter.propTypes = {
   setSelectedParams: PropTypes.func,
   onApplyFilters: PropTypes.func,
   onLoadData: PropTypes.func,
+  responseData: PropTypes.object,
 };

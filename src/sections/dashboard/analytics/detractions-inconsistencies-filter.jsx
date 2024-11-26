@@ -1,6 +1,7 @@
 import PropTypes from 'prop-types';
 import Grid from '@mui/material/Grid2';
 import TextField from '@mui/material/TextField';
+import RestoreIcon from '@mui/icons-material/Restore';
 import {
   Box,
   Button,
@@ -11,8 +12,9 @@ import {
   List,
   ListItemText,
   MenuItem,
+  Tooltip,
 } from '@mui/material';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import FilterListIcon from '@mui/icons-material/FilterList';
 import { ExpandMore, ExpandLess } from '@mui/icons-material';
 
@@ -20,6 +22,8 @@ import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { LocalizationProvider, DatePicker } from '@mui/x-date-pickers';
 import { format, parse } from 'date-fns';
 import esES from 'date-fns/locale/es';
+import { useSelector } from 'react-redux';
+import { useLocalStorage } from 'src/hooks/use-local-storage';
 
 const customEnLocale = {
   ...esES,
@@ -33,8 +37,8 @@ const initialTypeOptions = [
   { label: 'Todos', value: 'all' },
   { label: '01 - Factura', value: '01' },
   { label: '03 - Boleta de venta', value: '03' },
-  { label: '07 - Nota de crédito', value: 'F7' },
-  { label: '08 - Nota de débito', value: 'F8' },
+  { label: '07 - Nota de crédito', value: '07' },
+  { label: '08 - Nota de débito', value: '08' },
 ];
 
 const initialCurrencyOptions = [
@@ -46,10 +50,11 @@ const initialCurrencyOptions = [
 
 const initialFilterOptions = [
   { label: 'Todos', value: 'all' },
-  { label: 'Fecha de Pago', value: 'fecha_pago' },
-  { label: 'Tasa Detracción', value: 'tasa_detraction' },
-  { label: 'N° Constancia', value: 'pend_num_constancia' },
-  { label: 'F. Constancia', value: 'pend_fec_constancia' },
+  { label: 'Detracción pagada en defecto', value: 'Detracción pagada en defecto' },
+  { label: 'Tasa Detracción', value: 'Tasa Detracción' },
+  { label: 'Fecha de Pago', value: 'Fecha de Pago' },
+  { label: 'N° Constancia', value: 'N° Constancia' },
+  { label: 'F. Constancia', value: 'F. Constancia' },
 ];
 
 export const DetractionsInconsistenciesFilter = (props) => {
@@ -65,72 +70,15 @@ export const DetractionsInconsistenciesFilter = (props) => {
     selectedParams.period ? parse(selectedParams.period, 'yyyyMM', new Date()) : null
   );
 
+  const [DefaultTypeOptions, setDefaultTypeOptions] = useState(initialTypeOptions);
+  const [DefaultCurrencyOptions, setDefaultCurrencyOptions] = useState(initialCurrencyOptions);
+  const [DefaultFilterOptions, setDefaultFilterOptions] = useState(initialFilterOptions);
+  const [clean, setClean] = useState(false);
+  
   const handleSelected = (event) => {
     const { name, value } = event.target;
     setSelectedParams((state) => ({ ...state, [name]: value }));
   };
-
-  const handleSelectedOptions = (option) => {
-    let updatedSelection = [];
-  
-    if (option.value === 'all') {
-      // Si se selecciona/desmarca "Todos"
-      if (selectedOptions.includes('all')) {
-        updatedSelection = []; // Desmarcar todo
-      } else {
-        updatedSelection = filterOptions.map((opt) => opt.value); // Seleccionar todo
-      }
-    } else {
-      // Seleccionar/desmarcar una opción individual
-      updatedSelection = selectedOptions.includes(option.value)
-        ? selectedOptions.filter((item) => item !== option.value) // Desmarcar la opción
-        : [...selectedOptions, option.value]; // Agregar la opción seleccionada
-  
-      // Si todas las opciones están seleccionadas menos "Todos", incluir "Todos"
-      if (
-        updatedSelection.length === filterOptions.length - 1 &&
-        !updatedSelection.includes('all')
-      ) {
-        updatedSelection.push('all');
-      }
-  
-      // Si "Todos" está seleccionado pero se desmarca una opción individual, quitar "Todos"
-      if (updatedSelection.includes('all') && option.value !== 'all') {
-        updatedSelection = updatedSelection.filter((item) => item !== 'all');
-      }
-    }
-  
-    setSelectedOptions(updatedSelection);
-    setSelectedParams((state) => ({ ...state, filters: updatedSelection }));
-  };
-  
-
-  // const handleSelectedOptions = (option) => {
-  //   let updatedSelection = [];
-
-  //   if (option.value === 'all') {
-  //     if (selectedOptions.includes('all')) {
-  //       updatedSelection = [];
-  //     } else {
-  //       updatedSelection = [
-  //         'all',
-  //         ...filterOptions.filter((opt) => opt.value !== 'all').map((opt) => opt.value),
-  //       ];
-  //     }
-  //   } else {
-  //     updatedSelection = selectedOptions.includes(option.value)
-  //       ? selectedOptions.filter((item) => item !== option.value && item !== 'all')
-  //       : [...selectedOptions.filter((item) => item !== 'all'), option.value];
-
-  //     if (updatedSelection.length === filterOptions.length - 1) {
-  //       updatedSelection.push('all');
-  //     }
-  //   }
-
-  //   setSelectedOptions(updatedSelection);
-
-  //   setSelectedParams((state) => ({ ...state, ['filters']: updatedSelection }));
-  // };
 
   const handleSubOptionSelect = (subOption) => {
     setSelectedFactoringStatus((prevSelected) => {
@@ -144,16 +92,22 @@ export const DetractionsInconsistenciesFilter = (props) => {
     });
   };
 
+
+  const handleCleanFilters = () => {
+    setSelectedParams((state) => ({
+      ...state,
+      docType: 'all',
+      currency: 'all',
+      filters: { all: [] },
+    }));
+    setClean(!clean);
+  };
+
   const renderValue = (selected) => {
     if (selected.includes('all')) {
       return 'Todos seleccionados';
     }
-    if (selected.length > 2) {
-      return `${selected.length} seleccionados`;
-    }
-    return selected
-      .map((value) => filterOptions.find((opt) => opt.value === value)?.label)
-      .join(', ');
+    return selected.join(', ');
   };
 
   const formatDate = (date) => {
@@ -168,7 +122,6 @@ export const DetractionsInconsistenciesFilter = (props) => {
 
   const handleDateChange = (date) => {
     const formattedPeriod = date ? format(date, 'yyyyMM') : '';
-    console.log('Periodo seleccionado:', formattedPeriod);
     setSelectedDate(date);
     setSelectedParams((state) => ({ ...state, period: formattedPeriod, period_search: formattedPeriod }));
   };
@@ -180,39 +133,21 @@ export const DetractionsInconsistenciesFilter = (props) => {
     }));
   };
 
-
-  useEffect(() => {
-    setSelectedParams((state) => ({
-      ...state,
-      filters: selectedOptions,
-      factoringStatuses: selectedFactoringStatus,
-    }));
-    console.log('Filtros seleccionados: ', selectedOptions);
-  }, [selectedOptions, selectedFactoringStatus, setSelectedParams]);
-  // useEffect(() => {
-  //   setSelectedParams((state) => ({
-  //     ...state,
-  //     filters: selectedOptions,
-  //     factoringStatuses: selectedFactoringStatus,
-  //   }));
-  //   console.log('Filtros seleccionados: ', selectedOptions);
-  // }, [selectedOptions, selectedFactoringStatus, setSelectedParams]);
-
-  console.log("responseData: ", responseData);
-  
   useEffect(() => {
     if (responseData && responseData.data) {
       const filterData = responseData.data;
 
       if (filterData?.length) {
+        // tipos de comprobantes
         const uniqueTypes = [...new Set(filterData.map(item => item.tipoComprobante))];
-        setSearchTypeOptions(
-          uniqueTypes.length === 1
-            ? [{ label: 'Todos', value: 'all' }, { label: uniqueTypes[0], value: uniqueTypes[0] }]
-            : initialTypeOptions
+        setDefaultTypeOptions(uniqueTypes)
+        const filteredOptions = initialTypeOptions.filter(option => 
+          option.value === 'all' || uniqueTypes.some(type => type.startsWith(option.value))
         );
-        console.log("uniqueTypes: ", uniqueTypes);
+        setSearchTypeOptions(filteredOptions);
+        // monedas
         const uniqueCurrencies = [...new Set(filterData.map(item => item.codMoneda))];
+        setDefaultCurrencyOptions(uniqueCurrencies)
         const validCurrencies = uniqueCurrencies.filter(currency => ['PEN', 'USD'].includes(currency));
         setSearchCurrencyOptions(
           validCurrencies.length === 0
@@ -222,22 +157,85 @@ export const DetractionsInconsistenciesFilter = (props) => {
                 ...validCurrencies.map(currency => ({ label: `${currency} - ${currency}`, value: currency }))
               ]
         );
-        console.log("validCurrencies: ", validCurrencies);
+        
+        // observaciones
         const uniqueObservations = [...new Set(filterData.map(item => item.observacion))];
         setFilterOptions(
           uniqueObservations.length === 1
             ? [{ label: 'Todos', value: 'all' }, { label: uniqueObservations[0], value: uniqueObservations[0] }]
             : [{ label: 'Todos', value: 'all' }, ...uniqueObservations.map(obs => ({ label: obs, value: obs })) ]
         );
-        console.log("uniqueObservations: ", uniqueObservations);
+        setDefaultFilterOptions(uniqueObservations)
+
       }
     }
   }, [responseData]);
 
-
   useEffect(() => {
     onLoadData();
   }, [selectedParams.period]);
+
+
+  useEffect(() => {
+    const data = responseData?.data || [];
+    const isDocTypeAll = selectedParams.docType === 'all';
+    
+    const filteredRows = data.filter(row => {
+      const matchesDocType = isDocTypeAll || row.codComp === selectedParams.docType;
+      const matchesCurrency = selectedParams.currency === 'all' || row.codMoneda === selectedParams.currency;
+      return matchesDocType && matchesCurrency;
+    });
+    
+    if (filteredRows.length > 0) {
+      const uniqueCurrencies = [...new Set(filteredRows.map(item => item.codMoneda))];
+      const filteredCurrencyOptions = initialCurrencyOptions.filter(option =>
+        option.value === 'all' || uniqueCurrencies.some(currency => currency?.startsWith(option.value))
+      );
+      setSearchCurrencyOptions(filteredCurrencyOptions);
+      
+      const uniqueObservations = [...new Set(filteredRows.map(item => item.observacion))];
+  
+      const filteredOptionsObs = initialFilterOptions.filter(option =>
+        option.value === 'all' || uniqueObservations.some(filters => filters?.startsWith(option.value))
+      );
+      setFilterOptions(filteredOptionsObs);
+  
+    } else {
+      console.log("No hay filas filtradas, opciones no se actualizan.");
+    }
+  }, [selectedParams.docType, selectedParams.currency, selectedParams.filters]);
+
+  const handleSelectedOptions = (option) => {
+    let updatedSelection = [];
+  
+    if (option.value === 'all') {
+      if (selectedOptions.includes('all')) {
+        updatedSelection = [];
+      } else {
+        updatedSelection = filterOptions.map((opt) => opt.value);
+      }
+    } else {
+      // Seleccionar/desmarcar una opción individual
+      updatedSelection = selectedOptions.includes(option.value)
+        ? selectedOptions.filter((item) => item !== option.value)
+        : [...selectedOptions, option.value];
+      
+      if (
+        updatedSelection.length === filterOptions.length - 1 &&
+        !updatedSelection.includes('all')
+      ) {
+        updatedSelection.push('all');
+      }
+      
+      if (updatedSelection.includes('all') && option.value !== 'all') {
+        updatedSelection = updatedSelection.filter((item) => item !== 'all');
+      }
+    }
+  
+    setSelectedOptions(updatedSelection);
+    setSelectedParams((state) => ({ ...state, filters: updatedSelection }));
+  };
+  
 
   return (
     <Box
@@ -385,6 +383,14 @@ export const DetractionsInconsistenciesFilter = (props) => {
             </div>
           ))}
         </TextField>
+        <Tooltip title="Restablecer filtros">
+          <IconButton
+            onClick={handleCleanFilters}
+            size="large"
+          >
+            <RestoreIcon fontSize="large" />
+          </IconButton>
+        </Tooltip>
       </Box>
     </Box>
   );

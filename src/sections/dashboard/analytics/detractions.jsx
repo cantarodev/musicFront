@@ -20,6 +20,7 @@ import Skeleton from '@mui/material/Skeleton';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import CardHeader from '@mui/material/CardHeader';
+import { useLocalStorage } from 'src/hooks/use-local-storage';
 
 const PurchasesDetractions = ({ type }) => {
   const [responseData, setResponseData] = useState(null);
@@ -30,9 +31,10 @@ const PurchasesDetractions = ({ type }) => {
   const [totalInconsistencies, setTotalInconsistencies] = useState(0);
   const [downloadPath, setDownloadPath] = useState('');
   const user = useMockedUser();
+  const [filters, setFilters] = useLocalStorage('filters');
 
   const [selectedParams, setSelectedParams] = useState({
-    period: '',
+    period:  filters.period,
     account: selectedAccount,
     queryType: String(type).toLowerCase(),
     docType: 'all',
@@ -48,31 +50,22 @@ const PurchasesDetractions = ({ type }) => {
       }));
     }
   }, [selectedAccount]);
-  console.log("###################setSelectedParams: ", selectedParams);
-  console.log("responseData?.data?: ", responseData?.data);
 
   const data = responseData?.data;
-  
-  // Filtrar la data según los parámetros seleccionados
   const filteredData = data?.filter((row) => {
     let isValid = true;
-  
-    // Filtrar por moneda
     const monedaRow = row.tipoMoneda.split(' ')[0];
-    console.log("monedaRow: ", monedaRow);
     if (selectedParams.currency !== 'all' && monedaRow !== selectedParams.currency) {
       isValid = false;
     }
   
-    // Filtrar por tipo de comprobante
-    console.log("Tipo de comprobante: ", row.tipoComprobante);
-    console.log("selectedParams.docType: ", selectedParams.docType);
-    console.log("row.tipoComprobante: ", row.tipoComprobante);
-    if (selectedParams.docType !== 'all' && row.tipoComprobante !== selectedParams.docType) {
+    if (
+      selectedParams.docType !== 'all' && 
+      row.tipoComprobante.split(' - ')[0] !== selectedParams.docType
+    ) {
       isValid = false;
     }
-  
-    // Filtrar por observaciones
+
     if (selectedParams.filters.length > 0 && !selectedParams.filters.includes(row.observacion)) {
       isValid = false;
     }
@@ -80,12 +73,10 @@ const PurchasesDetractions = ({ type }) => {
     return isValid;
   }) || [];
   
-  console.log("Filtered Data:", filteredData);
-
 
   const onLoadData = async () => {
     const user_id = user?.user_id;
-    setDetailsMain([]);  // Reinicia los datos al cargar
+    setDetailsMain([]);
     setLoading(true);
     try {
       const response = await reportApi.getReportDetractions({
@@ -96,13 +87,10 @@ const PurchasesDetractions = ({ type }) => {
       const data = response?.data;
       setResponseData(data);
       if (data) {
-        const allResults = data?.data || [];  // Asegúrate de que 'data' siempre sea un array
-        console.log("response: ", response);
-        console.log("data: ", data);
-        console.log("allResults: ", allResults);
+        const allResults = data?.data || [];
         setDetailsMain(allResults);
 
-        // Cálculo de los totales
+        // calc de los totales
         const totalBase = allResults.reduce((sum, row) => sum + Math.abs(parseFloat(row.mtoImporteTotal) || 0), 0);
         const totalIgv = allResults.reduce((sum, row) => sum + Math.abs(parseFloat(row.sunat_monto_dep) || 0), 0);
         const totalImporte = allResults.reduce((sum, row) => sum + Math.abs(parseFloat(row.sunat_rate_csv) || 0), 0);
@@ -113,7 +101,7 @@ const PurchasesDetractions = ({ type }) => {
           importe: totalImporte,
         });
 
-        setTotalInconsistencies(allResults.length);  // Ahora 'allResults' siempre es un array
+        setTotalInconsistencies(allResults.length);
       }
 
       setLoading(false);
@@ -260,14 +248,25 @@ const PurchasesDetractions = ({ type }) => {
                   <TableCell>{row.mtoImporteTotal}</TableCell>
                   <TableCell>{row.sunat_monto_dep}</TableCell>
                   <TableCell>{row.sunat_rate_csv}</TableCell>
-                  <TableCell>{row.sunat_fecha_detraccion}</TableCell>
+                  <TableCell>{row.fecha_pago_sunat}</TableCell>
                   <TableCell>{row.sunat_fecha_pago}</TableCell>
                   <TableCell>{row.observacion}</TableCell>
                 </TableRow>
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={14}>No hay datos disponibles</TableCell>
+                <TableCell
+                  colSpan={25}
+                  align="center"
+                  style={{ height: 200 }}
+                >
+                  <Typography
+                    variant="body1"
+                    color="textSecondary"
+                  >
+                    No hay datos disponibles
+                  </Typography>
+                </TableCell>
               </TableRow>
             )}
           </TableBody>
