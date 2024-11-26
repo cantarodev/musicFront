@@ -10,6 +10,7 @@ import esES from 'date-fns/locale/es';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { useSelector } from 'react-redux';
 import { useLocalStorage } from 'src/hooks/use-local-storage';
+import { set } from 'nprogress';
 
 const initialTypeOptions = [
   { label: 'Todos', value: 'all' },
@@ -28,7 +29,8 @@ const initialCurrencyOptions = [
 
 const initialFilterOptions = [
   { label: 'Todos', value: 'all' },
-  { label: 'No válido', value: 'No válido' },
+  { label: 'No válido con nota de crédito: importes iguales', value: 'No válido con nota de crédito: importes iguales' },
+  { label: 'No válido con nota de crédito: importes distintos', value: 'No válido con nota de crédito: importes distintos' },
   { label: 'Pendiente', value: 'Pendiente' },
   { label: 'Pendiente por reinicio', value: 'Pendiente por reinicio' },
   { label: 'Subsanado', value: 'Subsanado' },
@@ -41,13 +43,17 @@ export const FactoringInconsistenciesFilter = (props) => {
   const [searchTypeOptions, setSearchTypeOptions] = useState(initialTypeOptions);
   const [searchCurrencyOptions, setSearchCurrencyOptions] = useState(initialCurrencyOptions);
   const [filterOptions, setFilterOptions] = useState(initialFilterOptions);
+
+  const [DefaultTypeOptions, setDefaultTypeOptions] = useState(initialTypeOptions);
+  const [DefaultCurrencyOptions, setDefaultCurrencyOptions] = useState(initialCurrencyOptions);
+  const [DefaultFilterOptions, setDefaultFilterOptions] = useState(initialFilterOptions);
+
   //const [selectedOptions, setSelectedOptions] = useState(selectedParams?.filters || ['all']);
   const [selectedOptions, setSelectedOptions] = useState(['all']); 
   const [selectedDate, setSelectedDate] = useState(
     selectedParams.period ? parse(selectedParams.period, 'yyyyMM', new Date()) : null
   );
-
-
+  const [clean, setClean] = useState(false);
   const handleCleanFilters = () => {
     setSelectedParams((state) => ({
       ...state,
@@ -58,22 +64,25 @@ export const FactoringInconsistenciesFilter = (props) => {
     setClean(!clean);
   };
 
+  const [selectedType, setSelectedType] = useState('all');
+
+
   useEffect(() => {
     if (responseData && responseData.data) {
       const filterData = responseData.data;
 
       if (filterData?.length) {
+        // tipos de comprobantes
         const uniqueTypes = [...new Set(filterData.map(item => item.tipoComprobante))];
-        setSearchTypeOptions(
-          uniqueTypes.length === 1
-            ? [{ label: 'Todos', value: 'all' }, { label: uniqueTypes[0], value: uniqueTypes[0] }]
-            : initialTypeOptions
+        setDefaultTypeOptions(uniqueTypes)
+        const filteredOptions = initialTypeOptions.filter(option => 
+          option.value === 'all' || uniqueTypes.some(type => type.startsWith(option.value))
         );
-        console.log("uniqueTypes: ", uniqueTypes);
-
+        setSearchTypeOptions(filteredOptions);
+        // monedas
         const uniqueCurrencies = [...new Set(filterData.map(item => item.codMoneda))];
+        setDefaultCurrencyOptions(uniqueCurrencies)
         const validCurrencies = uniqueCurrencies.filter(currency => ['PEN', 'USD'].includes(currency));
-
         setSearchCurrencyOptions(
           validCurrencies.length === 0
             ? initialCurrencyOptions
@@ -82,18 +91,53 @@ export const FactoringInconsistenciesFilter = (props) => {
                 ...validCurrencies.map(currency => ({ label: `${currency} - ${currency}`, value: currency }))
               ]
         );
-        console.log("validCurrencies: ", validCurrencies);
-
+        
+        // observaciones
         const uniqueObservations = [...new Set(filterData.map(item => item.observacion))];
         setFilterOptions(
           uniqueObservations.length === 1
             ? [{ label: 'Todos', value: 'all' }, { label: uniqueObservations[0], value: uniqueObservations[0] }]
             : [{ label: 'Todos', value: 'all' }, ...uniqueObservations.map(obs => ({ label: obs, value: obs })) ]
         );
-        console.log("uniqueObservations: ", uniqueObservations);
+        setDefaultFilterOptions(uniqueObservations)
+
       }
     }
   }, [responseData]);
+
+  useEffect(() => {
+  
+    const data = responseData?.data || [];
+
+    const isDocTypeAll = selectedParams.docType === 'all';
+
+    const filteredRows = data.filter(row => {
+      const matchesDocType = isDocTypeAll || row.codComp === selectedParams.docType; 
+      const matchesCurrency = selectedParams.currency === 'all' || row.codMoneda === selectedParams.currency; 
+      return matchesDocType && matchesCurrency; 
+    });
+    
+    if (filteredRows.length > 0) {
+      const uniqueCurrencies = [...new Set(filteredRows.map(item => item.codMoneda))];
+      
+      const filteredCurrencyOptions = initialCurrencyOptions.filter(option =>
+        option.value === 'all' || uniqueCurrencies.some(currency => currency?.startsWith(option.value))
+      );
+      setSearchCurrencyOptions(filteredCurrencyOptions);
+      
+      const uniqueObservations = [...new Set(filteredRows.map(item => item.observacion))];
+  
+      const filteredOptionsObs = initialFilterOptions.filter(option =>
+        option.value === 'all' || uniqueObservations.some(filters => filters?.startsWith(option.value))
+      );
+      setFilterOptions(filteredOptionsObs);
+  
+    } else {
+      console.log("No hay filas filtradas, opciones no se actualizan.");
+    }
+  
+  }, [selectedParams.docType, selectedParams.currency, selectedParams.filters]);
+  
 
   useEffect(() => {
     onLoadData();

@@ -22,6 +22,8 @@ import { useSelector } from 'react-redux';
 
 import { usePageView } from 'src/hooks/use-page-view';
 
+import TabsContainerFiles from 'src/components/tabs-files';
+
 const useItemsSearch = (user_id, rucAccount) => {
   const [state, setState] = useState({
     filters: {
