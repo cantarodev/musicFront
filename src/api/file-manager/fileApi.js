@@ -19,8 +19,8 @@ export const createFile = async (formData) => {
   );
 };
 
-export const deleteFile = async (user_id, file_id) => {
-  return handleResponse(apiClient.delete(`/file/${user_id}/${file_id}`));
+export const deleteFile = async (user_id, file_id, option) => {
+  return handleResponse(apiClient.delete(`/file/${option}/${user_id}/${file_id}`));
 };
 
 export const downloadFile = async (user_id, file_id, option) => {

@@ -155,6 +155,7 @@ const useItemsStore = (searchState, rucAccount) => {
       const response = await fileManagerApi.deleteFile({
         user_id: searchState?.user_id,
         file_id: itemId,
+        option: 'ple',
       });
       if (isMounted()) {
         setState((prevState) => {

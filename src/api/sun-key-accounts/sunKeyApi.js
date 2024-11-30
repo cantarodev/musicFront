@@ -19,6 +19,8 @@ export const createClaveSolAccount = (user_id, verified, name, ruc, username, pa
 };
 
 export const validateClaveSolAccount = (user_id, account_id, ruc, username, password, mode) => {
+  console.log(user_id, account_id, ruc, username, password, mode);
+
   return handleResponse(
     apiClient.post('/claveSolAccount/validate', {
       user_id,

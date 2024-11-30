@@ -11,6 +11,8 @@ import CloseIcon from '@mui/icons-material/Close';
 import toast from 'react-hot-toast';
 import { claveSolAccountsApi } from 'src/api/sun-key-accounts/sunKeyService'; // Assuming the API file location
 import { Scrollbar } from 'src/components/scrollbar';
+import { useAuth } from 'src/hooks/use-auth';
+import { useMockedUser } from 'src/hooks/use-mocked-user';
 
 export const SunKeyListTable = (props) => {
   const {
@@ -34,6 +36,8 @@ export const SunKeyListTable = (props) => {
   const [currentClaveSol, setCurrentClaveSol] = useState(null);
   const [enableBulkActions, setEnableBulkActions] = useState(false);
   const rootMap = new Map();
+
+  const user = useMockedUser();
 
   useEffect(() => {
     setEnableBulkActions(selected.length > 0);
@@ -96,9 +100,11 @@ export const SunKeyListTable = (props) => {
 
       for (let index = 1; index < filas.length; index++) {
         const celdas = filas[index].getElementsByTagName('td');
-        const account = registrosFiltrados.find(
+
+        let account = registrosFiltrados.find(
           (obj) => obj.account_id == celdas[1].querySelector('input').value
         );
+
         if (account) {
           const loaderContainer = celdas[4].querySelector('div');
 
@@ -117,6 +123,7 @@ export const SunKeyListTable = (props) => {
               style={{ color: '#6366f1', width: '25px', height: '25px' }}
             />
           );
+          account = { ...account, user_id: user?.user_id, mode: '' };
 
           const resp = await claveSolAccountsApi.validateClaveSolAccount(account);
           if (resp.validated) {

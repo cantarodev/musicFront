@@ -36,6 +36,10 @@ import { useSelector } from 'react-redux';
 import { setFilteredPurchases } from 'src/slices/filtered-results';
 import { useDispatch } from 'react-redux';
 
+import { getComparator, sortRows } from 'src/utils/apply-sort-observations';
+
+import { Observations, NoObservations } from 'src/components/inconsistencies';
+
 const columnLabels = {
   periodo: 'Período',
   ruc: 'RUC',
@@ -65,33 +69,8 @@ const columnLabels = {
   observacionObligado: 'Observación Obligados CPE.',
 };
 
-function descendingComparator(a, b, orderBy) {
-  const aValue = orderBy.split('.').reduce((obj, key) => obj[key], a);
-  const bValue = orderBy.split('.').reduce((obj, key) => obj[key], b);
-
-  if (parseFloat(bValue) < parseFloat(aValue)) return -1;
-  if (parseFloat(bValue) > parseFloat(aValue)) return 1;
-  return 0;
-}
-
-function getComparator(order, orderBy) {
-  return order === 'desc'
-    ? (a, b) => descendingComparator(a, b, orderBy)
-    : (a, b) => -descendingComparator(a, b, orderBy);
-}
-
-function sortRows(array, comparator) {
-  const stabilizedRows = array.map((el, index) => [el, index]);
-  stabilizedRows.sort((a, b) => {
-    const order = comparator(a[0], b[0]);
-    if (order !== 0) return order;
-    return a[1] - b[1];
-  });
-  return stabilizedRows.map((el) => el[0]);
-}
-
 export const PurchasesInconsistenciesDetails = (props) => {
-  const { loading, filePath, onLoadData, params } = props;
+  const { loading, filePath, params } = props;
 
   const dispatch = useDispatch();
   const [modalOpen, setModalOpen] = useState(false);
@@ -103,7 +82,6 @@ export const PurchasesInconsistenciesDetails = (props) => {
   const [page, setPage] = useState(0);
   const rowsPerPage = 20;
   const containerRef = useRef();
-  const prevParamsRef = useRef(params);
 
   const [columnVisibility, setColumnVisibility] = useState({
     periodo: true,
@@ -1112,14 +1090,7 @@ export const PurchasesInconsistenciesDetails = (props) => {
                           className="customTableCell"
                           sx={{ textAlign: 'right' }}
                         >
-                          <Typography
-                            // sx={
-                            //   detail.observacion['cpe'].some((obs) => obs.includes('IGV', 'igv'))
-                            //     ? { color: 'red' }
-                            //     : { color: 'inherit' }
-                            // }
-                            style={{ fontSize: 14 }}
-                          >
+                          <Typography style={{ fontSize: 14 }}>
                             {formatNumber(detail.mtos.mtoIGV)}
                           </Typography>
                         </TableCell>
@@ -1139,16 +1110,7 @@ export const PurchasesInconsistenciesDetails = (props) => {
                           className="customTableCell"
                           sx={{ textAlign: 'right' }}
                         >
-                          <Typography
-                            // sx={
-                            //   detail.observacion['cpe'].some((obs) =>
-                            //     obs.includes('Importe', 'importe')
-                            //   )
-                            //     ? { color: 'red' }
-                            //     : { color: 'inherit' }
-                            // }
-                            style={{ fontSize: 14 }}
-                          >
+                          <Typography style={{ fontSize: 14 }}>
                             {formatNumber(detail.monto)}
                           </Typography>
                         </TableCell>
@@ -1168,14 +1130,7 @@ export const PurchasesInconsistenciesDetails = (props) => {
                           className="customTableCell"
                           sx={{ textAlign: 'right' }}
                         >
-                          <Typography
-                            // sx={
-                            //   detail.observacion['tc'].length > 0
-                            //     ? { color: 'red' }
-                            //     : { color: 'inherit' }
-                            // }
-                            style={{ fontSize: 14 }}
-                          >
+                          <Typography style={{ fontSize: 14 }}>
                             {detail.tipoCambio ? detail.tipoCambio : '-'}
                           </Typography>
                         </TableCell>
@@ -1193,23 +1148,9 @@ export const PurchasesInconsistenciesDetails = (props) => {
                               }}
                             >
                               {detail.observaciones['tipoCambio']?.length > 0 ? (
-                                <Typography
-                                  color="text.secondary"
-                                  fontWeight="bold"
-                                  sx={{
-                                    cursor: 'pointer',
-                                    '&:hover': {
-                                      color: 'primary.main',
-                                    },
-                                  }}
-                                  onClick={() =>
-                                    handleOpen(detail.observaciones['tipoCambio'].join('. '))
-                                  }
-                                >
-                                  {detail.observaciones['tipoCambio'].join('. ')}
-                                </Typography>
+                                <Observations messages={detail.observaciones['tipoCambio']} />
                               ) : (
-                                'Sin observaciones'
+                                <NoObservations />
                               )}
                             </Typography>
                           </TableCell>
@@ -1226,20 +1167,9 @@ export const PurchasesInconsistenciesDetails = (props) => {
                             }}
                           >
                             {detail.observaciones['cpe']?.length > 0 ? (
-                              <Typography
-                                color="text.secondary"
-                                fontWeight="bold"
-                                sx={{
-                                  cursor: 'pointer',
-                                  '&:hover': {
-                                    color: 'primary.main',
-                                  },
-                                }}
-                              >
-                                {detail.observaciones['cpe'].join('. ')}
-                              </Typography>
+                              <Observations messages={detail.observaciones['cpe']} />
                             ) : (
-                              'Sin observaciones'
+                              <NoObservations />
                             )}
                           </Typography>
                         </TableCell>
@@ -1257,20 +1187,9 @@ export const PurchasesInconsistenciesDetails = (props) => {
                               }}
                             >
                               {detail.observaciones['inconsistencias']?.length > 0 ? (
-                                <Typography
-                                  color="text.secondary"
-                                  fontWeight="bold"
-                                  sx={{
-                                    cursor: 'pointer',
-                                    '&:hover': {
-                                      color: 'primary.main',
-                                    },
-                                  }}
-                                >
-                                  {detail.observaciones['inconsistencias'].join('. ')}
-                                </Typography>
+                                <Observations messages={detail.observaciones['inconsistencias']} />
                               ) : (
-                                'Sin observaciones'
+                                <NoObservations />
                               )}
                             </Typography>
                           </TableCell>
@@ -1289,20 +1208,9 @@ export const PurchasesInconsistenciesDetails = (props) => {
                               }}
                             >
                               {detail.observaciones['condicion']?.length > 0 ? (
-                                <Typography
-                                  color="text.secondary"
-                                  fontWeight="bold"
-                                  sx={{
-                                    cursor: 'pointer',
-                                    '&:hover': {
-                                      color: 'primary.main',
-                                    },
-                                  }}
-                                >
-                                  {detail.observaciones['condicion'].join('. ')}
-                                </Typography>
+                                <Observations messages={detail.observaciones['condicion']} />
                               ) : (
-                                'Sin observaciones'
+                                <NoObservations />
                               )}
                             </Typography>
                           </TableCell>
@@ -1320,20 +1228,9 @@ export const PurchasesInconsistenciesDetails = (props) => {
                               }}
                             >
                               {detail.observaciones['obligado']?.length > 0 ? (
-                                <Typography
-                                  color="text.secondary"
-                                  fontWeight="bold"
-                                  sx={{
-                                    cursor: 'pointer',
-                                    '&:hover': {
-                                      color: 'primary.main',
-                                    },
-                                  }}
-                                >
-                                  {detail.observaciones['obligado'].join('. ')}
-                                </Typography>
+                                <Observations messages={detail.observaciones['obligado']} />
                               ) : (
-                                'Sin observaciones'
+                                <NoObservations />
                               )}
                             </Typography>
                           </TableCell>

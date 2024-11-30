@@ -55,8 +55,8 @@ class FileManagerApi {
   }
 
   async deleteFile(request = {}) {
-    const { user_id, file_id } = request;
-    return deleteFile(user_id, file_id);
+    const { user_id, file_id, option } = request;
+    return deleteFile(user_id, file_id, option);
   }
 
   async downloadFile(request = {}) {

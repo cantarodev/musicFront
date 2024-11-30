@@ -4,7 +4,6 @@ import PropTypes from 'prop-types';
 import { authApi } from 'src/api/auth/authService';
 import { Issuer } from 'src/utils/auth';
 import { AuthContext, initialState } from './auth-context';
-import { Button, Modal } from '@mui/material';
 
 import { useNavigate } from 'react-router-dom';
 import { jwtDecode } from 'jwt-decode';
@@ -73,7 +72,6 @@ export const AuthProvider = (props) => {
   const [state, dispatch] = useReducer(reducer, initialState);
   const [showModal, setShowModal] = useState(false);
   const [counter, setCounter] = useState(20);
-  const [lastActive, setLastActive] = useState(Date.now());
   const navigate = useNavigate();
   const countdownRef = useRef(null);
 
@@ -149,49 +147,6 @@ export const AuthProvider = (props) => {
   }, [initialize]);
 
   useEffect(() => {
-    const handleUserActivity = () => {
-      if (!showModal) {
-        setLastActive(Date.now());
-        setCounter(20);
-
-        const currentTime = Date.now();
-        const expirationTime = getTokenExpirationTime();
-        const timeRemaining = expirationTime - currentTime;
-
-        if (timeRemaining <= 1000 * 20 && timeRemaining > 0) {
-          refreshSession();
-        }
-      }
-    };
-
-    window.addEventListener('mousemove', handleUserActivity);
-    window.addEventListener('keypress', handleUserActivity);
-
-    const checkInactivity = setInterval(() => {
-      const currentTime = Date.now();
-      const expirationTime = getTokenExpirationTime();
-      const timeRemaining = expirationTime - currentTime;
-
-      if (timeRemaining <= 1000 * 20 && !showModal && timeRemaining > 0) {
-        setShowModal(true);
-        setCounter(20);
-      }
-
-      if (timeRemaining <= 0) {
-        setShowModal(false);
-        signOut();
-        navigate('/');
-      }
-    }, 1000);
-
-    return () => {
-      clearInterval(checkInactivity);
-      window.removeEventListener('mousemove', handleUserActivity);
-      window.removeEventListener('keypress', handleUserActivity);
-    };
-  }, [lastActive, refreshSession, showModal, navigate]);
-
-  useEffect(() => {
     if (showModal) {
       countdownRef.current = setInterval(() => {
         setCounter((prevCounter) => {
@@ -252,6 +207,61 @@ export const AuthProvider = (props) => {
     setShowModal(false);
     setCounter(20);
   }, [refreshSession]);
+
+  useEffect(() => {
+    const isSessionActive = () => {
+      const currentTime = Date.now();
+      const expirationTime = getTokenExpirationTime();
+      return expirationTime > currentTime;
+    };
+
+    if (!isSessionActive()) {
+      return;
+    }
+
+    const handleUserActivity = () => {
+      if (!showModal) {
+        setCounter(20);
+
+        const currentTime = Date.now();
+        const expirationTime = getTokenExpirationTime();
+        const timeRemaining = expirationTime - currentTime;
+
+        if (timeRemaining <= 1000 * 20 && timeRemaining > 0) {
+          refreshSession();
+        }
+      }
+    };
+
+    window.addEventListener('mousemove', handleUserActivity);
+    window.addEventListener('keypress', handleUserActivity);
+
+    const checkInactivity = setInterval(() => {
+      const currentTime = Date.now();
+      const expirationTime = getTokenExpirationTime();
+      const timeRemaining = expirationTime - currentTime;
+
+      if (timeRemaining <= 1000 * 20 && !showModal && timeRemaining > 0) {
+        setShowModal(true);
+        setCounter(20);
+      }
+
+      if (timeRemaining <= 0) {
+        setShowModal(false);
+        signOut();
+        navigate('/');
+        clearInterval(checkInactivity);
+        window.removeEventListener('mousemove', handleUserActivity);
+        window.removeEventListener('keypress', handleUserActivity);
+      }
+    }, 1000);
+
+    return () => {
+      clearInterval(checkInactivity);
+      window.removeEventListener('mousemove', handleUserActivity);
+      window.removeEventListener('keypress', handleUserActivity);
+    };
+  }, [refreshSession, showModal, navigate, signOut, getTokenExpirationTime]);
 
   return (
     <AuthContext.Provider
