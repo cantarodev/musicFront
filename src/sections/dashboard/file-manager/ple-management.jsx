@@ -3,24 +3,19 @@ import Box from '@mui/material/Box';
 import Container from '@mui/material/Container';
 import Grid from '@mui/material/Grid2';
 import Stack from '@mui/material/Stack';
-import Typography from '@mui/material/Typography';
 
 import { fileManagerApi } from 'src/api/file-manager/fileService';
 import { Seo } from 'src/components/seo';
-import { useDialog } from 'src/hooks/use-dialog';
 import { useMounted } from 'src/hooks/use-mounted';
 import { useSettings } from 'src/hooks/use-settings';
 import { ItemDrawer } from 'src/sections/dashboard/file-manager/item-drawer';
-import { ItemPleList } from 'src/sections/dashboard/file-manager/item-ple-list';
-import { ItemSearch } from 'src/sections/dashboard/file-manager/item-search';
-import { StoragePleStats } from 'src/sections/dashboard/file-manager/storage-ple-stats';
 import { useMockedUser } from 'src/hooks/use-mocked-user';
 import { PLESearchDialog } from 'src/sections/dashboard/file-manager/search-ple';
-import socket from 'src/utils/socket';
 import toast from 'react-hot-toast';
-import { useSelector } from 'react-redux';
 
-import { usePageView } from 'src/hooks/use-page-view';
+import VideoSearch from 'src/components/video-search';
+import VideoPlayer from 'src/components/video-player';
+import { List, ListItem, ListItemText } from '@mui/material';
 
 const useItemsSearch = (user_id, rucAccount) => {
   const [state, setState] = useState({
@@ -201,51 +196,34 @@ const Page = () => {
   const settings = useSettings();
 
   const user = useMockedUser();
-  const selectedAccount = useSelector((state) => state.account);
+  const [selectedVideos, setSelectedVideos] = useState([]);
+  const [currentVideoIndex, setCurrentVideoIndex] = useState(null);
 
-  const itemsSearch = useItemsSearch(user?.user_id, selectedAccount);
-  const itemsStore = useItemsStore(itemsSearch.state, selectedAccount);
-  const detailsDialog = useDialog();
-  const pleSearchDialog = useDialog(); // Dialog state for PLE search
-  const currentItem = useCurrentItem(itemsStore.items, detailsDialog.data);
-  const totals = useItemsTotals(user?.user_id, selectedAccount);
-  const [loading, setLoading] = useState(true);
-  const [status, setStatus] = useState('');
-
-  const handleDelete = useCallback(
-    async (itemId) => {
-      setLoading(true);
-      detailsDialog.handleClose();
-      await itemsStore.handleDelete(itemId);
-      totals.handleItemsTotalsGet();
-    },
-    [detailsDialog, itemsStore]
-  );
-
-  useEffect(() => {
-    setLoading(true);
-    if (totals.items.length > 0) {
-      setLoading(false);
+  const handleVideoSelect = (video) => {
+    setSelectedVideos((prev) => [...prev, video]);
+    if (currentVideoIndex === null) {
+      setCurrentVideoIndex(0); // Reproduce el primer video automáticamente
     }
-  }, [totals.items]);
+  };
 
-  useEffect(() => {
-    socket.emit('joinRoom', user?.user_id);
-
-    socket.on('status', (change) => {
-      setStatus(change);
+  const handleVideoEnd = () => {
+    setSelectedVideos((prev) => {
+      // Elimina el video que terminó de reproducirse
+      const newVideos = prev.filter((_, index) => index !== currentVideoIndex);
+      if (newVideos.length > 0) {
+        // Reproduce el siguiente video si queda en la lista
+        setCurrentVideoIndex((prevIndex) =>
+          prevIndex < newVideos.length ? prevIndex : newVideos.length - 1
+        );
+      } else {
+        // Si no quedan videos, resetea el índice actual
+        setCurrentVideoIndex(null);
+      }
+      return newVideos;
     });
+  };
 
-    return () => {
-      socket.off('status');
-    };
-  }, []);
-
-  useEffect(() => {
-    itemsStore.handleItemsGet();
-  }, [status]);
-
-  usePageView();
+  const currentVideo = selectedVideos[currentVideoIndex];
 
   return (
     <>
@@ -275,55 +253,35 @@ const Page = () => {
                   lg: 4,
                 }}
               >
-                <StoragePleStats
-                  items={totals.items}
-                  loading={loading}
-                  title="PLEs compras y ventas"
-                  opt="ple"
-                />
-                <ItemSearch
-                  onFilterType={itemsSearch.handleFilterType}
-                  onFilterYear={itemsSearch.handleFilterYear}
-                  onFiltersChange={itemsSearch.handleFiltersChange}
-                  onSortChange={itemsSearch.handleSortChange}
-                  sortBy={itemsSearch.state.sortBy}
-                  sortDir={itemsSearch.state.sortDir}
-                  year={itemsSearch.state.year}
-                  type={itemsSearch.state.type}
-                  loading={setLoading}
-                  handleItemsTotalsGet={totals.handleItemsTotalsGet}
-                  handleItemsGet={itemsStore.handleItemsGet}
-                  opt="ple"
-                />
-                <ItemPleList
-                  setLoading={setLoading}
-                  count={itemsStore.itemsCount}
-                  items={itemsStore.items}
-                  onDelete={handleDelete}
-                  onFavorite={itemsStore.handleFavorite}
-                  onOpen={detailsDialog.handleOpen}
-                  onPageChange={itemsSearch.handlePageChange}
-                  onRowsPerPageChange={itemsSearch.handleRowsPerPageChange}
-                  page={itemsSearch.state.page}
-                  rowsPerPage={itemsSearch.state.rowsPerPage}
-                  loading={loading}
+                <VideoSearch onSelect={handleVideoSelect} />
+                <Box>
+                  <h2>Videos</h2>
+                  <List>
+                    {selectedVideos.map((video, index) => (
+                      <ListItem
+                        key={index}
+                        sx={{
+                          backgroundColor: index === currentVideoIndex ? 'lightblue' : 'inherit',
+                          borderRadius: '4px',
+                          marginBottom: '4px',
+                          cursor: 'pointer',
+                        }}
+                        onClick={() => setCurrentVideoIndex(index)}
+                      >
+                        <ListItemText primary={video.snippet.title} />
+                      </ListItem>
+                    ))}
+                  </List>
+                </Box>
+                <VideoPlayer
+                  video={currentVideo}
+                  onVideoEnd={handleVideoEnd}
                 />
               </Stack>
             </Grid>
           </Grid>
         </Container>
       </Box>
-      <ItemDrawer
-        item={currentItem}
-        onClose={detailsDialog.handleClose}
-        onDelete={handleDelete}
-        onFavorite={itemsStore.handleFavorite}
-        open={detailsDialog.open}
-      />
-      <PLESearchDialog
-        onClose={pleSearchDialog.handleClose}
-        open={pleSearchDialog.open}
-      />
     </>
   );
 };
